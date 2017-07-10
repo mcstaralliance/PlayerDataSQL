@@ -1,0 +1,49 @@
+name: ${project.name}
+version: '${project.version}'
+main: ${project.groupId}.${project.artifactId}.${project.name}
+description: '${project.description}'
+
+commands:
+  ${project.name}:
+    description: 这是一个${project.name}插件
+    aliases: [pds]
+permissions:
+  ${project.name}.*:
+    description: ${project.name}所有权限
+    default: op
+    children:
+      ${project.name}.bypass: true
+      ${project.name}.cmdcomplete: true
+      ${project.name}.cmd: true
+  ${project.name}.cmdcomplete:
+    description: 自动补全命令的权限
+    default: op
+  ${project.name}.cmd:
+    description: 所有命令的权限
+    default: op
+    children: []
+  ${project.name}.cmd.help:
+    description: 获取插件帮助的权限
+    default: op
+  ${project.name}.cmd.reload:
+    description: 插件重载总权限
+    default: op
+    children:
+      ${project.name}.cmd.reload.config: true
+      ${project.name}.cmd.reload.help: true
+      ${project.name}.cmd.reload.lang: true
+      ${project.name}.cmd.reload.list: true
+      ${project.name}.cmd.reload.plugin: true
+  ${project.name}.cmd.reload.plugin:
+    description: 重载插件全部配置的权限
+    default: op
+  ${project.name}.cmd.reload.config:
+    description: 重载插件配置的权限
+    default: op
+  ${project.name}.cmd.reload.help:
+    description: '使用/${project.name} reload help的权限'
+    default: true
+  ${project.name}.cmd.reload.lang:
+    description: 重载插件语言文件的权限
+    default: op
+  
