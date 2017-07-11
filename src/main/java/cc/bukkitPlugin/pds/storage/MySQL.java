@@ -10,6 +10,7 @@ import java.sql.Statement;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 
@@ -154,7 +155,7 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
                         try{
                             this.mConn.setNetworkTimeout((callback)->callback.run(),this.mNetworkTimeout*1000);
                         }catch(SQLFeatureNotSupportedException|AbstractMethodError exp){
-                            Log.warn("此数据库不支持设置网络超时");
+                            Log.info(ChatColor.YELLOW+"此数据库驱动不支持设置网络超时");
                         }
                     }
                 }finally{
