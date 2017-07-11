@@ -3,6 +3,7 @@ package cc.bukkitPlugin.pds.dmodel;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Map;
 
 import org.bukkit.OfflinePlayer;
@@ -17,7 +18,11 @@ import cc.commons.util.FileUtil;
 import cc.commons.util.reflect.ClassUtil;
 import cc.commons.util.reflect.FieldUtil;
 import cc.commons.util.reflect.MethodUtil;
+import thaumcraft.api.research.ResearchCategories;
+import thaumcraft.api.research.ResearchCategoryList;
+import thaumcraft.api.research.ResearchItem;
 import thaumcraft.common.Thaumcraft;
+import thaumcraft.common.lib.research.ResearchManager;
 
 public class DM_Thaumcraft extends ADataModel{
 
@@ -125,6 +130,18 @@ public class DM_Thaumcraft extends ADataModel{
         tValue=tTagMap.get(TAG_Eldritch_Temp);
         if(NBTUtil.isNBTTagInt(tValue)){
             Thaumcraft.proxy.getPlayerKnowledge().setWarpTemp(tPlayerName,(int)FieldUtil.getFieldValue(NBTUtil.field_NBTTagInt_value,tValue));
+        }
+        
+        // 完成自动解锁的研究
+        ResearchManager tMan=Thaumcraft.proxy.getResearchManager();
+        Collection<ResearchCategoryList> tRCs=ResearchCategories.researchCategories.values();
+        for(ResearchCategoryList sRCL : tRCs){
+            Collection<ResearchItem> tRIs=sRCL.research.values();
+            for(ResearchItem sRI : tRIs){
+                if(sRI.isAutoUnlock()){
+                    MethodUtil.invokeMethod(this.method_ResearchManager_completeResearch,tMan,new Object[]{tNMSPlayer,sRI.key});
+                }
+            }
         }
     }
 
