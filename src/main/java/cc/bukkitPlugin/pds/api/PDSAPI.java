@@ -30,7 +30,7 @@ public class PDSAPI implements Listener,IConfigModel{
     private static LinkedHashMap<String,IDataModel> mRegistedModels=new LinkedHashMap<>();
     /** 启用的模块 */
     private static ArrayList<IDataModel> mEnabledModels=new ArrayList<>();
-    /** 启用的模块 */
+    /** 配置中启用的模块 */
     private static HashSet<String> mEnabledModelsStr=new HashSet<>();
     /** 启用的模块数组 */
     private static IDataModel[] mEnabledModelsA=null;
@@ -91,12 +91,13 @@ public class PDSAPI implements Listener,IConfigModel{
     }
 
     public static IDataModel remove(String pModelName){
-        String tLowerCase=pModelName.toLowerCase();
+        IDataModel tRemoved=PDSAPI.mRegistedModels.remove(pModelName.toLowerCase());
+        if(tRemoved!=null) {
         synchronized(PDSAPI.class){
-            PDSAPI.mEnabledModels.remove(tLowerCase);
+            PDSAPI.mEnabledModels.remove(tRemoved);
             PDSAPI.mEnabledModelsA=null;
-        }
-        return PDSAPI.mRegistedModels.remove(tLowerCase);
+        }}
+        return tRemoved; 
     }
 
     public static void remove(Plugin pPlugin){
