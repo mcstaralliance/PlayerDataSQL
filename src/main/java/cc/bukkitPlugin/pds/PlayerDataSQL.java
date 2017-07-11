@@ -8,6 +8,7 @@ import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.plugin.ABukkitPlugin;
 import cc.bukkitPlugin.pds.api.PDSAPI;
 import cc.bukkitPlugin.pds.api.event.CallDataModelRegisterEvent;
+import cc.bukkitPlugin.pds.command.CommandExc;
 import cc.bukkitPlugin.pds.dmodel.DM_Baubles;
 import cc.bukkitPlugin.pds.dmodel.DM_MCStats;
 import cc.bukkitPlugin.pds.dmodel.DM_Minecraft;
@@ -44,7 +45,9 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
         // 注册监听器
         new PreventListener(this,this.mUserMan);
         new PlayerListener(this,this.mUserMan);
+        
         // 绑定命令管理器
+        new CommandExc(this);
 
         PDSAPI.registerModel(new DM_Minecraft(this));
         PDSAPI.registerModel(new DM_MCStats(this));
