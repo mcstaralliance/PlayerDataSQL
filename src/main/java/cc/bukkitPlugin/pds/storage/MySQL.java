@@ -153,7 +153,7 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
                     if(this.mNetworkTimeout>0){
                         try{
                             this.mConn.setNetworkTimeout((callback)->callback.run(),this.mNetworkTimeout*1000);
-                        }catch(SQLFeatureNotSupportedException exp){
+                        }catch(SQLFeatureNotSupportedException|AbstractMethodError exp){
                             Log.warn("此数据库不支持设置网络超时");
                         }
                     }
