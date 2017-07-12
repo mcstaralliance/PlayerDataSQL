@@ -57,12 +57,14 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
      * 
      * @param pUser
      *            用户数据
+     * @param pPlayer
+     *            还原的用户
      */
-    public void restoreUser(User pUser){
+    public void restoreUser(User pUser,Player pPlayer){
         if(Bukkit.isPrimaryThread()){
-            this.restoreUser0(pUser);
+            this.restoreUser0(pUser,pPlayer);
         }else{
-            Bukkit.getScheduler().runTask(this.mPlugin,()->restoreUser0(pUser));
+            Bukkit.getScheduler().runTask(this.mPlugin,()->restoreUser0(pUser,pPlayer));
         }
     }
 
@@ -79,7 +81,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
         try{
             return this.mPlugin.getStorage().get(pPlayer);
         }catch(SQLException exp){
-            Log.severe("从数据库获取玩家数据时发生了错误",exp);
+            Log.severe(this.mPlugin.C("MsgErrorOnLoadSQLData","player",pPlayer.getName()),exp);
             throw exp;
         }
     }
@@ -107,7 +109,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
         try{
             this.mPlugin.getStorage().update(pUser);
         }catch(SQLException exp){
-            Log.severe("对数据库更新玩家数据时发生了错误",exp);
+            Log.severe(this.mPlugin.C("MsgErrorOnUpdateSQLData","%player%",pUser.getName()),exp);
             return;
         }
         Log.debug("Save user data "+pUser.getName()+" done!");
@@ -126,7 +128,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
         try{
             tResult=this.mPlugin.getStorage().update(pPlayer,new String[]{User.COL_LOCK},new Object[]{true});
         }catch(SQLException exp){
-            Log.severe("对数据库更新玩家数据时发生了错误",exp);
+            Log.severe(this.mPlugin.C("MsgErrorOnUpdateSQLData","%player%",pPlayer.getName()),exp);
         }
 
         if(tResult){
@@ -137,11 +139,15 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
 
     }
 
-    public User getUserData(OfflinePlayer pPlayer,boolean pCloseInv){
-        Player tPlayer=pPlayer.getPlayer();
-        return tPlayer==null?null:this.getUserData(tPlayer,pCloseInv);
-    }
-
+    /**
+     * 获取用户当前序列化的数据
+     * 
+     * @param pPlayer
+     *            用户
+     * @param pCloseInv
+     *            是否关闭背包
+     * @return 用户的数据
+     */
     public User getUserData(Player pPlayer,boolean pCloseInv){
         if(pCloseInv){
             InventoryView tView=pPlayer.getOpenInventory();
@@ -159,7 +165,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
             try{
                 tDatas.put(sModel.getModelId().toLowerCase(),sModel.getData(pPlayer,tDatas));
             }catch(Throwable exp){
-                Log.severe("模块 "+sModel.getDesc()+" 在序列化数据时发生错误",exp);
+                Log.severe(this.mPlugin.C("MsgModelErrorOnSerializeData",new String[]{"%model%","%player%"},sModel.getDesc(),pPlayer.getName()),exp);
             }
         }
 
@@ -175,9 +181,8 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
      * @param pUser
      *            用户,包含序列化的数据
      */
-    protected void restoreUser0(User pUser){
-        Player tPlayer=Bukkit.getPlayerExact(pUser.getName());
-        if(tPlayer!=null&&tPlayer.isOnline()){
+    protected void restoreUser0(User pUser,Player pPlayer){
+        if(pPlayer!=null&&pPlayer.isOnline()){
             Log.debug("Start restore data for user "+pUser.getName());
             Map<String,byte[]> tDatas=pUser.getDataMap(false);
             for(IDataModel sModel : PDSAPI.getEnableModel()){
@@ -185,14 +190,11 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
                 if(tData==null) tData=new byte[0];
 
                 try{
-                    sModel.restore(tPlayer,tData);
+                    sModel.restore(pPlayer,tData);
                 }catch(Throwable exp){
-                    Log.severe("模块 "+sModel.getDesc()+" 在反序列化数据时发生错误",exp);
+                    Log.severe(this.mPlugin.C("MsgModelErrorOndeserializeData",new String[]{"%model%","%player%"},sModel.getDesc(),pUser.getName()),exp);
                 }
             }
-
-            this.createSaveTask(tPlayer);
-            this.unlockUser(tPlayer,false);
         }else{
             Log.debug("User "+pUser.getName()+" not found!");
         }
@@ -235,7 +237,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
         }
     }
 
-    public void createSaveTask(OfflinePlayer pPlayer){
+    public void createSaveTask(Player pPlayer){
         if(this.mSaveInterval<=0) return;
 
         String tName=pPlayer.getName();

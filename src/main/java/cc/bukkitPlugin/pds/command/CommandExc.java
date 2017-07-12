@@ -21,6 +21,8 @@ public class CommandExc extends TCommandExc<PlayerDataSQL> implements CommandExe
 
     protected void registerSubCommand(){
         super.registerSubCommand();
+        
+        this.register(new CommandLoad(this));
     }
 
 }

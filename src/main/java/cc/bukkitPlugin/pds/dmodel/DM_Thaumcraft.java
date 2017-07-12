@@ -3,7 +3,9 @@ package cc.bukkitPlugin.pds.dmodel;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.bukkit.OfflinePlayer;
@@ -18,10 +20,12 @@ import cc.commons.util.FileUtil;
 import cc.commons.util.reflect.ClassUtil;
 import cc.commons.util.reflect.FieldUtil;
 import cc.commons.util.reflect.MethodUtil;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import thaumcraft.api.research.ResearchCategories;
 import thaumcraft.api.research.ResearchCategoryList;
 import thaumcraft.api.research.ResearchItem;
 import thaumcraft.common.Thaumcraft;
+import thaumcraft.common.lib.network.PacketHandler;
 import thaumcraft.common.lib.research.ResearchManager;
 
 public class DM_Thaumcraft extends ADataModel{
@@ -38,6 +42,10 @@ public class DM_Thaumcraft extends ADataModel{
     private Method method_ResearchManager_loadResearchNBT;
     private Method method_ResearchManager_loadScannedNBT;
     private Method method_ResearchManager_completeResearch;
+
+    private Method method_SimpleNetworkWrapper_sendTo;
+
+    private List<Class<?>> mSyncPackets=new ArrayList<>();
 
     private Boolean mInit=null;
 
@@ -76,6 +84,19 @@ public class DM_Thaumcraft extends ADataModel{
             this.method_ResearchManager_saveResearchNBT=tClazz.getDeclaredMethod("saveResearchNBT",NBTUtil.clazz_NBTTagCompound,NMSUtil.clazz_EntityPlayer);
             this.method_ResearchManager_saveScannedNBT=tClazz.getDeclaredMethod("saveScannedNBT",NBTUtil.clazz_NBTTagCompound,NMSUtil.clazz_EntityPlayer);
             this.method_ResearchManager_completeResearch=tClazz.getDeclaredMethod("completeResearch",NMSUtil.clazz_EntityPlayer,String.class);
+
+            String tPackage="thaumcraft.common.lib.network.playerdata.";
+            String[] tPackets=new String[]{"PacketSyncAspects","PacketSyncResearch","PacketSyncScannedItems","PacketSyncScannedEntities","PacketSyncScannedPhenomena"};
+            for(String sClassStr : tPackets){
+                try{
+                    this.mSyncPackets.add(Class.forName(tPackage+sClassStr));
+                    Log.developInfo("find thaumcraft sync packet "+sClassStr);
+                }catch(ClassNotFoundException ignore){
+                }
+            }
+
+            tClazz=Class.forName("cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper");
+            this.method_SimpleNetworkWrapper_sendTo=MethodUtil.getMethodIgnoreParam(tClazz,"sendTo",true).get(0);
         }catch(Exception exp){
             if(!(exp instanceof ClassNotFoundException)&&!(exp instanceof NoSuchMethodException))
                 Log.severe("模块 "+this.getDesc()+" 初始化时发生了错误",exp);
@@ -131,7 +152,13 @@ public class DM_Thaumcraft extends ADataModel{
         if(NBTUtil.isNBTTagInt(tValue)){
             Thaumcraft.proxy.getPlayerKnowledge().setWarpTemp(tPlayerName,(int)FieldUtil.getFieldValue(NBTUtil.field_NBTTagInt_value,tValue));
         }
-        
+
+        // 同步到客户端
+        for(Class<?> sClazz : this.mSyncPackets){
+            IMessage tMsg=(IMessage)ClassUtil.newInstance(sClazz,NMSUtil.clazz_EntityPlayer,tNMSPlayer);
+            MethodUtil.invokeMethod(method_SimpleNetworkWrapper_sendTo,PacketHandler.INSTANCE,tMsg,tNMSPlayer);
+        }
+
         // 完成自动解锁的研究
         ResearchManager tMan=Thaumcraft.proxy.getResearchManager();
         Collection<ResearchCategoryList> tRCs=ResearchCategories.researchCategories.values();

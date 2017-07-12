@@ -1,14 +1,12 @@
 package cc.bukkitPlugin.pds;
 
-import java.sql.SQLException;
-
 import org.bukkit.Bukkit;
 
-import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.plugin.ABukkitPlugin;
 import cc.bukkitPlugin.pds.api.PDSAPI;
 import cc.bukkitPlugin.pds.api.event.CallDataModelRegisterEvent;
 import cc.bukkitPlugin.pds.command.CommandExc;
+import cc.bukkitPlugin.pds.dmodel.DM_ArmourersWorkshop;
 import cc.bukkitPlugin.pds.dmodel.DM_Baubles;
 import cc.bukkitPlugin.pds.dmodel.DM_MCStats;
 import cc.bukkitPlugin.pds.dmodel.DM_Minecraft;
@@ -45,7 +43,7 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
         // 注册监听器
         new PreventListener(this,this.mUserMan);
         new PlayerListener(this,this.mUserMan);
-        
+
         // 绑定命令管理器
         new CommandExc(this);
 
@@ -54,18 +52,13 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
         PDSAPI.registerModel(new DM_Baubles(this));
         PDSAPI.registerModel(new DM_Thaumcraft(this));
         PDSAPI.registerModel(new DM_TConstruct(this));
+        PDSAPI.registerModel(new DM_ArmourersWorkshop(this));
         Bukkit.getPluginManager().callEvent(new CallDataModelRegisterEvent());
 
         // 初始化管理器并载入配置
         this.reloadPlugin(null);
 
         PDSAPI.checkModels(true);
-
-        try{
-            ((MySQL)this.mStorage).getConn();
-        }catch(SQLException exp){
-            Log.warn("无法连接至数据库:"+exp.getMessage());
-        }
     }
 
     @Override

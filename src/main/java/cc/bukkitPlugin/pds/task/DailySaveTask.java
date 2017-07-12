@@ -1,7 +1,7 @@
 package cc.bukkitPlugin.pds.task;
 
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.pds.user.User;
@@ -12,14 +12,14 @@ import cc.bukkitPlugin.pds.user.UserManager;
  */
 public class DailySaveTask implements Runnable{
 
-    public final OfflinePlayer mPlayer;
+    public final Player mPlayer;
     private String mName;
     private UserManager mUserMan;
 
     private int mTaskId;
     private int mSaveCount;
 
-    public DailySaveTask(OfflinePlayer pPlayer,UserManager pUserMan){
+    public DailySaveTask(Player pPlayer,UserManager pUserMan){
         this.mPlayer=pPlayer;
         this.mName=pPlayer.getName();
         this.mUserMan=pUserMan;

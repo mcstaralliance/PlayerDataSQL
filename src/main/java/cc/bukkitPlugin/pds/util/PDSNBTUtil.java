@@ -25,8 +25,8 @@ public class PDSNBTUtil extends NBTUtil{
     /** void writeCompressed(NBTTagCompound,OutputStream) */
     public static final Method method_NBTCompressedStreamTools_writeCompressed;
 
-    public static final Method method_EntityPlayer_readFromNBT;
-    public static final Method method_EntityPlayer_writeToNBT;
+    public static final Method method_EntityPlayer_readEntityFromNBT;
+    public static final Method method_EntityPlayer_writeEntityToNBT;
 
     static{
         String packetPath=ClassUtil.getClassPacket(clazz_NBTTagCompound.getName());
@@ -71,8 +71,8 @@ public class PDSNBTUtil extends NBTUtil{
         }else{
             readMethodPos=0;
         }
-        method_EntityPlayer_readFromNBT=MethodUtil.getMethod(NMSUtil.clazz_EntityPlayer,tms.get(readMethodPos).getName(),clazz_NBTTagCompound,false);
-        method_EntityPlayer_writeToNBT=MethodUtil.getMethod(NMSUtil.clazz_EntityPlayer,tms.get(1-readMethodPos).getName(),clazz_NBTTagCompound,false);
+        method_EntityPlayer_readEntityFromNBT=MethodUtil.getMethod(NMSUtil.clazz_EntityPlayer,tms.get(readMethodPos).getName(),clazz_NBTTagCompound,false);
+        method_EntityPlayer_writeEntityToNBT=MethodUtil.getMethod(NMSUtil.clazz_EntityPlayer,tms.get(1-readMethodPos).getName(),clazz_NBTTagCompound,false);
         // Entity readFromNBT-END
     }
 
@@ -85,7 +85,7 @@ public class PDSNBTUtil extends NBTUtil{
      *            NBT
      */
     public static void setPlayerNBT(Player pPlayer,Object pNBTTag){
-        MethodUtil.invokeMethod(method_EntityPlayer_readFromNBT,NMSUtil.getNMSPlayer(pPlayer),pNBTTag);
+        MethodUtil.invokeMethod(method_EntityPlayer_readEntityFromNBT,NMSUtil.getNMSPlayer(pPlayer),pNBTTag);
     }
 
     /**
@@ -97,7 +97,7 @@ public class PDSNBTUtil extends NBTUtil{
      */
     public static Object getPlayerNBT(Player pPlayer){
         Object tNBTTag=NBTUtil.newNBTTagCompound();
-        MethodUtil.invokeMethod(method_EntityPlayer_writeToNBT,NMSUtil.getNMSPlayer(pPlayer),tNBTTag);
+        MethodUtil.invokeMethod(method_EntityPlayer_writeEntityToNBT,NMSUtil.getNMSPlayer(pPlayer),tNBTTag);
         return tNBTTag;
     }
 

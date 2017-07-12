@@ -3,7 +3,6 @@ package cc.bukkitPlugin.pds.task;
 import java.sql.SQLException;
 
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import cc.bukkitPlugin.commons.Log;
@@ -25,19 +24,22 @@ public class LoadUserTask implements Runnable{
     protected int mRetry;
 
     protected PlayerDataSQL mPlugin;
-    protected final Player mPlayer;
+    /** 载入数据到 */
+    protected final Player mLoadFor;
 
-    public LoadUserTask(OfflinePlayer pPlayer,UserManager pUserMan){
-        this.mName=pPlayer.getName();
+    protected boolean mDone=false;
+
+    public LoadUserTask(Player pForPlayer,UserManager pUserMan){
+        this.mName=pForPlayer.getName();
+        this.mLoadFor=pForPlayer;
+
         this.mUserMan=pUserMan;
-
         this.mPlugin=pUserMan.getPlugin();
-        this.mPlayer=pPlayer.getPlayer();
     }
 
     @Override
     public synchronized void run(){
-        if(this.mPlayer==null||!this.mPlayer.isOnline()){
+        if(this.mLoadFor==null||!this.mLoadFor.isOnline()||this.mDone){
             this.cancelTask();
             return;
         }
@@ -45,12 +47,9 @@ public class LoadUserTask implements Runnable{
         User tUser=null;
 
         try{
-            tUser=this.mUserMan.loadUser(this.mPlayer);
+            tUser=this.mUserMan.loadUser(this.mLoadFor);
         }catch(SQLException exp){
-            if(this.mPlugin.getConfigManager().isKickOnSQLReadError()){
-                this.mPlayer.kickPlayer(this.mPlugin.C("MsgDataExpection"));
-                this.cancelTask();
-            }
+
             this.handleExcetion(exp);
             return;
         }catch(Throwable exp){
@@ -59,34 +58,45 @@ public class LoadUserTask implements Runnable{
             return;
         }
 
-        if((tUser==null||tUser.isLocked())&&(++this.mRetry)<RETRY_COUNT){
+        if((tUser==null||tUser.isLocked())&&(++this.mRetry)<=RETRY_COUNT){
             Log.debug("Load user data "+this.mName+" fail "+mRetry+(tUser==null?"(no data and wait)":"(Locked)"));
         }else{
-            this.restoreUser(tUser);
+            this.restoreUser(tUser,false);
         }
 
     }
 
     protected void handleExcetion(Throwable pExp){
+        if(this.mPlugin.getConfigManager().mKickOnReadSQLError){
+            this.mLoadFor.kickPlayer(this.mPlugin.C("MsgDataExpection"));
+            this.cancelTask();
+            return;
+        }
         Log.debug("Load user data "+this.mName+" fail "+(++this.mRetry)+'.');
-        if(this.mRetry>RETRY_COUNT) this.restoreUser((User)null);
+        if(this.mRetry>RETRY_COUNT) this.restoreUser((User)null,true);
     }
 
-    protected void restoreUser(User pUser){
-        Bukkit.getScheduler().cancelTask(this.mTaskId);
+    protected void restoreUser(User pUser,boolean pException){
+        this.cancelTask();
 
-        if(pUser==null){
+        boolean tNoRestore=this.mPlugin.getConfigManager().mNoRestoreIfSQLDataNotExist;
+        if(pUser==null&&(pException||!tNoRestore)){
             Log.debug("Use blank data restore for player "+this.mName);
-            pUser=new User(this.mPlayer);
+            pUser=new User(this.mLoadFor);
         }
 
-        this.mUserMan.restoreUser(pUser);
-        Log.debug("Load user data "+this.mName+" done.");
-        this.mUserMan.lockUserData(this.mPlayer);
+        if(pUser!=null){
+            this.mUserMan.restoreUser(pUser,this.mLoadFor);
+        }
+
+        this.mUserMan.unlockUser(this.mLoadFor,false);
+        this.mUserMan.lockUserData(this.mLoadFor);
+        this.mUserMan.createSaveTask(this.mLoadFor);
     }
 
     protected void cancelTask(){
         Bukkit.getScheduler().cancelTask(this.mTaskId);
+        this.mDone=true;
     }
 
     public void setTaskId(int taskId){

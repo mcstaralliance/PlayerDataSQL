@@ -36,7 +36,7 @@ public class PlayerListener extends AListener<PlayerDataSQL>{
     @EventHandler
     public void onJoin(PlayerJoinEvent pEvent){
         LoadUserTask tTask=new LoadUserTask(pEvent.getPlayer(),this.mUserMan);
-        int tInterval=this.mPlugin.getConfigManager().getSyncDelay();
+        int tInterval=this.mPlugin.getConfigManager().mSyncDelay;
         tTask.setTaskId(Bukkit.getScheduler().runTaskTimerAsynchronously(this.mPlugin,tTask,tInterval,tInterval).getTaskId());
     }
 

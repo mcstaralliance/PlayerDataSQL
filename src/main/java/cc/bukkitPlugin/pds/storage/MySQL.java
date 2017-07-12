@@ -10,6 +10,7 @@ import java.sql.Statement;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -90,9 +91,20 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
         tSBuilder.append(this.mPassword=tSecMain.getString("Password",this.mPassword)).append('\0');
 
         int tNewCfghash=tSBuilder.toString().hashCode();
+        boolean tTestConn=this.mConn==null;
         if(this.mCfgHash!=tNewCfghash){
             this.mCfgHash=tNewCfghash;
             this.handleConnClose();
+        }
+        if(tTestConn){
+            Bukkit.getScheduler().runTask(this.mPlugin,()->{
+                try{
+                    this.getConn();
+                    Log.info(this.mPlugin.C("MsgSuccessConnectToDB"));
+                }catch(SQLException exp){
+                    Log.warn(this.mPlugin.C("MsgUnableConnectToDB")+": "+exp.getMessage());
+                }
+            });
         }
     }
 
@@ -195,8 +207,9 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
                 tUser.setData(tResult.getBytes(User.COL_DATA));
             }
         }finally{
-            this.mLock.unlock();
             IOUtil.closeStream(tResult);
+            Log.developInfo("Read user "+pPlayer.getName()+" at time "+System.nanoTime());
+            this.mLock.unlock();
         }
         return tUser;
     }
@@ -213,6 +226,7 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
             tStatement.setBytes(3,pUser.getData());
             return tStatement.executeUpdate()!=0;
         }finally{
+            Log.developInfo("Update user "+pUser.getName()+" at time "+System.nanoTime());
             this.mLock.unlock();
         }
     }

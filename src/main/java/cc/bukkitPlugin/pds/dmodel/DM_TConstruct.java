@@ -1,36 +1,26 @@
 package cc.bukkitPlugin.pds.dmodel;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.HashSet;
 import java.util.Map;
-
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 
 import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
 import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
-import cc.bukkitPlugin.pds.util.PDSNBTUtil;
-import cc.commons.util.reflect.ClassUtil;
 import cc.commons.util.reflect.MethodUtil;
 
-public class DM_TConstruct extends DM_MCStats{
+public class DM_TConstruct extends DataInValidModel{
 
+    public static final String EXT_PROP_NAME="TConstruct";
     public static final String TAG_MAIN="TConstruct";
 
-    private Method method_TConstructAPI_getInventoryWrapper;
-    private Method method_IPlayerExtendedInventoryWrapper_getKnapsackInventory;
-    private Method method_IPlayerExtendedInventoryWrapper_getAccessoryInventory;
-    private Method method_TPlayerStats_loadNBTData;
-    private Method method_TPlayerStats_saveNBTData;
+    private Method method_TPlayerStats_get;
+    private Method method_TPlayerStats_register;
 
     private Boolean mInit=null;
 
     public DM_TConstruct(PlayerDataSQL pPlugin){
-        super(pPlugin);
+        super(pPlugin,"tconstruct.armor.player.TPlayerStats",EXT_PROP_NAME);
     }
 
     @Override
@@ -48,19 +38,14 @@ public class DM_TConstruct extends DM_MCStats{
         if(this.mInit!=null)
             return this.mInit.booleanValue();
 
-        Class<?> tClazz=null;
         try{
-            Class.forName("tconstruct.TConstruct");
-            tClazz=Class.forName("tconstruct.api.TConstructAPI");
-            method_TConstructAPI_getInventoryWrapper=tClazz.getMethod("getInventoryWrapper",NMSUtil.clazz_EntityPlayer);
+            this.initExProp();
 
-            tClazz=method_TConstructAPI_getInventoryWrapper.getReturnType();
-            method_IPlayerExtendedInventoryWrapper_getKnapsackInventory=tClazz.getMethod("getKnapsackInventory",NMSUtil.clazz_EntityPlayer);
-            method_IPlayerExtendedInventoryWrapper_getAccessoryInventory=tClazz.getMethod("getAccessoryInventory",NMSUtil.clazz_EntityPlayer);
+            Class<?> tClazz=Class.forName(this.mExPropClass);
+            this.method_TPlayerStats_get=MethodUtil.getMethod(tClazz,"get",NMSUtil.clazz_EntityPlayer,true);
+            this.method_TPlayerStats_register=MethodUtil.getMethod(tClazz,"register",NMSUtil.clazz_EntityPlayer,true);
 
-            tClazz=Class.forName("tconstruct.armor.player.TPlayerStats");
-            this.method_TPlayerStats_saveNBTData=MethodUtil.getMethod(tClazz,"saveNBTData",NBTUtil.clazz_NBTTagCompound,true);
-            this.method_TPlayerStats_loadNBTData=MethodUtil.getMethod(tClazz,"loadNBTData",NBTUtil.clazz_NBTTagCompound,true);
+            this.mModelTags.add(TAG_MAIN);
         }catch(Exception exp){
             if(!(exp instanceof ClassNotFoundException))
                 Log.severe("模块 "+this.getDesc()+" 初始化时发生了错误",exp);
@@ -70,61 +55,25 @@ public class DM_TConstruct extends DM_MCStats{
     }
 
     @Override
-    public byte[] getData(Player pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
-        Object tNBT=NBTUtil.newNBTTagCompound();
-        MethodUtil.invokeMethod(this.method_TPlayerStats_saveNBTData,this.getPlayerData(pPlayer),tNBT);
-        return PDSNBTUtil.compressNBT(tNBT);
-    }
-
-    @Override
-    public void restore(Player pPlayer,byte[] pData) throws Exception{
-        this.reset(pPlayer);
-        MethodUtil.invokeMethod(this.method_TPlayerStats_loadNBTData,this.getPlayerData(pPlayer),fixNBT(PDSNBTUtil.decompressNBT(pData)));
-    }
-
-    @Override
-    public byte[] loadFileData(OfflinePlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException{
-        byte[] tData=pLoadedData.get(DM_Minecraft.ID.toLowerCase());
-        if(tData==null) tData=super.loadFileData(pPlayer,pLoadedData);
-
-        Object tNBT=PDSNBTUtil.decompressNBT(tData);
-        Map<String,Object> tNBTValue=NBTUtil.getNBTTagCompoundValue(tNBT);
-        Object tTCNBT=tNBTValue.remove(TAG_MAIN);
-        tNBTValue.clear();
-        tNBTValue.put(TAG_MAIN,tTCNBT);
-        return PDSNBTUtil.compressNBT(tNBT);
-    }
-
-    private Object getPlayerData(Player pPlayer){
-        return MethodUtil.invokeStaticMethod(this.method_TConstructAPI_getInventoryWrapper,NMSUtil.getNMSPlayer(pPlayer));
-    }
-
-    public boolean reset(Player pTargetPlayer){
-        Object tNMSPlayer=NMSUtil.getNMSPlayer(pTargetPlayer);
-        Object tPlayerData=MethodUtil.invokeMethod(this.method_TConstructAPI_getInventoryWrapper,null,tNMSPlayer);
-
-        Object tNBTTag=fixNBT(NBTUtil.newNBTTagCompound());
-        MethodUtil.invokeMethod(this.method_TPlayerStats_loadNBTData,tPlayerData,tNBTTag);
-        HashSet<Object> NMSInvs=new HashSet<>();
-        NMSInvs.add(MethodUtil.invokeMethod(method_IPlayerExtendedInventoryWrapper_getKnapsackInventory,tPlayerData,tNMSPlayer));
-        NMSInvs.add(MethodUtil.invokeMethod(method_IPlayerExtendedInventoryWrapper_getAccessoryInventory,tPlayerData,tNMSPlayer));
-        for(Object sNMSInv : NMSInvs){
-            if(sNMSInv==null)
-                continue;
-            Inventory tInv=(Inventory)ClassUtil.newInstance(NMSUtil.clazz_CraftInventory,NMSUtil.clazz_IInventory,sNMSInv);
-            for(int i=0;i<tInv.getSize();i++){
-                tInv.setItem(i,null);
-            }
-        }
-        return true;
-    }
-
-    public static Object fixNBT(Object pNBTTag){
+    public Object correctNBTData(Object pNBTTag){
         Map<String,Object> tMapValue=NBTUtil.getNBTTagCompoundValue(pNBTTag);
         if(!tMapValue.containsKey(TAG_MAIN)){
             tMapValue.put(TAG_MAIN,NBTUtil.newNBTTagCompound());
         }
         return pNBTTag;
     }
+
+    @Override
+    protected Object getExProp(Object pNMSPlayer){
+        return MethodUtil.invokeStaticMethod(method_TPlayerStats_get,pNMSPlayer);
+    }
+
+    @Override
+    protected void registerExProp(Object pNMSPlayer){
+        MethodUtil.invokeStaticMethod(method_TPlayerStats_register,pNMSPlayer);
+    }
+
+    @Override
+    protected void updateToAround(Object pNMSPlayer,Object pExProp){}
 
 }

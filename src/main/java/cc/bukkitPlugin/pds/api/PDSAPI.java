@@ -127,6 +127,8 @@ public class PDSAPI implements Listener,IConfigModel{
         return PDSAPI.mEnabledModelsA;
     }
 
+    private boolean mFirtInit=true;
+    
     public PDSAPI(PlayerDataSQL pPlugin){
         pPlugin.registerEvents(this);
         pPlugin.getConfigManager().registerConfigModel(this);
@@ -156,6 +158,9 @@ public class PDSAPI implements Listener,IConfigModel{
                 PDSAPI.mEnabledModelsStr.add(sKey.toLowerCase());
             }
         }
+        
+        PDSAPI.checkModels(!this.mFirtInit);
+        this.mFirtInit=false;
     }
 
     @EventHandler

@@ -91,7 +91,7 @@ public class User{
             Log.severe("从SQL反序列化数据时发生错误",exp);
             PlayerDataSQL tPlugin=PlayerDataSQL.getInstance();
             Player tPlayer=this.mPlayer.getPlayer();
-            if(tPlugin.getConfigManager().isKickOnSQLReadError()&&tPlayer!=null){
+            if(tPlugin.getConfigManager().mKickOnReadSQLError&&tPlayer!=null){
                 tPlayer.getPlayer().kickPlayer(tPlugin.C("MsgDataExpection"));
             }
         }finally{
