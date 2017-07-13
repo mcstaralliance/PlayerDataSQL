@@ -46,7 +46,10 @@ public class PlayerListener extends AListener<PlayerDataSQL>{
         if(this.mUserMan.isNotLocked(tPlayer)){
             this.mUserMan.cancelSaveTask(tPlayer);
             User tUser=this.mUserMan.getUserData(pEvent.getPlayer(),true);
-            Bukkit.getScheduler().runTaskAsynchronously(this.mPlugin,()->this.mUserMan.saveUser(tUser,false));
+            Bukkit.getScheduler().runTaskAsynchronously(this.mPlugin,()->{
+                this.mUserMan.saveUser(tUser,false);
+                this.mUserMan.unlockUser(tPlayer,true);
+            });
         }else{
             this.mUserMan.unlockUser(tPlayer,false);
         }
