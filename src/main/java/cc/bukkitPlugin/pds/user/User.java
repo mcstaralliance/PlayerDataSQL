@@ -24,7 +24,7 @@ public class User{
     public static final String COL_LOCK="locked";
     public static final String COL_DATA="data";
 
-    public transient final OfflinePlayer mPlayer;
+    public transient OfflinePlayer mPlayer;
     /** 标识,玩家名字 */
     private String mName;
     /** 数据是否被锁定 */
@@ -35,6 +35,10 @@ public class User{
     private transient byte[] mDataCache=null;
 
     public User(OfflinePlayer pPlayer){
+        this.setPlayer(pPlayer);
+    }
+
+    public void setPlayer(OfflinePlayer pPlayer){
         this.mPlayer=pPlayer;
         this.mName=pPlayer.getName();
     }
