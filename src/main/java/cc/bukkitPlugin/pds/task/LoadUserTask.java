@@ -87,6 +87,8 @@ public class LoadUserTask implements Runnable{
 
         if(pUser!=null){
             this.mUserMan.restoreUser(pUser,this.mLoadFor);
+        }else{
+            Log.debug("duce setting NoRestoreIfSQLDataNotExist=true,plugin skip load user data");
         }
 
         this.mUserMan.unlockUser(this.mLoadFor,false);
