@@ -241,25 +241,17 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
     public boolean update(OfflinePlayer pPlayer,String[] pCols,Object...pValues) throws SQLException{
         ValidData.valid(pCols.length!=0&&pCols.length==pValues.length,"SQL 参数错误,参数数量为0或不相等");
 
-        boolean tFindId=false;
         StringBuilder tSBuilder=new StringBuilder();
-        tSBuilder.append("REPLACE INTO "+this.mTableName+" SET ");
+        tSBuilder.append("UPDATE "+this.mTableName+" SET ");
         for(int i=0;i<pCols.length;i++){
             tSBuilder.append(pCols[i]).append('=').append('?').append(',');
-            if(pCols[i].equalsIgnoreCase(User.COL_NAME)){
-                tFindId=true;
-            }
         }
 
-        PreparedStatement tStatement;
-        if(tFindId){
-            tSBuilder.deleteCharAt(tSBuilder.length()-1);
-            tStatement=this.getOrCreate(this.getConn(),tSBuilder.toString());
-        }else{
-            tSBuilder.append(User.COL_NAME).append('=').append('?');
-            tStatement=this.getOrCreate(this.getConn(),tSBuilder.toString());
-            tStatement.setObject(pCols.length+1,pPlayer.getName());
-        }
+        tSBuilder.deleteCharAt(tSBuilder.length()-1);
+        tSBuilder.append(" WHERE ").append(User.COL_NAME).append('=').append('?');
+        PreparedStatement tStatement=this.getOrCreate(this.getConn(),tSBuilder.toString());
+        tStatement.setObject(pCols.length+1,pPlayer.getName());
+
         for(int i=0;i<pCols.length;i++){
             tStatement.setObject(i+1,pValues[i]);
         }
