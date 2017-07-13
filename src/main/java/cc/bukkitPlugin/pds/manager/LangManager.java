@@ -36,6 +36,8 @@ public class LangManager extends TLangManager<PlayerDataSQL>{
         this.mConfig.addDefault("MsgDataExpection","数据库背包数据异常,请稍候再试");
         this.mConfig.addDefault("MsgCannotLoadDataForConsole","§c不能为控制台载入数据");
         this.mConfig.addDefault("MsgCannotCopyDataForConsole","§c不能为控制台复制数据");
+        this.mConfig.addDefault("MsgCannotSaveDataForConsole","§c不能为控制台保存数据");
+        this.mConfig.addDefault("MsgPlayerDataLockSaveNotAllow","§c玩家 §4§l%player% §c的数据已被锁定,玩家可能在线,数据可能会被覆盖");
         this.mConfig.addDefault("MsgPlayerNotOnline","§c玩家 §4§l%player% §c未在线");
         this.mConfig.addDefault("MsgPlayerNotExist","§c玩家 §4§l%player% §c不存在");
         this.mConfig.addDefault("MsgErrorOnLoadSQLData","§c从数据库载入 §4§l%player% §c的数据时发生了错误");
@@ -44,6 +46,7 @@ public class LangManager extends TLangManager<PlayerDataSQL>{
         this.mConfig.addDefault("MsgModelErrorOndeserializeData","§c模块 %model% 在反序列化 %player% 的数据时发生了错误");
         this.mConfig.addDefault("MsgLoadDataForPlayer","已经为 %for% 载入 %from% 的数据");
         this.mConfig.addDefault("MsgCopyDataForPlayer","已经复制  %from% 的数据到  %for%");
+        this.mConfig.addDefault("MsgSaveDataForPlayer","已经保存  %from% 的数据到  %to%");
         this.mConfig.addDefault("MsgSuccessConnectToDB","成功连接到数据库");
         this.mConfig.addDefault("MsgUnableConnectToDB","§c无法连接到数据库");
         this.mConfig.addDefault("WordFor","为谁");
