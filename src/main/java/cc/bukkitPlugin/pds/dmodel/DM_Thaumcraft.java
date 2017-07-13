@@ -153,12 +153,6 @@ public class DM_Thaumcraft extends ADataModel{
             Thaumcraft.proxy.getPlayerKnowledge().setWarpTemp(tPlayerName,(int)FieldUtil.getFieldValue(NBTUtil.field_NBTTagInt_value,tValue));
         }
 
-        // 同步到客户端
-        for(Class<?> sClazz : this.mSyncPackets){
-            IMessage tMsg=(IMessage)ClassUtil.newInstance(sClazz,NMSUtil.clazz_EntityPlayer,tNMSPlayer);
-            MethodUtil.invokeMethod(method_SimpleNetworkWrapper_sendTo,PacketHandler.INSTANCE,tMsg,tNMSPlayer);
-        }
-
         // 完成自动解锁的研究
         ResearchManager tMan=Thaumcraft.proxy.getResearchManager();
         Collection<ResearchCategoryList> tRCs=ResearchCategories.researchCategories.values();
@@ -169,6 +163,12 @@ public class DM_Thaumcraft extends ADataModel{
                     MethodUtil.invokeMethod(this.method_ResearchManager_completeResearch,tMan,new Object[]{tNMSPlayer,sRI.key});
                 }
             }
+        }
+
+        // 同步到客户端
+        for(Class<?> sClazz : this.mSyncPackets){
+            IMessage tMsg=(IMessage)ClassUtil.newInstance(sClazz,NMSUtil.clazz_EntityPlayer,tNMSPlayer);
+            MethodUtil.invokeMethod(method_SimpleNetworkWrapper_sendTo,PacketHandler.INSTANCE,tMsg,tNMSPlayer);
         }
     }
 
