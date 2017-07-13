@@ -164,7 +164,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
         if(tResult){
             Log.debug("Lock user data "+tName+" done.");
         }else{
-            Log.debug("Lock user data "+tName+" faid!");
+            Log.debug("Lock user data "+tName+" faid, may be no data in db !");
         }
 
     }
@@ -194,6 +194,8 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
      * @return 用户的数据
      */
     public User getUserData(Player pPlayer,boolean pCloseInv,CommandSender pReciver){
+        if(pPlayer==null||!pPlayer.isOnline()) return null;
+
         if(pCloseInv){
             InventoryView tView=pPlayer.getOpenInventory();
             if(tView!=null&&BukkitUtil.isValidItem(tView.getCursor())){
@@ -290,8 +292,11 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
         DailySaveTask tSaveTask=new DailySaveTask(pPlayer,this);
         BukkitTask tTask=Bukkit.getScheduler().runTaskTimer(this.mPlugin,tSaveTask,this.mSaveInterval,this.mSaveInterval);
         tSaveTask.setTaskId(tTask.getTaskId());
-
-        this.cancelSaveTask(pPlayer);
+        tTask=this.mTaskMap.put(tName.toLowerCase(),tTask);
+        if(tTask!=null){
+            tTask.cancel();
+            Log.debug("Old save task canceled for "+tName+'!');
+        }
     }
 
 }
