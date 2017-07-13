@@ -5,9 +5,11 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.plugin.ABukkitPlugin;
+import cc.bukkitPlugin.commons.util.BukkitUtil;
 import cc.bukkitPlugin.pds.api.PDSAPI;
 import cc.bukkitPlugin.pds.api.event.CallDataModelRegisterEvent;
 import cc.bukkitPlugin.pds.command.CommandExc;
@@ -54,7 +56,19 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
         // 初始化管理器并载入配置
         this.reloadPlugin(null);
 
-        PDSAPI.checkModels(true);
+        PDSAPI.checkModels(true); // 先加载配置,再决定启用哪些配置
+
+        for(Player sPlayer : BukkitUtil.getOnlinePlayers()){
+            this.mUserMan.createSaveTask(sPlayer);
+        }
+    }
+
+    @Override
+    public void onDisable(){
+        for(Player sPlayer : BukkitUtil.getOnlinePlayers()){
+            this.mUserMan.saveUser(sPlayer,false);
+        }
+        super.onDisable();
     }
 
     private void registerDM(){
