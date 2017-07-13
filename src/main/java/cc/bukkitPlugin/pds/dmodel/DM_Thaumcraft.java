@@ -42,6 +42,7 @@ public class DM_Thaumcraft extends ADataModel{
     private Method method_ResearchManager_loadResearchNBT;
     private Method method_ResearchManager_loadScannedNBT;
     private Method method_ResearchManager_completeResearch;
+    private Method method_ResearchManager_getResearchForPlayer;
 
     private Method method_SimpleNetworkWrapper_sendTo;
 
@@ -84,6 +85,7 @@ public class DM_Thaumcraft extends ADataModel{
             this.method_ResearchManager_saveResearchNBT=tClazz.getDeclaredMethod("saveResearchNBT",NBTUtil.clazz_NBTTagCompound,NMSUtil.clazz_EntityPlayer);
             this.method_ResearchManager_saveScannedNBT=tClazz.getDeclaredMethod("saveScannedNBT",NBTUtil.clazz_NBTTagCompound,NMSUtil.clazz_EntityPlayer);
             this.method_ResearchManager_completeResearch=tClazz.getDeclaredMethod("completeResearch",NMSUtil.clazz_EntityPlayer,String.class);
+            this.method_ResearchManager_getResearchForPlayer=tClazz.getDeclaredMethod("getResearchForPlayer",String.class);
 
             String tPackage="thaumcraft.common.lib.network.playerdata.";
             String[] tPackets=new String[]{"PacketSyncAspects","PacketSyncResearch","PacketSyncScannedItems","PacketSyncScannedEntities","PacketSyncScannedPhenomena"};
@@ -109,9 +111,10 @@ public class DM_Thaumcraft extends ADataModel{
     public byte[] getData(Player pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
         Object tNBTTagCompound=NBTUtil.newNBTTagCompound();
         Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer);
-        MethodUtil.invokeMethod(this.method_ResearchManager_saveAspectNBT,null,new Object[]{tNBTTagCompound,tNMSPlayer});
-        MethodUtil.invokeMethod(this.method_ResearchManager_saveResearchNBT,null,new Object[]{tNBTTagCompound,tNMSPlayer});
-        MethodUtil.invokeMethod(this.method_ResearchManager_saveScannedNBT,null,new Object[]{tNBTTagCompound,tNMSPlayer});
+
+        MethodUtil.invokeStaticMethod(this.method_ResearchManager_saveAspectNBT,tNBTTagCompound,tNMSPlayer);
+        MethodUtil.invokeStaticMethod(this.method_ResearchManager_saveResearchNBT,tNBTTagCompound,tNMSPlayer);
+        MethodUtil.invokeStaticMethod(this.method_ResearchManager_saveScannedNBT,tNBTTagCompound,tNMSPlayer);
 
         String tPlayerName=pPlayer.getName();
         Map<String,Object> tTagMap=NBTUtil.getNBTTagCompoundValue(tNBTTagCompound);
@@ -129,9 +132,27 @@ public class DM_Thaumcraft extends ADataModel{
 
         Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer);
         Object tNBT=PDSNBTUtil.decompressNBT(pData);
-        MethodUtil.invokeMethod(this.method_ResearchManager_loadAspectNBT,null,new Object[]{tNBT,tNMSPlayer});
-        MethodUtil.invokeMethod(this.method_ResearchManager_loadResearchNBT,null,new Object[]{tNBT,tNMSPlayer});
-        MethodUtil.invokeMethod(this.method_ResearchManager_loadScannedNBT,null,new Object[]{tNBT,tNMSPlayer});
+
+        // 完成自动解锁的研究
+        ResearchManager tMan=Thaumcraft.proxy.getResearchManager();
+        Collection<ResearchCategoryList> tRCs=ResearchCategories.researchCategories.values();
+        for(ResearchCategoryList sRCL : tRCs){
+            Collection<ResearchItem> tRIs=sRCL.research.values();
+            for(ResearchItem sRI : tRIs){
+                if(sRI.isAutoUnlock()){
+                    MethodUtil.invokeMethod(this.method_ResearchManager_completeResearch,tMan,new Object[]{tNMSPlayer,sRI.key});
+                }
+            }
+        }
+
+        if(pData.length==0){
+            Log.debug("Init tc aspect for "+pPlayer.getName());
+            MethodUtil.invokeStaticMethod(method_ResearchManager_getResearchForPlayer,pPlayer.getName());
+        }
+
+        MethodUtil.invokeStaticMethod(this.method_ResearchManager_loadAspectNBT,tNBT,tNMSPlayer);
+        MethodUtil.invokeStaticMethod(this.method_ResearchManager_loadResearchNBT,tNBT,tNMSPlayer);
+        MethodUtil.invokeStaticMethod(this.method_ResearchManager_loadScannedNBT,tNBT,tNMSPlayer);
 
         String tPlayerName=pPlayer.getName();
         Map<String,Object> tTagMap=NBTUtil.getNBTTagCompoundValue(tNBT);
@@ -151,18 +172,6 @@ public class DM_Thaumcraft extends ADataModel{
         tValue=tTagMap.get(TAG_Eldritch_Temp);
         if(NBTUtil.isNBTTagInt(tValue)){
             Thaumcraft.proxy.getPlayerKnowledge().setWarpTemp(tPlayerName,(int)FieldUtil.getFieldValue(NBTUtil.field_NBTTagInt_value,tValue));
-        }
-
-        // 完成自动解锁的研究
-        ResearchManager tMan=Thaumcraft.proxy.getResearchManager();
-        Collection<ResearchCategoryList> tRCs=ResearchCategories.researchCategories.values();
-        for(ResearchCategoryList sRCL : tRCs){
-            Collection<ResearchItem> tRIs=sRCL.research.values();
-            for(ResearchItem sRI : tRIs){
-                if(sRI.isAutoUnlock()){
-                    MethodUtil.invokeMethod(this.method_ResearchManager_completeResearch,tMan,new Object[]{tNMSPlayer,sRI.key});
-                }
-            }
         }
 
         // 同步到客户端
