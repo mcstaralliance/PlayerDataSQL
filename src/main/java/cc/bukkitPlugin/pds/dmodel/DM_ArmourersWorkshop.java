@@ -18,7 +18,7 @@ public class DM_ArmourersWorkshop extends ADM_InVanilla{
 
     @Override
     public String getModelId(){
-        return "ArmourersWorksho";
+        return "ArmourersWorkshoh";
     }
 
     @Override
