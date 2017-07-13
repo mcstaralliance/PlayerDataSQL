@@ -115,10 +115,13 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
 
     protected void handleConnClose(){
         this.mLock.lock();
-        IOUtil.closeStream(this.mConn);
-        this.mConn=null;
-        this.mStatementCache.clear();
-        this.mLock.unlock();
+        try{
+            IOUtil.closeStream(this.mConn);
+            this.mConn=null;
+            this.mStatementCache.clear();
+        }finally{
+            this.mLock.unlock();
+        }
     }
 
     /**
@@ -207,9 +210,12 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
                 tUser.setData(tResult.getBytes(User.COL_DATA));
             }
         }finally{
-            IOUtil.closeStream(tResult);
-            Log.developInfo("Read user "+pPlayer.getName()+" at time "+System.nanoTime());
-            this.mLock.unlock();
+            try{
+                IOUtil.closeStream(tResult);
+                Log.developInfo("Read user "+pPlayer.getName()+" at time "+System.nanoTime());
+            }finally{
+                this.mLock.unlock();
+            }
         }
         return tUser;
     }
@@ -226,8 +232,8 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
             tStatement.setBytes(3,pUser.getData());
             return tStatement.executeUpdate()!=0;
         }finally{
-            Log.developInfo("Update user "+pUser.getName()+" at time "+System.nanoTime());
             this.mLock.unlock();
+            Log.developInfo("Update user "+pUser.getName()+" at time "+System.nanoTime());
         }
     }
 

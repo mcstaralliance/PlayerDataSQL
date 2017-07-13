@@ -43,8 +43,10 @@ public class PDSAPI implements Listener,IConfigModel{
      *             插件未实例化
      */
     public static PlayerDataSQL getPlugin(){
-        if(PDSAPI.mPlugin==null){
-            PDSAPI.mPlugin=PlayerDataSQL.getInstance();
+        synchronized(PDSAPI.class){
+            if(PDSAPI.mPlugin==null){
+                PDSAPI.mPlugin=PlayerDataSQL.getInstance();
+            }
         }
         return PDSAPI.mPlugin;
     }
@@ -92,12 +94,13 @@ public class PDSAPI implements Listener,IConfigModel{
 
     public static IDataModel remove(String pModelName){
         IDataModel tRemoved=PDSAPI.mRegistedModels.remove(pModelName.toLowerCase());
-        if(tRemoved!=null) {
-        synchronized(PDSAPI.class){
-            PDSAPI.mEnabledModels.remove(tRemoved);
-            PDSAPI.mEnabledModelsA=null;
-        }}
-        return tRemoved; 
+        if(tRemoved!=null){
+            synchronized(PDSAPI.class){
+                PDSAPI.mEnabledModels.remove(tRemoved);
+                PDSAPI.mEnabledModelsA=null;
+            }
+        }
+        return tRemoved;
     }
 
     public static void remove(Plugin pPlugin){
@@ -128,7 +131,7 @@ public class PDSAPI implements Listener,IConfigModel{
     }
 
     private boolean mFirtInit=true;
-    
+
     public PDSAPI(PlayerDataSQL pPlugin){
         pPlugin.registerEvents(this);
         pPlugin.getConfigManager().registerConfigModel(this);
@@ -158,7 +161,7 @@ public class PDSAPI implements Listener,IConfigModel{
                 PDSAPI.mEnabledModelsStr.add(sKey.toLowerCase());
             }
         }
-        
+
         PDSAPI.checkModels(!this.mFirtInit);
         this.mFirtInit=false;
     }
