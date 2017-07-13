@@ -231,25 +231,23 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
         BukkitTask tTask=this.mTaskMap.remove(tName.toLowerCase());
         if(tTask!=null){
             tTask.cancel();
+            Log.debug("Save task canceled for user "+tName+'!');
             Log.debug("Save task canceled for "+tName+'!');
-        }else{
-            Log.debug("No task can be canceled for "+tName+'!');
         }
     }
 
     public void createSaveTask(Player pPlayer){
         if(this.mSaveInterval<=0) return;
 
+        this.lockUserData(pPlayer);
         String tName=pPlayer.getName();
+
         Log.debug("Scheduling daily save task for user "+tName+'.');
         DailySaveTask tSaveTask=new DailySaveTask(pPlayer,this);
         BukkitTask tTask=Bukkit.getScheduler().runTaskTimer(this.mPlugin,tSaveTask,this.mSaveInterval,this.mSaveInterval);
         tSaveTask.setTaskId(tTask.getTaskId());
-        BukkitTask tOldTask=this.mTaskMap.put(tName.toLowerCase(),tTask);
-        if(tOldTask!=null){
-            Log.debug("Already scheduled task for user "+tName+'!');
-            tOldTask.cancel();
-        }
+
+        this.cancelSaveTask(pPlayer);
     }
 
 }

@@ -90,7 +90,6 @@ public class LoadUserTask implements Runnable{
         }
 
         this.mUserMan.unlockUser(this.mLoadFor,false);
-        this.mUserMan.lockUserData(this.mLoadFor);
         this.mUserMan.createSaveTask(this.mLoadFor);
     }
 
