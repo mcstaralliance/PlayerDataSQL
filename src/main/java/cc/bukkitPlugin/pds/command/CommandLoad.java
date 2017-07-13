@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -11,7 +12,6 @@ import org.bukkit.entity.Player;
 import cc.bukkitPlugin.commons.plugin.command.TACommandBase;
 import cc.bukkitPlugin.commons.util.BukkitUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
-import cc.bukkitPlugin.pds.user.User;
 import cc.bukkitPlugin.pds.user.UserManager;
 
 public class CommandLoad extends TACommandBase<PlayerDataSQL,CommandExc>{
@@ -50,8 +50,9 @@ public class CommandLoad extends TACommandBase<PlayerDataSQL,CommandExc>{
         Bukkit.getScheduler().runTaskAsynchronously(this.mPlugin,()->{
             try{
                 UserManager tUserMan=this.mPlugin.getUserManager();
-                User tUserData=tUserMan.loadUser(tLoadFrom);
-                tUserMan.restoreUser(tUserData,tLoadFor);
+                GameMode tMode=tLoadFor.getGameMode();
+                tUserMan.restoreUser(tUserMan.loadUser(tLoadFrom),tLoadFor,pSender);
+                tLoadFor.setGameMode(tMode);
             }catch(SQLException e){
                 send(pSender,C("MsgErrorOnLoadSQLData","%player%",tLoadFrom.getName())+": "+e.getLocalizedMessage());
                 return;

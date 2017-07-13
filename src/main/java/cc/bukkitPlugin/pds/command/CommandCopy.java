@@ -3,6 +3,7 @@ package cc.bukkitPlugin.pds.command;
 import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -43,14 +44,16 @@ public class CommandCopy extends TACommandBase<PlayerDataSQL,CommandExc>{
         if(tCopyFrom==null)
             return send(pSender,C("MsgPlayerNotExist","%player%",pArgs[0]));
 
+        GameMode tMode=tCopyFor.getGameMode();
         UserManager tUserMan=this.mPlugin.getUserManager();
-        tUserMan.restoreUser(tUserMan.getUserData(tCopyFrom,false),tCopyFor);
+        tUserMan.restoreUser(tUserMan.getUserData(tCopyFrom,false,pSender),tCopyFor,pSender);
+        tCopyFor.setGameMode(tMode);
 
         return send(pSender,C("MsgCopyDataForPlayer",
                 new String[]{"%from%","%for%"},
                 new Object[]{tCopyFrom==pSender?C("WordYou"):tCopyFrom.getName(),tCopyFor==pSender?C("WordYou"):tCopyFor.getName()}));
     }
-    
+
     @Override
     public ArrayList<String> getHelp(CommandSender pSender,String pLabel){
         ArrayList<String> tHelps=new ArrayList<>();
