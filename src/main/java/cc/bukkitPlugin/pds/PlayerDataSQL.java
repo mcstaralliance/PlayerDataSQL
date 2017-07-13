@@ -1,17 +1,17 @@
 package cc.bukkitPlugin.pds;
 
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.util.List;
+
 import org.bukkit.Bukkit;
 
+import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.plugin.ABukkitPlugin;
 import cc.bukkitPlugin.pds.api.PDSAPI;
 import cc.bukkitPlugin.pds.api.event.CallDataModelRegisterEvent;
 import cc.bukkitPlugin.pds.command.CommandExc;
-import cc.bukkitPlugin.pds.dmodel.DM_ArmourersWorkshop;
-import cc.bukkitPlugin.pds.dmodel.DM_Baubles;
-import cc.bukkitPlugin.pds.dmodel.DM_MCStats;
-import cc.bukkitPlugin.pds.dmodel.DM_Minecraft;
-import cc.bukkitPlugin.pds.dmodel.DM_TConstruct;
-import cc.bukkitPlugin.pds.dmodel.DM_Thaumcraft;
+import cc.bukkitPlugin.pds.dmodel.ADataModel;
 import cc.bukkitPlugin.pds.listener.PlayerListener;
 import cc.bukkitPlugin.pds.listener.PreventListener;
 import cc.bukkitPlugin.pds.manager.ConfigManager;
@@ -19,6 +19,7 @@ import cc.bukkitPlugin.pds.manager.LangManager;
 import cc.bukkitPlugin.pds.storage.IStorage;
 import cc.bukkitPlugin.pds.storage.MySQL;
 import cc.bukkitPlugin.pds.user.UserManager;
+import cc.commons.util.reflect.ClassUtil;
 
 public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
 
@@ -47,18 +48,42 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
         // 绑定命令管理器
         new CommandExc(this);
 
-        PDSAPI.registerModel(new DM_Minecraft(this));
-        PDSAPI.registerModel(new DM_MCStats(this));
-        PDSAPI.registerModel(new DM_Baubles(this));
-        PDSAPI.registerModel(new DM_Thaumcraft(this));
-        PDSAPI.registerModel(new DM_TConstruct(this));
-        PDSAPI.registerModel(new DM_ArmourersWorkshop(this));
+        this.registerDM();
         Bukkit.getPluginManager().callEvent(new CallDataModelRegisterEvent());
 
         // 初始化管理器并载入配置
         this.reloadPlugin(null);
 
         PDSAPI.checkModels(true);
+    }
+
+    private void registerDM(){
+        String tPackage=ADataModel.class.getPackage().getName();
+        tPackage=tPackage==null?"cc.bukkitPlugin.pds.dmodel":tPackage;
+
+        List<Class<?>> tDMClasses=null;
+        try{
+            tDMClasses=ClassUtil.getPackageClasses(tPackage,true);
+        }catch(IOException exp){
+            Log.severe("Error on auto register datamodel",exp);
+            return;
+        }
+
+        int tRegisteredCount=0;
+        for(Class<?> tClass : tDMClasses){
+            if(tClass.isInterface()||Modifier.isAbstract(tClass.getModifiers())||!ADataModel.class.isAssignableFrom(tClass))
+                continue;
+
+            try{
+                ADataModel tModel=ClassUtil.newInstance((Class<? extends ADataModel>)tClass,PlayerDataSQL.class,this);
+                PDSAPI.registerModel(tModel);
+                tRegisteredCount++;
+            }catch(Throwable exp){
+                Log.severe("Error on auto register datamodel class: "+tClass.getName(),exp);
+            }
+        }
+
+        Log.debug("auto registered "+tRegisteredCount+" datamodel");
     }
 
     @Override

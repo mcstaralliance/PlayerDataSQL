@@ -93,7 +93,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
      * @param pLock
      */
     public void saveUser(Player pPlayer,boolean pLock){
-        this.saveUser(getUserData(pPlayer,pLock),pLock);
+        this.saveUser(getUserData(pPlayer,false),pLock);
     }
 
     /**

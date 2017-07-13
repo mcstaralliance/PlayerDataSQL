@@ -3,16 +3,12 @@ package cc.bukkitPlugin.pds.dmodel;
 import java.lang.reflect.Method;
 
 import cc.bukkitPlugin.commons.Log;
-import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.commons.util.reflect.MethodUtil;
 
-public class DM_ArmourersWorkshop extends DataInValidModel{
+public class DM_ArmourersWorkshop extends ADM_InVanilla{
 
     public static final String EXT_PROP_NAME="playerCustomEquipmentData";
-
-    private Method method_ExPropsPlayerEquipmentData_get;
-    private Method method_ExPropsPlayerEquipmentData_register;
 
     private Method method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround;
 
@@ -36,14 +32,10 @@ public class DM_ArmourersWorkshop extends DataInValidModel{
             return this.mInit.booleanValue();
 
         try{
-            
+
             this.initExProp();
 
-            Class<?> tClazz=Class.forName(this.mExPropClass);
-            this.method_ExPropsPlayerEquipmentData_get=MethodUtil.getMethod(tClazz,"get",NMSUtil.clazz_EntityPlayer,true);
-            this.method_ExPropsPlayerEquipmentData_register=MethodUtil.getMethod(tClazz,"register",NMSUtil.clazz_EntityPlayer,true);
-
-            this.method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround=MethodUtil.getMethod(tClazz,"updateEquipmentDataToPlayersAround",true);
+            this.method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround=MethodUtil.getMethod(this.mExPropClazz,"updateEquipmentDataToPlayersAround",true);
 
             // 时装的TAG
             this.mModelTags.add("wardrobeContainer");
@@ -65,16 +57,6 @@ public class DM_ArmourersWorkshop extends DataInValidModel{
             return (this.mInit=false);
         }
         return (this.mInit=true);
-    }
-
-    @Override
-    protected Object getExProp(Object pNMSPlayer){
-        return MethodUtil.invokeStaticMethod(method_ExPropsPlayerEquipmentData_get,pNMSPlayer);
-    }
-
-    @Override
-    protected void registerExProp(Object pNMSPlayer){
-        MethodUtil.invokeStaticMethod(method_ExPropsPlayerEquipmentData_register,pNMSPlayer);
     }
 
     @Override

@@ -17,19 +17,27 @@ import cc.bukkitPlugin.pds.util.PDSNBTUtil;
 import cc.commons.util.reflect.FieldUtil;
 import cc.commons.util.reflect.MethodUtil;
 
-public abstract class DataInValidModel extends DM_Minecraft{
+public abstract class ADM_InVanilla extends DM_Minecraft{
 
     protected final HashSet<String> mModelTags=new HashSet<>();
     protected final String mExPropClass;
+    protected Class<?> mExPropClazz;
     protected final String mExPropName;
 
+    /** void loadNBTData(NBTTagCompound) */
     private Method method_ExProp_loadNBTData;
+    /** void saveNBTData(NBTTagCompound) */
     private Method method_ExProp_saveNBTData;
+
+    /** static T get(EntityPlayer) */
+    private Method method_ExProp_get;
+    /** static void register(EntityPlayer) */
+    private Method method_ExProp_register;
 
     protected Boolean mInit=null;
     private Field field_NMSEntity_extendedProperties;
 
-    public DataInValidModel(PlayerDataSQL pPlugin,String pExPropClass,String pExPropName){
+    public ADM_InVanilla(PlayerDataSQL pPlugin,String pExPropClass,String pExPropName){
         super(pPlugin);
 
         this.mExPropClass=pExPropClass;
@@ -37,10 +45,16 @@ public abstract class DataInValidModel extends DM_Minecraft{
     }
 
     protected void initExProp() throws Exception{
-        Class<?> tClazz=Class.forName(this.mExPropClass);
+        this.mExPropClazz=Class.forName(this.mExPropClass);
 
-        this.method_ExProp_loadNBTData=MethodUtil.getMethod(tClazz,"loadNBTData",NBTUtil.clazz_NBTTagCompound,true);
-        this.method_ExProp_saveNBTData=MethodUtil.getMethod(tClazz,"saveNBTData",NBTUtil.clazz_NBTTagCompound,true);
+        this.method_ExProp_loadNBTData=MethodUtil.getMethod(this.mExPropClazz,"loadNBTData",NBTUtil.clazz_NBTTagCompound,true);
+        this.method_ExProp_saveNBTData=MethodUtil.getMethod(this.mExPropClazz,"saveNBTData",NBTUtil.clazz_NBTTagCompound,true);
+
+        try{
+            this.method_ExProp_get=this.mExPropClazz.getDeclaredMethod("get",NMSUtil.clazz_EntityPlayer);
+            this.method_ExProp_register=this.mExPropClazz.getDeclaredMethod("register",NMSUtil.clazz_EntityPlayer);
+        }catch(NoSuchMethodException ignore){
+        }
 
         try{
             this.field_NMSEntity_extendedProperties=NMSUtil.clazz_NMSEntity.getDeclaredField("extendedProperties");
@@ -92,7 +106,10 @@ public abstract class DataInValidModel extends DM_Minecraft{
 
     public void reset(Object pNMSPlayer){
         Object tExProp=this.getExProp(pNMSPlayer);
-        if(tExProp==null) return;
+        if(tExProp==null){
+            this.registerExProp(pNMSPlayer);
+            return;
+        }
 
         Map<?,?> tExProps=null;
         if(this.field_NMSEntity_extendedProperties==null){
@@ -141,9 +158,41 @@ public abstract class DataInValidModel extends DM_Minecraft{
         return tExProp;
     }
 
-    protected abstract Object getExProp(Object pNMSPlayer);
+    /**
+     * 获取当前Mod数据
+     * 
+     * @param pNMSPlayer
+     *            NMS玩家,数据类型为EntityPlayer
+     * @return Mod数据或null
+     */
+    protected Object getExProp(Object pNMSPlayer){
+        if(this.method_ExProp_get==null)
+            throw new AbstractMethodError("'get' method not define");
 
-    protected abstract void registerExProp(Object pNMSPlayer);
+        return MethodUtil.invokeStaticMethod(this.method_ExProp_get,pNMSPlayer);
+    }
+
+    /**
+     * 为Mod注册数据
+     * 
+     * @param pNMSPlayer
+     *            NMS玩家,数据类型为EntityPlayer
+     */
+    protected void registerExProp(Object pNMSPlayer){
+        if(this.method_ExProp_get==null)
+            throw new AbstractMethodError("'register' method not define");
+
+        MethodUtil.invokeStaticMethod(this.method_ExProp_register,pNMSPlayer);
+    }
+
+    @Override
+    public abstract String getModelId();
+
+    @Override
+    public abstract String getDesc();
+
+    @Override
+    public abstract boolean initOnce();
 
     protected abstract void updateToAround(Object pNMSPlayer,Object pExProp);
 
