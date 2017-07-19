@@ -46,7 +46,7 @@ public class CommandCopy extends TACommandBase<PlayerDataSQL,CommandExc>{
 
         GameMode tMode=tCopyFor.getGameMode();
         UserManager tUserMan=this.mPlugin.getUserManager();
-        tUserMan.restoreUser(tUserMan.getUserData(tCopyFrom,false,pSender),tCopyFor,pSender);
+        tUserMan.restoreUser(tUserMan.getUserData(tCopyFrom,false,pSender),tCopyFor.getName(),pSender);
         tCopyFor.setGameMode(tMode);
 
         return send(pSender,C("MsgCopyDataForPlayer",

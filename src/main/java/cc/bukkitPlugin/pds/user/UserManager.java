@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryView;
@@ -60,7 +59,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
      * @param pPlayer
      *            还原的用户
      */
-    public void restoreUser(User pUser,Player pPlayer){
+    public void restoreUser(User pUser,String pPlayer){
         this.restoreUser(pUser,pPlayer,(CommandSender)null);
     }
 
@@ -74,7 +73,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
      * @param pReciver
      *            消息接收者
      */
-    public void restoreUser(User pUser,Player pPlayer,CommandSender pReciver){
+    public void restoreUser(User pUser,String pPlayer,CommandSender pReciver){
         if(Bukkit.isPrimaryThread()){
             this.restoreUser0(pUser,pPlayer,pReciver);
         }else{
@@ -91,11 +90,11 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
      * @throws SQLException
      *             读取数据库时发生异常
      */
-    public User loadUser(OfflinePlayer pPlayer) throws SQLException{
+    public User loadUser(String pPlayer) throws SQLException{
         try{
             return this.mPlugin.getStorage().get(pPlayer);
         }catch(SQLException exp){
-            Log.severe(this.mPlugin.C("MsgErrorOnLoadSQLData","player",pPlayer.getName()),exp);
+            Log.severe(this.mPlugin.C("MsgErrorOnLoadSQLData","player",pPlayer),exp);
             throw exp;
         }
     }
@@ -151,22 +150,28 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
      * @param pPlayer
      *            用户
      */
-    public void lockUserData(OfflinePlayer pPlayer){
+    public void lockUserData(String pPlayer){
+        if(Bukkit.isPrimaryThread()){
+            Bukkit.getScheduler().runTask(this.mPlugin,()->this.lockUserData0(pPlayer));
+        }else{
+            this.lockUserData0(null);
+        }
+    }
+
+    public void lockUserData0(String pPlayer){
         boolean tResult=false;
-        String tName=pPlayer.getName();
 
         try{
             tResult=this.mPlugin.getStorage().update(pPlayer,new String[]{User.COL_LOCK},new Object[]{true});
         }catch(SQLException exp){
-            Log.severe(this.mPlugin.C("MsgErrorOnUpdateSQLData","%player%",pPlayer.getName()),exp);
+            Log.severe(this.mPlugin.C("MsgErrorOnUpdateSQLData","%player%",pPlayer),exp);
         }
 
         if(tResult){
-            Log.debug("Lock user data "+tName+" done.");
+            Log.debug("Lock user data "+pPlayer+" done.");
         }else{
-            Log.debug("Lock user data "+tName+" faid, may be no data in db !");
+            Log.debug("Lock user data "+pPlayer+" faid, may be no data in db !");
         }
-
     }
 
     /**
@@ -183,7 +188,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
     }
 
     /**
-     * 获取用户当前序列化的数据
+     * 获取用户当前序列化的数据,请只在主线程调用
      * 
      * @param pPlayer
      *            用户
@@ -195,6 +200,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
      */
     public User getUserData(Player pPlayer,boolean pCloseInv,CommandSender pReciver){
         if(pPlayer==null||!pPlayer.isOnline()) return null;
+        if(!Bukkit.isPrimaryThread()) throw new IllegalStateException("请勿在异步线程调用此方法");
 
         if(pCloseInv){
             InventoryView tView=pPlayer.getOpenInventory();
@@ -206,7 +212,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
             pPlayer.closeInventory();
         }
 
-        User tUser=new User(pPlayer);
+        User tUser=new User(pPlayer.getName());
         Map<String,byte[]> tDatas=tUser.getDataMap(true);
         for(IDataModel sModel : PDSAPI.getEnableModel()){
             try{
@@ -228,8 +234,9 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
      * @param pUser
      *            用户,包含序列化的数据
      */
-    protected void restoreUser0(User pUser,Player pPlayer,CommandSender pReciver){
-        if(pPlayer!=null&&pPlayer.isOnline()){
+    protected void restoreUser0(User pUser,String pPlayer,CommandSender pReciver){
+        Player tPlayer=Bukkit.getPlayerExact(pPlayer);
+        if(tPlayer!=null&&tPlayer.isOnline()){
             Log.debug("Start restore data for user "+pUser.getName());
             Map<String,byte[]> tDatas=pUser.getDataMap(false);
             for(IDataModel sModel : PDSAPI.getEnableModel()){
@@ -237,7 +244,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
                 if(tData==null) tData=new byte[0];
 
                 try{
-                    sModel.restore(pPlayer,tData);
+                    sModel.restore(tPlayer,tData);
                 }catch(Throwable exp){
                     Log.severe(pReciver,this.mPlugin.C("MsgModelErrorOndeserializeData",new String[]{"%model%","%player%"},sModel.getDesc(),pUser.getName()),exp);
                 }
@@ -247,19 +254,19 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
         }
     }
 
-    public boolean isLocked(OfflinePlayer pPlayer){
-        return this.mLocked.contains(pPlayer.getName().toLowerCase());
+    public boolean isLocked(String pPlayer){
+        return this.mLocked.contains(pPlayer.toLowerCase());
     }
 
-    public boolean isNotLocked(OfflinePlayer pPlayer){
+    public boolean isNotLocked(String pPlayer){
         return !this.isLocked(pPlayer);
     }
 
-    public void lockUser(OfflinePlayer pPlayer){
-        this.mLocked.add(pPlayer.getName().toLowerCase());
+    public void lockUser(String pPlayer){
+        this.mLocked.add(pPlayer.toLowerCase());
     }
 
-    public void unlockUser(OfflinePlayer pPlayer,boolean pScheduled){
+    public void unlockUser(String pPlayer,boolean pScheduled){
         if(pScheduled){
             Bukkit.getScheduler().runTask(this.mPlugin,()->unlockUser(pPlayer));
         }else{
@@ -267,35 +274,41 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
         }
     }
 
-    private void unlockUser(OfflinePlayer pPlayer){
+    private void unlockUser(String pPlayer){
         while(this.isLocked(pPlayer)){
-            this.mLocked.remove(pPlayer.getName().toLowerCase());
+            this.mLocked.remove(pPlayer.toLowerCase());
         }
     }
 
-    public void cancelSaveTask(OfflinePlayer pPlayer){
-        String tName=pPlayer.getName();
-        BukkitTask tTask=this.mTaskMap.remove(tName.toLowerCase());
+    public void cancelSaveTask(String pPlayer){
+        BukkitTask tTask=this.mTaskMap.remove(pPlayer.toLowerCase());
         if(tTask!=null){
             tTask.cancel();
-            Log.debug("Save task canceled for "+tName+'!');
+            Log.debug("Save task canceled for "+pPlayer+'!');
         }
     }
 
-    public void createSaveTask(Player pPlayer){
+    public void createSaveTask(String pPlayer){
         if(this.mSaveInterval<=0) return;
 
-        this.lockUserData(pPlayer);
-        String tName=pPlayer.getName();
+        if(Bukkit.isPrimaryThread()){
+            this.createSaveTask0(pPlayer);
+        }else{
+            Bukkit.getScheduler().runTask(this.mPlugin,()->this.createSaveTask0(pPlayer));
+        }
+    }
 
-        Log.debug("Scheduling daily save task for user "+tName+'.');
+    protected void createSaveTask0(String pPlayer){
+        this.lockUserData(pPlayer);
+
+        Log.debug("Scheduling daily save task for user "+pPlayer+'.');
         DailySaveTask tSaveTask=new DailySaveTask(pPlayer,this);
         BukkitTask tTask=Bukkit.getScheduler().runTaskTimer(this.mPlugin,tSaveTask,this.mSaveInterval,this.mSaveInterval);
         tSaveTask.setTaskId(tTask.getTaskId());
-        tTask=this.mTaskMap.put(tName.toLowerCase(),tTask);
+        tTask=this.mTaskMap.put(pPlayer.toLowerCase(),tTask);
         if(tTask!=null){
             tTask.cancel();
-            Log.debug("Old save task canceled for "+tName+'!');
+            Log.debug("Old save task canceled for "+pPlayer+'!');
         }
     }
 

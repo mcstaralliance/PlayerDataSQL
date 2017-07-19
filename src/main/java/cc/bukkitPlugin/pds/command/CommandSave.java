@@ -48,7 +48,7 @@ public class CommandSave extends TACommandBase<PlayerDataSQL,CommandExc>{
         Bukkit.getScheduler().runTaskAsynchronously(this.mPlugin,()->{
             User tOldData=null;
             try{
-                tOldData=tUserMan.loadUser(tSaveTo);
+                tOldData=tUserMan.loadUser(tSaveTo.getName());
             }catch(SQLException e){
                 send(pSender,C("MsgErrorOnLoadSQLData","%player%",tSaveTo.getName())+": "+e.getLocalizedMessage());
                 return;
@@ -59,7 +59,7 @@ public class CommandSave extends TACommandBase<PlayerDataSQL,CommandExc>{
                 return;
             }
 
-            tUserData.setPlayer(tSaveTo);
+            tUserData.setPlayer(tSaveTo.getName());
             if(tUserMan.saveUser(tUserData,false,pSender)){
                 send(pSender,C("MsgSaveDataForPlayer",
                         new String[]{"%from%","%to%"},

@@ -2,8 +2,6 @@ package cc.bukkitPlugin.pds.storage;
 
 import java.sql.SQLException;
 
-import org.bukkit.OfflinePlayer;
-
 import cc.bukkitPlugin.pds.user.User;
 
 public interface IStorage{
@@ -17,7 +15,7 @@ public interface IStorage{
      * @throws SQLException
      *             读写数据库时发生异常
      */
-    public User get(OfflinePlayer pPlayer) throws SQLException;
+    public User get(String pPlayer) throws SQLException;
 
     /**
      * 使用用户数据更新或插入到数据库中
@@ -47,6 +45,6 @@ public interface IStorage{
      * @throws SQLException
      *             读写数据库时发生异常
      */
-    public boolean update(OfflinePlayer pPlayer,String[] pCols,Object...pValues) throws SQLException;
+    public boolean update(String pPlayer,String[] pCols,Object...pValues) throws SQLException;
 
 }

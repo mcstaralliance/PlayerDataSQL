@@ -14,14 +14,15 @@ public class DailySaveTask implements Runnable{
 
     public final Player mPlayer;
     private String mName;
-    private UserManager mUserMan;
+    private UserManager pPlayer;
 
     private int mTaskId;
     private int mSaveCount;
+    private UserManager mUserMan;
 
-    public DailySaveTask(Player pPlayer,UserManager pUserMan){
-        this.mPlayer=pPlayer;
-        this.mName=pPlayer.getName();
+    public DailySaveTask(String pPlayer,UserManager pUserMan){
+        this.mPlayer=Bukkit.getPlayerExact(pPlayer);
+        this.mName=pPlayer;
         this.mUserMan=pUserMan;
     }
 

@@ -25,6 +25,28 @@ import cc.commons.util.reflect.ClassUtil;
 
 public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
 
+    /**
+     * 踢出玩家,线程安全的
+     * 
+     * @param pPlayer
+     *            玩家名字
+     */
+    public static void kickPlayerOnError(String pPlayer){
+        if(Bukkit.isPrimaryThread()){
+            PlayerDataSQL.kickPlayerOnError0(pPlayer);
+        }else{
+            Bukkit.getScheduler().runTask(getInstance(),()->PlayerDataSQL.kickPlayerOnError0(pPlayer));
+        }
+    }
+
+    private static void kickPlayerOnError0(String pPlayer){
+        Player tPlayer=Bukkit.getPlayerExact(pPlayer);
+        PlayerDataSQL tPlugin=PlayerDataSQL.getInstance();
+        if(tPlayer!=null){
+            tPlayer.getPlayer().kickPlayer(tPlugin.C("MsgDataExpection"));
+        }
+    }
+
     private UserManager mUserMan;
     private IStorage mStorage;
 
@@ -59,7 +81,7 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
         PDSAPI.checkModels(true); // 先加载配置,再决定启用哪些配置
 
         for(Player sPlayer : BukkitUtil.getOnlinePlayers()){
-            this.mUserMan.createSaveTask(sPlayer);
+            this.mUserMan.createSaveTask(sPlayer.getName());
         }
     }
 

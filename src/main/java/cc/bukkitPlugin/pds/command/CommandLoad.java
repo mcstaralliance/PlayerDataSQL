@@ -51,7 +51,7 @@ public class CommandLoad extends TACommandBase<PlayerDataSQL,CommandExc>{
             try{
                 UserManager tUserMan=this.mPlugin.getUserManager();
                 GameMode tMode=tLoadFor.getGameMode();
-                tUserMan.restoreUser(tUserMan.loadUser(tLoadFrom),tLoadFor,pSender);
+                tUserMan.restoreUser(tUserMan.loadUser(tLoadFrom.getName()),tLoadFor.getName(),pSender);
                 tLoadFor.setGameMode(tMode);
             }catch(SQLException e){
                 send(pSender,C("MsgErrorOnLoadSQLData","%player%",tLoadFrom.getName())+": "+e.getLocalizedMessage());

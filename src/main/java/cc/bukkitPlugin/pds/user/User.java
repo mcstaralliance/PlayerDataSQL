@@ -10,9 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-
 import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.commons.util.ByteUtil;
@@ -24,7 +21,6 @@ public class User{
     public static final String COL_LOCK="locked";
     public static final String COL_DATA="data";
 
-    public transient OfflinePlayer mPlayer;
     /** 标识,玩家名字 */
     private String mName;
     /** 数据是否被锁定 */
@@ -34,13 +30,12 @@ public class User{
     /** {@link #mData}的数据序列化缓存 */
     private transient byte[] mDataCache=null;
 
-    public User(OfflinePlayer pPlayer){
+    public User(String pPlayer){
         this.setPlayer(pPlayer);
     }
 
-    public void setPlayer(OfflinePlayer pPlayer){
-        this.mPlayer=pPlayer;
-        this.mName=pPlayer.getName();
+    public void setPlayer(String pPlayer){
+        this.mName=pPlayer;
     }
 
     public byte[] getData(){
@@ -93,10 +88,8 @@ public class User{
             }
         }catch(IOException exp){
             Log.severe("从SQL反序列化数据时发生错误",exp);
-            PlayerDataSQL tPlugin=PlayerDataSQL.getInstance();
-            Player tPlayer=this.mPlayer.getPlayer();
-            if(tPlugin.getConfigManager().mKickOnReadSQLError&&tPlayer!=null){
-                tPlayer.getPlayer().kickPlayer(tPlugin.C("MsgDataExpection"));
+            if(PlayerDataSQL.getInstance().getConfigManager().mKickOnReadSQLError){
+                PlayerDataSQL.kickPlayerOnError(this.mName);
             }
         }finally{
             IOUtil.closeStream(tDIStream);

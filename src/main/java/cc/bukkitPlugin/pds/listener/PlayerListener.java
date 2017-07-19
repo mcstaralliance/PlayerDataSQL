@@ -30,19 +30,17 @@ public class PlayerListener extends AListener<PlayerDataSQL>{
     public void onLogin(PlayerLoginEvent pEvent){
         Player tPlayer=pEvent.getPlayer();
         Log.debug("Lock user "+tPlayer.getName()+" done!");
-        this.mUserMan.lockUser(tPlayer);
+        this.mUserMan.lockUser(tPlayer.getName());
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent pEvent){
-        LoadUserTask tTask=new LoadUserTask(pEvent.getPlayer(),this.mUserMan);
-        int tInterval=this.mPlugin.getConfigManager().mSyncDelay;
-        tTask.setTaskId(Bukkit.getScheduler().runTaskTimerAsynchronously(this.mPlugin,tTask,tInterval,tInterval).getTaskId());
+        Bukkit.getScheduler().runTaskAsynchronously(this.mPlugin,new LoadUserTask(pEvent.getPlayer(),this.mUserMan));
     }
 
     @EventHandler(priority=MONITOR)
     public void onQuit(PlayerQuitEvent pEvent){
-        Player tPlayer=pEvent.getPlayer();
+        String tPlayer=pEvent.getPlayer().getName();
         if(this.mUserMan.isNotLocked(tPlayer)){
             this.mUserMan.cancelSaveTask(tPlayer);
             User tUser=this.mUserMan.getUserData(pEvent.getPlayer(),true);
