@@ -248,14 +248,19 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
 
         tSBuilder.deleteCharAt(tSBuilder.length()-1);
         tSBuilder.append(" WHERE ").append(User.COL_NAME).append('=').append('?');
-        PreparedStatement tStatement=this.getOrCreate(this.getConn(),tSBuilder.toString());
-        tStatement.setString(pCols.length+1,pPlayer);
+        this.mLock.lock();
+        try{
+            PreparedStatement tStatement=this.getOrCreate(this.getConn(),tSBuilder.toString());
+            tStatement.setString(pCols.length+1,pPlayer);
 
-        for(int i=0;i<pCols.length;i++){
-            tStatement.setObject(i+1,pValues[i]);
+            for(int i=0;i<pCols.length;i++){
+                tStatement.setObject(i+1,pValues[i]);
+            }
+
+            return tStatement.executeUpdate()!=0;
+        }finally{
+            this.mLock.unlock();
         }
-
-        return tStatement.executeUpdate()!=0;
     }
 
     private int mCheckSecs=0;
