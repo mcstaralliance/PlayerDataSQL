@@ -72,7 +72,7 @@ public class CommandCopy extends TACommandBase<PlayerDataSQL,CommandExc>{
         if(hasCmdPermission(pSender)){
             tTabs=new ArrayList<>();
             if(pArgs.length<=2){
-                tTabs.addAll(BukkitUtil.getOfflinePlayersName());
+                tTabs.addAll(BukkitUtil.getOnlinePlayersName());
             }
         }
 
