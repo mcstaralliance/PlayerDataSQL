@@ -33,6 +33,8 @@ public class LangManager extends TLangManager<PlayerDataSQL>{
         this.mConfig.addDefault("HelpCmdLoadForPlayer","为玩家载入指定玩家的数据库数据");
         this.mConfig.addDefault("HelpCmdCopy","复制指定玩家的数据到自己身上");
         this.mConfig.addDefault("HelpCmdCopyForPlayer","为玩家复制指定玩家的数据");
+        this.mConfig.addDefault("HelpCmdSave","保存你的数据到指定玩家");
+        this.mConfig.addDefault("HelpCmdSaveToPlayer","保存前者玩家数据到指定玩家");
         this.mConfig.addDefault("MsgDataExpection","数据库背包数据异常,请稍候再试");
         this.mConfig.addDefault("MsgCannotLoadDataForConsole","§c不能为控制台载入数据");
         this.mConfig.addDefault("MsgErrorOnLoadingDataWait","§c载入数据等待期间发生错误");
@@ -52,6 +54,7 @@ public class LangManager extends TLangManager<PlayerDataSQL>{
         this.mConfig.addDefault("MsgUnableConnectToDB","§c无法连接到数据库");
         this.mConfig.addDefault("WordFor","为谁");
         this.mConfig.addDefault("WordFrom","来源");
+        this.mConfig.addDefault("WordPlayer","玩家");
         this.mConfig.addDefault("WordYou","你");
 
     }

@@ -1,12 +1,15 @@
 package cc.bukkitPlugin.pds.command;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import cc.bukkitPlugin.commons.plugin.command.TACommandBase;
+import cc.bukkitPlugin.commons.util.BukkitUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.user.User;
 import cc.bukkitPlugin.pds.user.UserManager;
@@ -25,7 +28,8 @@ public class CommandSave extends TACommandBase<PlayerDataSQL,CommandExc>{
         if(pArgs.length==0) return help(pSender,pLabel);
         if(pArgs.length>2) return errorArgsNumber(pSender,pArgs.length);
 
-        Player tSaveTo,tSaveFrom;
+        Player tSaveFrom;
+        OfflinePlayer tSaveTo;
         int tSaveToIndex;
         if(pArgs.length==1){
             tSaveToIndex=0;
@@ -39,9 +43,9 @@ public class CommandSave extends TACommandBase<PlayerDataSQL,CommandExc>{
             if(tSaveFrom==null)
                 return send(pSender,C("MsgPlayerNotOnline","%player%",pArgs[0]));
         }
-        tSaveTo=Bukkit.getPlayerExact(pArgs[tSaveToIndex]);
+        tSaveTo=Bukkit.getOfflinePlayer(pArgs[tSaveToIndex]);
         if(tSaveTo==null)
-            return send(pSender,C("MsgPlayerNotExist","%player%",pArgs[0]));
+            return send(pSender,C("MsgPlayerNotExist","%player%",pArgs[tSaveToIndex]));
 
         UserManager tUserMan=this.mPlugin.getUserManager();
         User tUserData=tUserMan.getUserData(tSaveFrom,false);
@@ -68,6 +72,31 @@ public class CommandSave extends TACommandBase<PlayerDataSQL,CommandExc>{
         });
 
         return true;
+    }
+    
+    @Override
+    public ArrayList<String> getHelp(CommandSender pSender,String pLabel){
+        ArrayList<String> tHelps=new ArrayList<>();
+        if(hasCmdPermission(pSender)){
+            tHelps.add(constructCmdUsage(C("WordPlayer")));
+            tHelps.add(this.mExector.getCmdUsagePrefix()+C("HelpCmdSave"));
+            tHelps.add(constructCmdUsage(C("WordPlayer"),C("WordPlayer")));
+            tHelps.add(this.mExector.getCmdUsagePrefix()+C("HelpCmdSaveToPlayer"));
+        }
+        return tHelps;
+    }
+
+    @Override
+    public ArrayList<String> getTabSubCmd(CommandSender pSender,String pLabel,String[] pArgs){
+        ArrayList<String> tTabs=null;
+        if(hasCmdPermission(pSender)){
+            tTabs=new ArrayList<>();
+            if(pArgs.length<=2){
+                tTabs.addAll(BukkitUtil.getOnlinePlayersName());
+            }
+        }
+
+        return tTabs;
     }
 
 }
