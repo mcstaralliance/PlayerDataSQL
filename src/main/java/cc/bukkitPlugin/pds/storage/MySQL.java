@@ -85,9 +85,9 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
         StringBuilder tSBuilder=new StringBuilder();
         tSBuilder.append(this.mDBHost=tSecMain.getString("DBHost",this.mDBHost)).append('\0');
         tSBuilder.append(this.mDatabase=tSecMain.getString("Database",this.mDatabase)).append('\0');
-        tSBuilder.append(this.mTableName=tSecMain.getString("TableName",this.mTableName)).append('\0');
         tSBuilder.append(this.mUsername=tSecMain.getString("Username",this.mUsername)).append('\0');
         tSBuilder.append(this.mPassword=tSecMain.getString("Password",this.mPassword)).append('\0');
+        this.mTableName=tSecMain.getString("TableName",this.mTableName);
 
         int tNewCfghash=tSBuilder.toString().hashCode();
         boolean tTestConn=this.mConn==null;
