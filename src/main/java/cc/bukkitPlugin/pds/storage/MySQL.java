@@ -211,7 +211,7 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
         }finally{
             try{
                 IOUtil.closeStream(tResult);
-                Log.developInfo("Read user "+pPlayer+" at time "+System.nanoTime());
+                Log.developInfo("Read user "+pPlayer+" at time "+System.nanoTime()+",hasdata="+(tUser!=null));
             }finally{
                 this.mLock.unlock();
             }

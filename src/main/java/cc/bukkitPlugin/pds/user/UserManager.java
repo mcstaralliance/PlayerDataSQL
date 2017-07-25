@@ -250,7 +250,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
                 }
             }
         }else{
-            Log.debug("User "+pUser.getName()+" not found!");
+            Log.debug("User "+pUser.getName()+" not online! cancel restore");
         }
     }
 
