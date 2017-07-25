@@ -23,6 +23,7 @@ public class DM_Baubles extends ADataModel{
     private Method method_BaublesApi_getBaubles=null;
     private Method method_InventoryBaubles_readNBT=null;
     private Method method_InventoryBaubles_saveNBT=null;
+    private Method method_InventoryBaubles_syncSlotToClients=null;
 
     private Boolean mInit=null;
 
@@ -53,6 +54,7 @@ public class DM_Baubles extends ADataModel{
             tClazz=Class.forName("baubles.common.container.InventoryBaubles");
             this.method_InventoryBaubles_readNBT=MethodUtil.getMethod(tClazz,"readNBT",NBTUtil.clazz_NBTTagCompound,true);
             this.method_InventoryBaubles_saveNBT=MethodUtil.getMethod(tClazz,"saveNBT",NBTUtil.clazz_NBTTagCompound,true);
+            this.method_InventoryBaubles_syncSlotToClients=MethodUtil.getMethod(tClazz,"syncSlotToClients",int.class,true);
         }catch(Exception exp){
             if(!(exp instanceof ClassNotFoundException))
                 Log.severe("模块 "+this.getDesc()+" 初始化时发生了错误",exp);
@@ -74,6 +76,7 @@ public class DM_Baubles extends ADataModel{
         Object tNMSInv=this.getBaublesNMSInv(pPlayer);
         this.clearInv(tNMSInv);
         MethodUtil.invokeMethod(this.method_InventoryBaubles_readNBT,tNMSInv,PDSNBTUtil.decompressNBT(pData));
+        this.updateToAround(NMSUtil.getNMSPlayer(pPlayer),tNMSInv);
     }
 
     @Override
@@ -93,6 +96,12 @@ public class DM_Baubles extends ADataModel{
         Inventory tInv=(Inventory)ClassUtil.newInstance(NMSUtil.clazz_CraftInventory,NMSUtil.clazz_IInventory,pInv);
         for(int i=0;i<tInv.getSize();i++){
             tInv.setItem(i,null);
+        }
+    }
+
+    protected void updateToAround(Object pNMSPlayer,Object pBaublesInv){
+        for(int i=0;i<4;i++){
+            MethodUtil.invokeMethod(method_InventoryBaubles_syncSlotToClients,pBaublesInv,i);
         }
     }
 
