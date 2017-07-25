@@ -2,6 +2,8 @@ package cc.bukkitPlugin.pds.listener;
 
 import static org.bukkit.event.EventPriority.MONITOR;
 
+import java.sql.SQLException;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -41,6 +43,7 @@ public class PlayerListener extends AListener<PlayerDataSQL>{
     @EventHandler(priority=MONITOR)
     public void onQuit(PlayerQuitEvent pEvent){
         String tPlayer=pEvent.getPlayer().getName();
+        Log.debug("Handle player quit");
         if(this.mUserMan.isNotLocked(tPlayer)){
             this.mUserMan.cancelSaveTask(tPlayer);
             User tUser=this.mUserMan.getUserData(pEvent.getPlayer(),true);
@@ -50,6 +53,29 @@ public class PlayerListener extends AListener<PlayerDataSQL>{
             });
         }else{
             this.mUserMan.unlockUser(tPlayer,false);
+
+            // Data not loaded, check if is use file data import
+            User tUser=this.mUserMan.getUserData(pEvent.getPlayer(),true);
+            Bukkit.getScheduler().runTaskAsynchronously(this.mPlugin,()->{
+                int i=3;
+                while(i-->0){
+                    try{
+                        if(this.mUserMan.loadUser(tPlayer)==null){
+                            if(!this.mPlugin.getConfigManager().mNoRestoreIfSQLDataNotExist){
+                                tUser.getDataMap(true).clear();
+                            }
+                            if(this.mUserMan.saveUser(tUser,false)){
+                                break;
+                            }
+                        }
+                    }catch(SQLException ignore){
+                    }
+                }
+                if(i<0){
+                    Log.warn("Error! fail to op database, this may cause a playerdata reset fo user "+tPlayer);
+                }
+            });
+
         }
     }
 

@@ -42,7 +42,7 @@ public class LoadUserTask implements Runnable{
     public void run(){
         if(this.mName==null) return;
 
-        while(true){
+        while(this.mUserMan.isLocked(this.mName)){
             try{
                 Thread.sleep(this.mInterval);
             }catch(InterruptedException exp){
@@ -67,11 +67,17 @@ public class LoadUserTask implements Runnable{
                     Log.debug("Load user data "+this.mName+" fail "+mRetry+(tUser==null?"(no data and wait)":"(Locked)"));
                 }else{
                     this.restoreUser(tUser,false);
+                    break;
                 }
             }catch(Throwable exp){
                 Log.severe(exp);
             }
         }
+
+        if(!this.mDone&&this.mUserMan.isNotLocked(this.mName)){ // maybe player quit the game
+            Log.debug("Cancel load data task for "+this.mName+", player may already quit game");
+        }
+
     }
 
     protected void handleExcetion(Throwable pExp){
@@ -99,8 +105,10 @@ public class LoadUserTask implements Runnable{
             Log.debug("duce setting NoRestoreIfSQLDataNotExist=true,plugin skip load user data");
         }
 
-        this.mUserMan.unlockUser(this.mName,false);
-        this.mUserMan.createSaveTask(this.mName);
+        if(this.mUserMan.isLocked(this.mName)){ //skip fo player quit
+            this.mUserMan.unlockUser(this.mName,false);
+            this.mUserMan.createSaveTask(this.mName);
+        }
     }
 
 }
