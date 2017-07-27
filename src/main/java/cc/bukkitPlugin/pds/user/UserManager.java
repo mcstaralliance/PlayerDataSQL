@@ -200,7 +200,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
      */
     public User getUserData(Player pPlayer,boolean pCloseInv,CommandSender pReciver){
         if(pPlayer==null||!pPlayer.isOnline()) return null;
-        if(!Bukkit.isPrimaryThread()) throw new IllegalStateException("请勿在异步线程调用此方法");
+        // if(!Bukkit.isPrimaryThread()) throw new IllegalStateException("请勿在异步线程调用此方法");
 
         if(pCloseInv){
             InventoryView tView=pPlayer.getOpenInventory();
