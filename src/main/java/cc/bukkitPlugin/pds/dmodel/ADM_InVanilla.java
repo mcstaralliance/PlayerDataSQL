@@ -28,6 +28,8 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
     private Method method_ExProp_loadNBTData;
     /** void saveNBTData(NBTTagCompound) */
     private Method method_ExProp_saveNBTData;
+    /** void init(Entity;World) */
+    private Method method_ExProp_init;
 
     /** static T get(EntityPlayer) */
     private Method method_ExProp_get;
@@ -49,6 +51,7 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
 
         this.method_ExProp_loadNBTData=MethodUtil.getMethod(this.mExPropClazz,"loadNBTData",NBTUtil.clazz_NBTTagCompound,true);
         this.method_ExProp_saveNBTData=MethodUtil.getMethod(this.mExPropClazz,"saveNBTData",NBTUtil.clazz_NBTTagCompound,true);
+        this.method_ExProp_init=MethodUtil.getMethodIgnoreParam(this.mExPropClazz,"init",true).get(0);
 
         try{
             this.method_ExProp_get=this.mExPropClazz.getDeclaredMethod("get",NMSUtil.clazz_EntityPlayer);
@@ -65,7 +68,7 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
     @Override
     public byte[] getData(Player pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
         Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer);
-        Object tData=this.getOrCreateExProp(tNMSPlayer);
+        Object tData=this.getOrCreateExProp(tNMSPlayer,pPlayer);
         if(tData==null) return new byte[0];
 
         Object tNBTTag=NBTUtil.newNBTTagCompound();
@@ -76,10 +79,10 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
     @Override
     public void restore(Player pPlayer,byte[] pData) throws Exception{
         Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer);
-        this.reset(tNMSPlayer);
+        this.reset(tNMSPlayer,pPlayer);
         if(pData.length==0) return;
 
-        Object tExProp=this.getOrCreateExProp(tNMSPlayer);
+        Object tExProp=this.getOrCreateExProp(tNMSPlayer,pPlayer);
         if(tExProp==null) return;
 
         MethodUtil.invokeMethod(method_ExProp_loadNBTData,tExProp,PDSNBTUtil.decompressNBT(pData));
@@ -104,10 +107,10 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
         return PDSNBTUtil.compressNBT(tNBT);
     }
 
-    public void reset(Object pNMSPlayer){
+    public void reset(Object pNMSPlayer,Player pPlayer){
         Object tExProp=this.getExProp(pNMSPlayer);
         if(tExProp==null){
-            this.registerExProp(pNMSPlayer);
+            this.registerExProp(pNMSPlayer,pPlayer);
             return;
         }
 
@@ -128,7 +131,7 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
         if(tExProps==null) tExProps=(Map<?,?>)FieldUtil.getFieldValue(this.field_NMSEntity_extendedProperties,pNMSPlayer);
 
         tExProps.remove(this.mExPropName);
-        this.registerExProp(pNMSPlayer);
+        this.registerExProp(pNMSPlayer,pPlayer);
     }
 
     /**
@@ -149,10 +152,10 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
      *            NMS玩家,类型为EntityPlayer
      * @return MOD数据或null
      */
-    public Object getOrCreateExProp(Object pNMSPlayer){
+    public Object getOrCreateExProp(Object pNMSPlayer,Player pPlayer){
         Object tExProp=this.getExProp(pNMSPlayer);
         if(tExProp==null){
-            this.registerExProp(pNMSPlayer);
+            this.registerExProp(pNMSPlayer,pPlayer);
             tExProp=this.getExProp(pNMSPlayer);
         }
         return tExProp;
@@ -178,11 +181,24 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
      * @param pNMSPlayer
      *            NMS玩家,数据类型为EntityPlayer
      */
-    protected void registerExProp(Object pNMSPlayer){
+    protected void registerExProp(Object pNMSPlayer,Player pPlayer){
         if(this.method_ExProp_get==null)
             throw new AbstractMethodError("'register' method not define");
 
         MethodUtil.invokeStaticMethod(this.method_ExProp_register,pNMSPlayer);
+        this.initExProp(pNMSPlayer,NMSUtil.getNMSWorld(pPlayer.getWorld()));
+    }
+
+    /**
+     * 初始化附属数据
+     * 
+     * @param pNMSPlayer
+     *            NMS玩家
+     * @param pNMSWorld
+     *            NMS世界
+     */
+    public void initExProp(Object pNMSPlayer,Object pNMSWorld){
+        MethodUtil.invokeMethod(method_ExProp_init,this.getExProp(pNMSPlayer),pNMSPlayer,pNMSWorld);
     }
 
     @Override
