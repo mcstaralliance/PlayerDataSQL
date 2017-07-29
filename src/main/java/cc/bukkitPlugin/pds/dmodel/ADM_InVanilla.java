@@ -1,6 +1,7 @@
 package cc.bukkitPlugin.pds.dmodel;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -18,6 +19,14 @@ import cc.commons.util.reflect.FieldUtil;
 import cc.commons.util.reflect.MethodUtil;
 
 public abstract class ADM_InVanilla extends DM_Minecraft{
+
+    public static final Method method_Entity_getExtendedProperties;
+    public static final Method method_Entity_registerExtendedProperties;
+
+    static{
+        method_Entity_registerExtendedProperties=MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity,"registerExtendedProperties",true).get(0);
+        method_Entity_getExtendedProperties=MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity,"getExtendedProperties",true).get(0);
+    }
 
     protected final HashSet<String> mModelTags=new HashSet<>();
     protected final String mExPropClass;
@@ -169,10 +178,22 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
      * @return Mod数据或null
      */
     protected Object getExProp(Object pNMSPlayer){
-        if(this.method_ExProp_get==null)
-            throw new AbstractMethodError("'get' method not define");
+        if(this.method_ExProp_get==null){
+            return this.getExPropNMS(pNMSPlayer);
+        }else{
+            return MethodUtil.invokeStaticMethod(this.method_ExProp_get,pNMSPlayer);
+        }
+    }
 
-        return MethodUtil.invokeStaticMethod(this.method_ExProp_get,pNMSPlayer);
+    /**
+     * 使用NMS Player接口的方法获取当前Mod数据
+     * 
+     * @param pNMSPlayer
+     *            NMS玩家,数据类型为EntityPlayer
+     * @return Mod数据或null
+     */
+    public final Object getExPropNMS(Object pNMSPlayer){
+        return MethodUtil.invokeMethod(method_Entity_getExtendedProperties,pNMSPlayer,this.mExPropName);
     }
 
     /**
@@ -182,11 +203,55 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
      *            NMS玩家,数据类型为EntityPlayer
      */
     protected void registerExProp(Object pNMSPlayer,Player pPlayer){
-        if(this.method_ExProp_get==null)
-            throw new AbstractMethodError("'register' method not define");
+        if(this.method_ExProp_get==null){
+            this.registerExPropNMS(pNMSPlayer,pPlayer);
+        }else{
+            MethodUtil.invokeStaticMethod(this.method_ExProp_register,pNMSPlayer);
+            this.initExProp(pNMSPlayer,NMSUtil.getNMSWorld(pPlayer.getWorld()));
+        }
+    }
 
-        MethodUtil.invokeStaticMethod(this.method_ExProp_register,pNMSPlayer);
-        this.initExProp(pNMSPlayer,NMSUtil.getNMSWorld(pPlayer.getWorld()));
+    /**
+     * 使用NMS Player接口的方法为Mod注册数据
+     * 
+     * @param pNMSPlayer
+     *            NMS玩家,数据类型为EntityPlayer
+     */
+    protected void registerExPropNMS(Object pNMSPlayer,Player pPlayer){
+        Object tNMSWorld=NMSUtil.getNMSWorld(pPlayer.getWorld());
+        MethodUtil.invokeMethod(method_Entity_registerExtendedProperties,pNMSPlayer,this.mExPropName,this.newExProp(pNMSPlayer,tNMSWorld));
+        this.initExProp(pNMSPlayer,tNMSWorld);
+    }
+
+    /**
+     * 实例化一个Mod的附属数据
+     * <p>
+     * 本方法不一定会调用,只在{@link #method_ExProp_get}为null
+     * 并调用{@link #registerExPropNMS(Object, Player)}时才会调用
+     * </p>
+     * 
+     * @param pNMSPlayer
+     *            NMS的玩家
+     * @param pNMSWorld
+     *            NMS的世界
+     * @return 新的mod附属数据实例
+     */
+    public Object newExProp(Object pNMSPlayer,Object pNMSWorld){
+        try{
+            Constructor<?> tConstructor=this.mExPropClazz.getDeclaredConstructor(NMSUtil.clazz_EntityPlayer);
+            tConstructor.setAccessible(true);
+            return tConstructor.newInstance(pNMSPlayer);
+        }catch(Throwable ignore){
+        }
+
+        try{
+            Constructor<?> tConstructor=this.mExPropClazz.getDeclaredConstructor();
+            tConstructor.setAccessible(true);
+            return tConstructor.newInstance();
+        }catch(Throwable ignore){
+        }
+
+        throw new IllegalStateException("Cannot instance ExProp for model "+this.getModelId());
     }
 
     /**
