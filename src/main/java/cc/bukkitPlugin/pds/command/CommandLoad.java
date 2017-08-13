@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import cc.bukkitPlugin.commons.plugin.command.TACommandBase;
 import cc.bukkitPlugin.commons.util.BukkitUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
+import cc.bukkitPlugin.pds.user.User;
 import cc.bukkitPlugin.pds.user.UserManager;
 
 public class CommandLoad extends TACommandBase<PlayerDataSQL,CommandExc>{
@@ -51,6 +52,11 @@ public class CommandLoad extends TACommandBase<PlayerDataSQL,CommandExc>{
             try{
                 UserManager tUserMan=this.mPlugin.getUserManager();
                 GameMode tMode=tLoadFor.getGameMode();
+                User tUser=tUserMan.loadUser(tLoadFrom.getName());
+                if(tUser==null){
+                    send(pSender,C("MsgPlayerDataNotExist","%player%",pArgs[0]));
+                    return;
+                }
                 tUserMan.restoreUser(tUserMan.loadUser(tLoadFrom.getName()),tLoadFor.getName(),pSender);
                 tLoadFor.setGameMode(tMode);
             }catch(SQLException e){

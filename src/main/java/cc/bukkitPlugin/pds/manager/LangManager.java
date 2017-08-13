@@ -41,6 +41,7 @@ public class LangManager extends TLangManager<PlayerDataSQL>{
         this.mConfig.addDefault("MsgCannotCopyDataForConsole","§c不能为控制台复制数据");
         this.mConfig.addDefault("MsgCannotSaveDataForConsole","§c不能为控制台保存数据");
         this.mConfig.addDefault("MsgPlayerDataLockSaveNotAllow","§c玩家 §4§l%player% §c的数据已被锁定,玩家可能在线,数据可能会被覆盖");
+        this.mConfig.addDefault("MsgPlayerDataNotExist","§c玩家 §4§l%player% §c的数据不存在,请检查大小写");
         this.mConfig.addDefault("MsgPlayerNotOnline","§c玩家 §4§l%player% §c未在线");
         this.mConfig.addDefault("MsgPlayerNotExist","§c玩家 §4§l%player% §c不存在");
         this.mConfig.addDefault("MsgErrorOnLoadSQLData","§c从数据库载入 §4§l%player% §c的数据时发生了错误");
