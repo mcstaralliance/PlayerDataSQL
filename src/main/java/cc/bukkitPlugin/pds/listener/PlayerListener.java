@@ -49,7 +49,13 @@ public class PlayerListener extends AListener<PlayerDataSQL>{
             this.mUserMan.cancelSaveTask(tPlayer);
             User tUser=this.mUserMan.getUserData(pEvent.getPlayer(),true);
             Bukkit.getScheduler().runTaskAsynchronously(this.mPlugin,()->{
-                this.mUserMan.saveUser(tUser,false);
+                int i=3;
+                do{
+                    if(this.mUserMan.saveUser(tUser,false)) break;
+                }while(--i>0);
+                if(i<=0){
+                    Log.debug("Fail to save player data,try times 3!");
+                }
                 this.mUserMan.unlockUser(tPlayer,true);
             });
         }else{
