@@ -312,4 +312,20 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
         }
     }
 
+    /**
+     * 清理/清空玩家所有模块的数据
+     * 
+     * @param pPlayer
+     *            玩家
+     */
+    public void cleanPlayerData(Player pPlayer){
+        for(IDataModel sModel : PDSAPI.getEnableModel()){
+            try{
+                sModel.cleanData(pPlayer);
+            }catch(Throwable exp){
+                Log.severe(this.mPlugin.C("MsgModelErrorOnClearData",new String[]{"%model%","%player%"},sModel.getDesc(),pPlayer.getName()),exp);
+            }
+        }
+    }
+
 }

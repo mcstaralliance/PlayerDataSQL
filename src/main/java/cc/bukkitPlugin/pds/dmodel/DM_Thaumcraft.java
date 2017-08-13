@@ -128,22 +128,9 @@ public class DM_Thaumcraft extends ADataModel{
 
     @Override
     public void restore(Player pPlayer,byte[] pData) throws Exception{
-        Thaumcraft.proxy.getPlayerKnowledge().wipePlayerKnowledge(pPlayer.getName());
-
-        Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer);
+        this.cleanData(pPlayer);
         Object tNBT=PDSNBTUtil.decompressNBT(pData);
-
-        // 完成自动解锁的研究
-        ResearchManager tMan=Thaumcraft.proxy.getResearchManager();
-        Collection<ResearchCategoryList> tRCs=ResearchCategories.researchCategories.values();
-        for(ResearchCategoryList sRCL : tRCs){
-            Collection<ResearchItem> tRIs=sRCL.research.values();
-            for(ResearchItem sRI : tRIs){
-                if(sRI.isAutoUnlock()){
-                    MethodUtil.invokeMethod(this.method_ResearchManager_completeResearch,tMan,new Object[]{tNMSPlayer,sRI.key});
-                }
-            }
-        }
+        Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer);
 
         if(pData.length==0){
             Log.debug("Init tc aspect for "+pPlayer.getName());
@@ -178,6 +165,24 @@ public class DM_Thaumcraft extends ADataModel{
         for(Class<?> sClazz : this.mSyncPackets){
             IMessage tMsg=(IMessage)ClassUtil.newInstance(sClazz,NMSUtil.clazz_EntityPlayer,tNMSPlayer);
             MethodUtil.invokeMethod(method_SimpleNetworkWrapper_sendTo,PacketHandler.INSTANCE,tMsg,tNMSPlayer);
+        }
+    }
+
+    @Override
+    public void cleanData(Player pPlayer){
+        Thaumcraft.proxy.getPlayerKnowledge().wipePlayerKnowledge(pPlayer.getName());
+        Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer);
+
+        // 完成自动解锁的研究
+        ResearchManager tMan=Thaumcraft.proxy.getResearchManager();
+        Collection<ResearchCategoryList> tRCs=ResearchCategories.researchCategories.values();
+        for(ResearchCategoryList sRCL : tRCs){
+            Collection<ResearchItem> tRIs=sRCL.research.values();
+            for(ResearchItem sRI : tRIs){
+                if(sRI.isAutoUnlock()){
+                    MethodUtil.invokeMethod(this.method_ResearchManager_completeResearch,tMan,new Object[]{tNMSPlayer,sRI.key});
+                }
+            }
         }
     }
 

@@ -53,6 +53,14 @@ public class DM_Minecraft extends ADataModel{
 
     @Override
     public void restore(Player pPlayer,byte[] pData) throws Exception{
+        this.cleanData(pPlayer);
+        GameMode tMode=pPlayer.getGameMode();
+        PDSNBTUtil.setPlayerNBT(pPlayer,PDSNBTUtil.decompressNBT(pData));
+        pPlayer.setGameMode(tMode);
+    }
+
+    @Override
+    public void cleanData(Player pPlayer){
         // clear buff
         for(PotionEffect sEffect : pPlayer.getActivePotionEffects()){
             pPlayer.removePotionEffect(sEffect.getType());
@@ -66,9 +74,9 @@ public class DM_Minecraft extends ADataModel{
                 this.method_EntityLivingBase_getAttributeMap=MethodUtil.getMethod(NMSUtil.clazz_EntityPlayer,(pMethod)->{
                     return pMethod.getName().contains("Attribute")&&pMethod.getParameterCount()==0;
                 },false).get(0);
-                
+
                 tAttributeMap=MethodUtil.invokeMethod(this.method_EntityLivingBase_getAttributeMap,tNMSPlayer);
-                
+
                 this.mMapFields.addAll(FieldUtil.getField(tAttributeMap.getClass(),(pField)->{
                     return Collection.class.isAssignableFrom(pField.getType())||Map.class.isAssignableFrom(pField.getType());
                 },false));
@@ -87,10 +95,6 @@ public class DM_Minecraft extends ADataModel{
                 }
             }
         }
-
-        GameMode tMode=pPlayer.getGameMode();
-        PDSNBTUtil.setPlayerNBT(pPlayer,PDSNBTUtil.decompressNBT(pData));
-        pPlayer.setGameMode(tMode);
     }
 
     @Override

@@ -267,6 +267,12 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
     }
 
     @Override
+    public void cleanData(Player pPlayer){
+        Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer);
+        this.reset(tNMSPlayer,pPlayer);
+    }
+
+    @Override
     public abstract String getModelId();
 
     @Override

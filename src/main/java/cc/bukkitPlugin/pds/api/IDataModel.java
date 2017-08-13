@@ -73,4 +73,15 @@ public interface IDataModel{
      */
     public byte[] loadFileData(OfflinePlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException;
 
+    /**
+     * 清理玩家此模块的数据
+     * <p>
+     * 通常在还原数据时使用
+     * </p>
+     * 
+     * @param pPlayer
+     *            要清理数据的玩家
+     */
+    public void cleanData(Player pPlayer);
+
 }

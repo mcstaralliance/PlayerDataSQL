@@ -183,6 +183,19 @@ public class DM_AcademyCraft extends DM_Minecraft{
         return serializeNBTMap(tNBTTags);
     }
 
+    @Override
+    public void cleanData(Player pPlayer){
+        Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer);
+        for(SubM sSubM : this.mDataModels){
+            Object tModelInstance=MethodUtil.invokeStaticMethod(sSubM.mInstnceMethod,tNMSPlayer);
+            if(tModelInstance==null) continue;
+
+            // 如果未空直接使用初始数据还原
+            Object tNBT=PDSNBTUtil.invokeNBTTagCompound_clone(sSubM.mInitialData);
+            MethodUtil.invokeMethod(method_DataPart_fromNBT,tModelInstance,tNBT);
+        }
+    }
+
     public static byte[] serializeNBTMap(Map<String,Object> pNBTTags) throws IOException{
         ByteArrayOutputStream tBAOStream=new ByteArrayOutputStream();
         DataOutputStream tDOStream=null;

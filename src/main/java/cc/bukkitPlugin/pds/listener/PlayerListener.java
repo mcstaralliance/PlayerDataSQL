@@ -37,6 +37,7 @@ public class PlayerListener extends AListener<PlayerDataSQL>{
 
     @EventHandler
     public void onJoin(PlayerJoinEvent pEvent){
+        this.mUserMan.cleanPlayerData(pEvent.getPlayer());
         Bukkit.getScheduler().runTaskAsynchronously(this.mPlugin,new LoadUserTask(pEvent.getPlayer(),this.mUserMan));
     }
 

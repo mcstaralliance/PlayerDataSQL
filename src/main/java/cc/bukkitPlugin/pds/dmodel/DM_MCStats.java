@@ -98,6 +98,13 @@ public class DM_MCStats extends ADataModel{
         return FileUtil.readData(tDataFile);
     }
 
+    @Override
+    public void cleanData(Player pPlayer){
+        Object tStatMan=this.getStatMan(pPlayer);
+        Map<Object,Object> tPlayerStatValue=this.getManStatValue(tStatMan);
+        tPlayerStatValue.clear();
+    }
+
     protected void loadDataFromString(Player pToPlayer,String pData){
         Object tStatMan=this.getStatMan(pToPlayer);
         Map<Object,Object> tPlayerStatValue=this.getManStatValue(tStatMan);
