@@ -66,6 +66,9 @@ public class LoadUserTask implements Runnable{
                 if((tUser==null||tUser.isLocked())&&(++this.mRetry)<=RETRY_COUNT){
                     Log.debug("Load user data "+this.mName+" fail "+mRetry+(tUser==null?"(no data and wait)":"(Locked)"));
                 }else{
+                    if(tUser!=null&&tUser.isLocked()){
+                        Log.warn("Use locked data to restore user "+this.mName);
+                    }
                     this.restoreUser(tUser,false);
                     break;
                 }
