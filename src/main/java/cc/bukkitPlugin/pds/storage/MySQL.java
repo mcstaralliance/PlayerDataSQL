@@ -23,6 +23,7 @@ import cc.bukkitPlugin.pds.user.User;
 import cc.commons.commentedyaml.CommentedSection;
 import cc.commons.commentedyaml.CommentedYamlConfig;
 import cc.commons.util.IOUtil;
+import cc.commons.util.StringUtil;
 import cc.commons.util.ValidData;
 
 public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeedClose,IStorage,Runnable{
@@ -31,7 +32,10 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
         StringBuilder tSBuilder=new StringBuilder("jdbc:mysql://");
         tSBuilder.append(pHost);
         tSBuilder.append('/').append(pDBName);
-        return tSBuilder.append("?useUnicode=true&characterEncoding=utf8&autoReconnect=true").toString();
+        if(StringUtil.isNotEmpty(pParams)){
+            tSBuilder.append('?').append(pParams);
+        }
+        return tSBuilder.toString();
     }
 
     public static Connection createConn(String pUrl,String pUsername,String pPassword,int pLoginTimeout) throws SQLException{
