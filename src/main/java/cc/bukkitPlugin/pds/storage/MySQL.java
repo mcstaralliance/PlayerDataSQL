@@ -27,7 +27,7 @@ import cc.commons.util.ValidData;
 
 public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeedClose,IStorage,Runnable{
 
-    public static String url(String pHost,String pDBName){
+    public static String url(String pHost,String pDBName,String pParams){
         StringBuilder tSBuilder=new StringBuilder("jdbc:mysql://");
         tSBuilder.append(pHost);
         tSBuilder.append('/').append(pDBName);
@@ -45,6 +45,7 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
     protected String mUsername="root";
     protected String mPassword="root";
     protected String mDBHost="localhost:3306";
+    protected String mURLParams="useUnicode=true&characterEncoding=utf8&autoReconnect=true";
     protected int mQueryTimeout=5;
     protected int mNetworkTimeout=10;
     protected int mLoginTimeout=5;
@@ -69,6 +70,7 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
         CommentedSection tSecMain=pConfig.getOrCreateSection("MySQL","MySql数据库配置");
         tSecMain.addDefault("DBHost",this.mDBHost,"数据库地址,包括端口");
         tSecMain.addDefault("Database",this.mDatabase,"数据库名");
+        tSecMain.addDefault("URLParams",this.mURLParams,"数据库链接参数");
         tSecMain.addDefault("TableName",this.mTableName,"数据表名");
         tSecMain.addDefault("Username",this.mUsername,"用户名");
         tSecMain.addDefault("Password",this.mPassword,"密码");
@@ -85,6 +87,7 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
         StringBuilder tSBuilder=new StringBuilder();
         tSBuilder.append(this.mDBHost=tSecMain.getString("DBHost",this.mDBHost)).append('\0');
         tSBuilder.append(this.mDatabase=tSecMain.getString("Database",this.mDatabase)).append('\0');
+        tSBuilder.append(this.mURLParams=tSecMain.getString("URLParams",this.mURLParams)).append('\0');
         tSBuilder.append(this.mUsername=tSecMain.getString("Username",this.mUsername)).append('\0');
         tSBuilder.append(this.mPassword=tSecMain.getString("Password",this.mPassword)).append('\0');
         this.mTableName=tSecMain.getString("TableName",this.mTableName);
@@ -138,7 +141,7 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
         try{
             if(this.mConn==null){
                 try{
-                    tConn=createConn(url(mDBHost,"mysql"),this.mUsername,this.mPassword,this.mLoginTimeout);
+                    tConn=createConn(url(this.mDBHost,"mysql",this.mURLParams),this.mUsername,this.mPassword,this.mLoginTimeout);
                     tStat=tConn.createStatement();
                     tStat.executeUpdate("CREATE DATABASE IF NOT EXISTS "+this.mDatabase+" CHARACTER SET UTF8");
                 }finally{
@@ -157,7 +160,7 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
             if(tConnClosed){
                 this.mStatementCache.clear();
                 try{
-                    this.mConn=createConn(url(this.mDBHost,this.mDatabase),this.mUsername,this.mPassword,this.mLoginTimeout);
+                    this.mConn=createConn(url(this.mDBHost,this.mDatabase,this.mURLParams),this.mUsername,this.mPassword,this.mLoginTimeout);
                     this.mConn.setAutoCommit(true);
                     tStat=this.mConn.createStatement();
                     tStat.execute("CREATE TABLE IF NOT EXISTS "+this.mTableName+"("
