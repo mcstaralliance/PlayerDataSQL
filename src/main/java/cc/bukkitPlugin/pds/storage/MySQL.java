@@ -99,6 +99,7 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
         int tNewCfghash=tSBuilder.toString().hashCode();
         boolean tTestConn=this.mConn==null;
         if(this.mCfgHash!=tNewCfghash){
+            tTestConn=true;
             this.mCfgHash=tNewCfghash;
             this.handleConnClose();
         }
