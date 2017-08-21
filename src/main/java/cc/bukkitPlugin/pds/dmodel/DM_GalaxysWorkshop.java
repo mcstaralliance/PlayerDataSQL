@@ -18,7 +18,7 @@ public class DM_GalaxysWorkshop extends ADM_InVanilla{
 
     @Override
     public String getModelId(){
-        return "GalaxysWorkshoh";
+        return "GalaxysWorkshop";
     }
 
     @Override
