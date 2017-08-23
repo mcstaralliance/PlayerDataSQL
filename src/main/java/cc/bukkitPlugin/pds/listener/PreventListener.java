@@ -30,8 +30,8 @@ public class PreventListener extends AListener<PlayerDataSQL>{
 
     public PreventListener(PlayerDataSQL pPlugin,UserManager pUserMan){
         super(pPlugin);
-
         this.mUserMan=pUserMan;
+
     }
 
     @EventHandler(priority=LOWEST)

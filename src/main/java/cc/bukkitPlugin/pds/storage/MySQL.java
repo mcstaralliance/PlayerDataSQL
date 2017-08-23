@@ -149,6 +149,8 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
                     tConn=createConn(url(this.mDBHost,"mysql",this.mURLParams),this.mUsername,this.mPassword,this.mLoginTimeout);
                     tStat=tConn.createStatement();
                     tStat.executeUpdate("CREATE DATABASE IF NOT EXISTS "+this.mDatabase+" CHARACTER SET UTF8");
+                }catch (SQLException e){
+
                 }finally{
                     IOUtil.closeStream(tConn,tStat);
                     tConn=null;
