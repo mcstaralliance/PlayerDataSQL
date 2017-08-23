@@ -55,10 +55,12 @@ public class LoadUserTask implements Runnable{
                 tUser=this.mUserMan.loadUser(this.mName);
             }catch(SQLException exp){
                 this.handleExcetion(exp);
+                if(this.mDone) return;
                 continue;
             }catch(Throwable exp){
                 Log.severe("载入玩家 "+this.mName+" 的数据时发生错误",exp);
                 this.handleExcetion(exp);
+                if(this.mDone) return;
                 continue;
             }
 
