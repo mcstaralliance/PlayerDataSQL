@@ -1,6 +1,7 @@
 package cc.bukkitPlugin.pds.dmodel;
 
 import cc.bukkitPlugin.commons.Log;
+import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.commons.util.reflect.MethodUtil;
 
@@ -11,6 +12,7 @@ public class DM_GalaxysWorkshop extends ADM_InVanilla{
     public static final String EXT_PROP_NAME="playerCustomEquipmentData";
 
     private Method method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround;
+    private Method method_ExPropsPlayerEquipmentData_sendSkinData;
 
     public DM_GalaxysWorkshop(PlayerDataSQL pPlugin){
         super(pPlugin,"wang.magick.galaxyworkshop.skin.ExPropsPlayerEquipmentData",EXT_PROP_NAME);
@@ -34,8 +36,8 @@ public class DM_GalaxysWorkshop extends ADM_InVanilla{
         try{
 
             this.initExProp();
-
             this.method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround=MethodUtil.getMethod(this.mExPropClazz,"updateEquipmentDataToPlayersAround",true);
+            this.method_ExPropsPlayerEquipmentData_sendSkinData=MethodUtil.getMethod(this.mExPropClazz,"sendSkinData",true);
 
             // 时装的TAG
             this.mModelTags.add("wardrobeContainer");
@@ -62,6 +64,7 @@ public class DM_GalaxysWorkshop extends ADM_InVanilla{
     @Override
     protected void updateToAround(Object pNMSPlayer,Object pExProp){
         MethodUtil.invokeMethod(method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround,pExProp);
+        MethodUtil.invokeMethod(method_ExPropsPlayerEquipmentData_sendSkinData,pExProp);
     }
 
 }

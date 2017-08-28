@@ -11,6 +11,7 @@ public class DM_ArmourersWorkshop extends ADM_InVanilla{
     public static final String EXT_PROP_NAME="playerCustomEquipmentData";
 
     private Method method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround;
+    private Method method_ExPropsPlayerEquipmentData_sendSkinData;
 
     public DM_ArmourersWorkshop(PlayerDataSQL pPlugin){
         super(pPlugin,"riskyken.armourersWorkshop.common.skin.ExPropsPlayerEquipmentData",EXT_PROP_NAME);
@@ -36,6 +37,7 @@ public class DM_ArmourersWorkshop extends ADM_InVanilla{
             this.initExProp();
 
             this.method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround=MethodUtil.getMethod(this.mExPropClazz,"updateEquipmentDataToPlayersAround",true);
+            this.method_ExPropsPlayerEquipmentData_sendSkinData=MethodUtil.getMethod(this.mExPropClazz,"sendSkinData",true);
 
             // 时装的TAG
             this.mModelTags.add("wardrobeContainer");
@@ -62,6 +64,7 @@ public class DM_ArmourersWorkshop extends ADM_InVanilla{
     @Override
     protected void updateToAround(Object pNMSPlayer,Object pExProp){
         MethodUtil.invokeMethod(method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround,pExProp);
+        MethodUtil.invokeMethod(method_ExPropsPlayerEquipmentData_sendSkinData,pExProp);
     }
 
 }
