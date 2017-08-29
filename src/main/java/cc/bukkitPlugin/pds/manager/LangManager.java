@@ -28,13 +28,13 @@ public class LangManager extends TLangManager<PlayerDataSQL>{
     @Override
     protected void addDefaults(){
         super.addDefaults();
-
         this.mConfig.addDefault("HelpCmdLoad","载入指定玩家数据库的数据到自己的身上");
         this.mConfig.addDefault("HelpCmdLoadForPlayer","为玩家载入指定玩家的数据库数据");
         this.mConfig.addDefault("HelpCmdCopy","复制指定玩家的数据到自己身上");
         this.mConfig.addDefault("HelpCmdCopyForPlayer","为玩家复制指定玩家的数据");
         this.mConfig.addDefault("HelpCmdSave","保存你的数据到指定玩家");
         this.mConfig.addDefault("HelpCmdSaveToPlayer","保存前者玩家数据到指定玩家");
+        this.mConfig.addDefault("HelpCmdRunScript","执行脚本操作玩家数据");
         this.mConfig.addDefault("MsgDataExpection","数据库背包数据异常,请稍候再试");
         this.mConfig.addDefault("MsgCannotLoadDataForConsole","§c不能为控制台载入数据");
         this.mConfig.addDefault("MsgErrorOnLoadingDataWait","§c载入数据等待期间发生错误");

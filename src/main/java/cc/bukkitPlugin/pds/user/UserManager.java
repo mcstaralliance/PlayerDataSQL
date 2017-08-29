@@ -212,7 +212,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
             pPlayer.closeInventory();
         }
 
-        User tUser=new User(pPlayer.getName());
+        User tUser=new User(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID")?pPlayer.getUniqueId().toString():pPlayer.getName());
         Map<String,byte[]> tDatas=tUser.getDataMap(true);
         for(IDataModel sModel : PDSAPI.getEnableModel()){
             try{

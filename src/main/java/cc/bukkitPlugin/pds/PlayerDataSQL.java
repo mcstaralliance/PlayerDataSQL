@@ -1,10 +1,13 @@
 package cc.bukkitPlugin.pds;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
+import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import cc.bukkitPlugin.commons.Log;
@@ -49,7 +52,7 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
 
     private UserManager mUserMan;
     private IStorage mStorage;
-
+    @Getter private List<File> scripts;
     /**
      * 此函数中不要进行模块间的互相调用<br />
      * 调用操作请在reload函数中进行
@@ -83,6 +86,16 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
         for(Player sPlayer : BukkitUtil.getOnlinePlayers()){
             this.mUserMan.createSaveTask(sPlayer.getName());
         }
+    }
+
+    @Override
+    public void reloadPlugin(CommandSender pSender) {
+        File script_path=new File(getDataFolder(),"scripts");
+        scripts.clear();
+        for(File f:script_path.listFiles()){
+            scripts.add(f);
+        }
+        super.reloadPlugin(pSender);
     }
 
     @Override

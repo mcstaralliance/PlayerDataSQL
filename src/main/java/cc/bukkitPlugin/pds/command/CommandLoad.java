@@ -52,12 +52,12 @@ public class CommandLoad extends TACommandBase<PlayerDataSQL,CommandExc>{
             try{
                 UserManager tUserMan=this.mPlugin.getUserManager();
                 GameMode tMode=tLoadFor.getGameMode();
-                User tUser=tUserMan.loadUser(tLoadFrom.getName());
+                User tUser=tUserMan.loadUser(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID")?tLoadFrom.getUniqueId().toString():mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID")?tLoadFrom.getUniqueId().toString():tLoadFrom.getName());
                 if(tUser==null){
                     send(pSender,C("MsgPlayerDataNotExist","%player%",pArgs[0]));
                     return;
                 }
-                tUserMan.restoreUser(tUserMan.loadUser(tLoadFrom.getName()),tLoadFor.getName(),pSender);
+                tUserMan.restoreUser(tUserMan.loadUser(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID")?tLoadFrom.getUniqueId().toString():tLoadFrom.getName()),tLoadFor.getName(),pSender);
                 tLoadFor.setGameMode(tMode);
             }catch(SQLException e){
                 send(pSender,C("MsgErrorOnLoadSQLData","%player%",tLoadFrom.getName())+": "+e.getLocalizedMessage());

@@ -19,7 +19,7 @@ public class ConfigManager extends TConfigManager<PlayerDataSQL>{
     @Override
     public void addDefaults(){
         super.addDefaults();
-
+        this.mConfig.addDefault("Plugin.UseUUID",false,"使用UUID保存数据(如果无需求不要开启)");
         this.mConfig.addDefault("Plugin.SyncDelay",this.mSyncDelay,"背包还原延迟(tick),重要");
         this.mConfig.addDefault("Plugin.KickOnReadSQLError",this.mKickOnReadSQLError,"读取SQL错误时踢出玩家");
         this.mConfig.addDefault("Plugin.NoRestoreIfSQLDataNotExist",this.mNoRestoreIfSQLDataNotExist,
