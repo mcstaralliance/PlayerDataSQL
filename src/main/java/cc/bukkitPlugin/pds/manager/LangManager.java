@@ -44,6 +44,10 @@ public class LangManager extends TLangManager<PlayerDataSQL>{
         this.mConfig.addDefault("MsgPlayerDataNotExist","§c玩家 §4§l%player% §c的数据不存在,请检查大小写");
         this.mConfig.addDefault("MsgPlayerNotOnline","§c玩家 §4§l%player% §c未在线");
         this.mConfig.addDefault("MsgPlayerNotExist","§c玩家 §4§l%player% §c不存在");
+        this.mConfig.addDefault("MsgRunScriptSuccess","§c运行脚本§b%script_name% §c成功，成功操作了§b%pcount%§c个玩家。");
+        this.mConfig.addDefault("MsgErrorOnRunScriptControlPlayer","§c运行脚本§b%script_name%操作§4§l%player%玩家时 §c时发生了错误");
+        this.mConfig.addDefault("MsgErrorOnRunScript","§c运行脚本%script_name% §c时发生了错误");
+        this.mConfig.addDefault("MsgErrorNotFoundScript","§c§4§l%script_name% §c这个脚本不存在");
         this.mConfig.addDefault("MsgErrorOnLoadSQLData","§c从数据库载入 §4§l%player% §c的数据时发生了错误");
         this.mConfig.addDefault("MsgErrorOnUpdateSQLData","§c对数据库更新玩家 §4§l%player% §c的数据时发生了错误");
         this.mConfig.addDefault("MsgModelErrorOnClearData","§c模块 %model% 在清理 %player% 的数据时发生了错误");
@@ -52,12 +56,14 @@ public class LangManager extends TLangManager<PlayerDataSQL>{
         this.mConfig.addDefault("MsgLoadDataForPlayer","已经为 %for% 载入 %from% 的数据");
         this.mConfig.addDefault("MsgCopyDataForPlayer","已经复制  %from% 的数据到  %for%");
         this.mConfig.addDefault("MsgSaveDataForPlayer","已经保存  %from% 的数据到  %to%");
+        this.mConfig.addDefault("MsgModifyDataForPlayer","已经修改 %from% 的数据到  %to%");
         this.mConfig.addDefault("MsgSuccessConnectToDB","成功连接到数据库");
         this.mConfig.addDefault("MsgUnableConnectToDB","§c无法连接到数据库");
         this.mConfig.addDefault("WordFor","为谁");
         this.mConfig.addDefault("WordFrom","来源");
         this.mConfig.addDefault("WordPlayer","玩家");
         this.mConfig.addDefault("WordYou","你");
+        this.mConfig.addDefault("WordScriptName","脚本名称");
 
     }
 

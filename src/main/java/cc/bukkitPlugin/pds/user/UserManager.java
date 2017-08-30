@@ -175,6 +175,20 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
     }
 
     /**
+     * 根据获取所有用户数据
+     *
+     * @throws SQLException
+     *             读写数据库时发生异常
+     */
+    public ArrayList<User> getall() throws SQLException{
+        ArrayList<User> users=new ArrayList(Bukkit.getOnlinePlayers().size());
+        for(Player p:Bukkit.getOnlinePlayers()){
+            users.add(getUserData(p,true));
+        }
+        users.addAll(this.mPlugin.getStorage().getall());
+        return users;
+    }
+    /**
      * 获取用户当前序列化的数据
      * 
      * @param pPlayer

@@ -1,6 +1,7 @@
 package cc.bukkitPlugin.pds.storage;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import cc.bukkitPlugin.pds.user.User;
 
@@ -16,7 +17,13 @@ public interface IStorage{
      *             读写数据库时发生异常
      */
     public User get(String pPlayer) throws SQLException;
-
+    /**
+     * 根据获取所有用户数据
+     *
+     * @throws SQLException
+     *             读写数据库时发生异常
+     */
+    public ArrayList<User> getall() throws SQLException;
     /**
      * 使用用户数据更新或插入到数据库中
      * 

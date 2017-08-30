@@ -7,9 +7,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+import cc.bukkitPlugin.pds.user.UserManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -25,6 +29,7 @@ import cc.commons.commentedyaml.CommentedYamlConfig;
 import cc.commons.util.IOUtil;
 import cc.commons.util.StringUtil;
 import cc.commons.util.ValidData;
+import org.bukkit.entity.Player;
 
 public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeedClose,IStorage,Runnable{
 
@@ -229,6 +234,40 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
         return tUser;
     }
 
+    @Override
+    public ArrayList<User> getall() throws SQLException{
+        ResultSet tResult=null;
+        HashSet<String> tOnlinePlayers=new HashSet();
+        for(Player p:Bukkit.getOnlinePlayers()){
+            tOnlinePlayers.add(p.getName().toLowerCase());
+        }
+        ArrayList<User> tUsers=new ArrayList();
+        this.mLock.lock();
+        try{
+            PreparedStatement tStatement=this.getOrCreate(this.getConn(),"SELECT * FROM "+this.mTableName+" WHERE "+ User.COL_LOCK+"=?");
+            tStatement.setBoolean(1,false);
+            tResult=tStatement.executeQuery();
+
+            while (tResult.next()){
+                User tUser=null;
+                tUser=new User(tResult.getString(User.COL_NAME));
+                if(tOnlinePlayers.contains(tUser.getName())){
+                    continue;
+                }
+                tUser.mLocked=tResult.getBoolean(User.COL_LOCK);
+                tUser.setData(tResult.getBytes(User.COL_DATA));
+                tUsers.add(tUser);
+            }
+        }finally{
+            try{
+                IOUtil.closeStream(tResult);
+                Log.developInfo("Read all users "+" at time "+System.nanoTime());
+            }finally{
+                this.mLock.unlock();
+            }
+        }
+        return tUsers;
+    }
     @Override
     public boolean update(User pUser) throws SQLException{
         this.mLock.lock();

@@ -3,6 +3,7 @@ package cc.bukkitPlugin.pds;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Getter;
@@ -52,7 +53,7 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
 
     private UserManager mUserMan;
     private IStorage mStorage;
-    @Getter private List<File> scripts;
+    @Getter private List<File> scripts=new ArrayList();
     /**
      * 此函数中不要进行模块间的互相调用<br />
      * 调用操作请在reload函数中进行
@@ -91,7 +92,9 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
     @Override
     public void reloadPlugin(CommandSender pSender) {
         File script_path=new File(getDataFolder(),"scripts");
+        if(!script_path.exists())script_path.mkdir();
         scripts.clear();
+        if(script_path.listFiles()!=null)
         for(File f:script_path.listFiles()){
             scripts.add(f);
         }
