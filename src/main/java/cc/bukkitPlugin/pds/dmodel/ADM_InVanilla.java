@@ -20,12 +20,15 @@ import cc.commons.util.reflect.MethodUtil;
 
 public abstract class ADM_InVanilla extends DM_Minecraft{
 
-    public static final Method method_Entity_getExtendedProperties;
-    public static final Method method_Entity_registerExtendedProperties;
+    protected static Method method_Entity_getExtendedProperties;
+    protected static Method method_Entity_registerExtendedProperties;
 
     static{
-        method_Entity_registerExtendedProperties=MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity,"registerExtendedProperties",true).get(0);
-        method_Entity_getExtendedProperties=MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity,"getExtendedProperties",true).get(0);
+        try{
+            method_Entity_registerExtendedProperties=MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity,"registerExtendedProperties",true).get(0);
+            method_Entity_getExtendedProperties=MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity,"getExtendedProperties",true).get(0);
+        }catch(IllegalStateException ignore){
+        }
     }
 
     protected final HashSet<String> mModelTags=new HashSet<>();

@@ -72,7 +72,9 @@ public class DM_Minecraft extends ADataModel{
         if(this.method_EntityLivingBase_getAttributeMap==null){
             try{
                 this.method_EntityLivingBase_getAttributeMap=MethodUtil.getMethod(NMSUtil.clazz_EntityPlayer,(pMethod)->{
-                    return pMethod.getName().contains("Attribute")&&pMethod.getParameterCount()==0;
+                    return pMethod.getName().contains("Attribute")
+                            &&pMethod.getParameterCount()==0
+                            &&pMethod.getReturnType().getSimpleName().contains("Attribute");
                 },false).get(0);
 
                 tAttributeMap=MethodUtil.invokeMethod(this.method_EntityLivingBase_getAttributeMap,tNMSPlayer);
