@@ -90,14 +90,15 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
     }
 
     @Override
-    public void reloadPlugin(CommandSender pSender) {
-        File script_path=new File(getDataFolder(),"scripts");
-        if(!script_path.exists())script_path.mkdir();
+    public void reloadPlugin(CommandSender pSender){
+        File tScriptDir=new File(getDataFolder(),"scripts");
+        if(!tScriptDir.exists()) tScriptDir.mkdir();
         scripts.clear();
-        if(script_path.listFiles()!=null)
-        for(File f:script_path.listFiles()){
-            scripts.add(f);
-        }
+        File[] tScriptFiles=tScriptDir.listFiles();
+        if(tScriptFiles!=null)
+            for(File sFile : tScriptFiles){
+                scripts.add(sFile);
+            }
         super.reloadPlugin(pSender);
     }
 

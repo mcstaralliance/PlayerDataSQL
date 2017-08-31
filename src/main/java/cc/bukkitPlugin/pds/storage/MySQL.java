@@ -8,15 +8,14 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-import cc.bukkitPlugin.pds.user.UserManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.plugin.INeedClose;
@@ -29,7 +28,6 @@ import cc.commons.commentedyaml.CommentedYamlConfig;
 import cc.commons.util.IOUtil;
 import cc.commons.util.StringUtil;
 import cc.commons.util.ValidData;
-import org.bukkit.entity.Player;
 
 public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeedClose,IStorage,Runnable{
 
