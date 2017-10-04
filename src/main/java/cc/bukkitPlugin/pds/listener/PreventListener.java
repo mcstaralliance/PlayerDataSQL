@@ -64,7 +64,7 @@ public class PreventListener extends AListener<PlayerDataSQL>{
     @EventHandler(ignoreCancelled=true,priority=HIGHEST)
     public void post(InventoryClickEvent pEvent){
         HumanEntity tWho=pEvent.getWhoClicked();
-        if(tWho instanceof Player&&this.mUserMan.isLocked(tWho.getName())){
+        if(tWho instanceof Player&&this.mUserMan.isLocked(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID")?tWho.getUniqueId().toString():tWho.getName())){
             pEvent.setCancelled(true);
             tWho.closeInventory();
         }
@@ -132,7 +132,7 @@ public class PreventListener extends AListener<PlayerDataSQL>{
 
     @EventHandler
     public void handle(PlayerMoveEvent pEvent){
-        if(this.mUserMan.isLocked(pEvent.getPlayer().getName())){
+        if(this.mUserMan.isLocked(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID")?pEvent.getPlayer().getUniqueId().toString():pEvent.getPlayer().getName())){
             Location tFromLoc=pEvent.getFrom();
             Location tToLoc=pEvent.getTo();
             tFromLoc.setYaw(tToLoc.getYaw());
@@ -151,7 +151,7 @@ public class PreventListener extends AListener<PlayerDataSQL>{
      * @return 是否取消
      */
     protected boolean handle(OfflinePlayer pPlayer,Cancellable pEvent){
-        if(this.mUserMan.isLocked(pPlayer.getName())){
+        if(this.mUserMan.isLocked(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID")?pPlayer.getUniqueId().toString():pPlayer.getName())){
             pEvent.setCancelled(true);
             return true;
         }
