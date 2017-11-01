@@ -53,7 +53,9 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
 
     private UserManager mUserMan;
     private IStorage mStorage;
-    @Getter private List<File> scripts=new ArrayList();
+    @Getter
+    private List<File> scripts=new ArrayList();
+
     /**
      * 此函数中不要进行模块间的互相调用<br />
      * 调用操作请在reload函数中进行
@@ -97,7 +99,7 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
         File[] tScriptFiles=tScriptDir.listFiles();
         if(tScriptFiles!=null)
             for(File sFile : tScriptFiles){
-                scripts.add(sFile);
+            scripts.add(sFile);
             }
         super.reloadPlugin(pSender);
     }
