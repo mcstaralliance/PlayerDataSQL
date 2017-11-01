@@ -52,7 +52,7 @@ public class PDSAPI implements Listener,IConfigModel{
     }
 
     /**
-     * 注册是一个数据模块
+     * 注册一个数据模块
      * <p>
      * 外部注册请只在{@link CallDataModelRegisterEvent}事件被触发时注册<br>
      * 否则,请手动调用{@link #checkModels()}
@@ -139,15 +139,16 @@ public class PDSAPI implements Listener,IConfigModel{
 
     @Override
     public void addDefaults(CommentedYamlConfig pConfig){
-        CommentedSection tSecMain=pConfig.getOrCreateSection("Sync","启用那些同步模块");
+        CommentedSection tSecMain=pConfig.getOrCreateSection("Sync","启用哪些同步模块");
         for(IDataModel sModel : PDSAPI.mRegistedModels.values()){
+            if(!sModel.initOnce()) continue;
             String[] tComments=null;
             if(StringUtil.isNotEmpty(sModel.getDesc())){
                 tComments=sModel.getDesc().split("\n");
             }else{
                 tComments=new String[0];
             }
-            tSecMain.addDefault(sModel.getModelId(),sModel.initOnce(),tComments);
+            tSecMain.addDefault(sModel.getModelId(),true,tComments);
         }
     }
 
