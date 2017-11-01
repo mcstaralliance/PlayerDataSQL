@@ -37,19 +37,19 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
     protected final String mExPropName;
 
     /** void loadNBTData(NBTTagCompound) */
-    private Method method_ExProp_loadNBTData;
+    protected Method method_ExProp_loadNBTData;
     /** void saveNBTData(NBTTagCompound) */
-    private Method method_ExProp_saveNBTData;
+    protected Method method_ExProp_saveNBTData;
     /** void init(Entity;World) */
-    private Method method_ExProp_init;
+    protected Method method_ExProp_init;
 
     /** static T get(EntityPlayer) */
-    private Method method_ExProp_get;
+    protected Method method_ExProp_get;
     /** static void register(EntityPlayer) */
-    private Method method_ExProp_register;
+    protected Method method_ExProp_register;
 
     protected Boolean mInit=null;
-    private Field field_NMSEntity_extendedProperties;
+    protected Field field_NMSEntity_extendedProperties;
 
     public ADM_InVanilla(PlayerDataSQL pPlugin,String pExPropClass,String pExPropName){
         super(pPlugin);
@@ -206,7 +206,7 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
      *            NMS玩家,数据类型为EntityPlayer
      */
     protected void registerExProp(Object pNMSPlayer,Player pPlayer){
-        if(this.method_ExProp_get==null){
+        if(this.method_ExProp_register==null){
             this.registerExPropNMS(pNMSPlayer,pPlayer);
         }else{
             MethodUtil.invokeStaticMethod(this.method_ExProp_register,pNMSPlayer);
