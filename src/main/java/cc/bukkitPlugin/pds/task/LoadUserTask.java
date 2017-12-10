@@ -48,7 +48,7 @@ public class LoadUserTask implements Runnable{
             }catch(InterruptedException exp){
                 Log.severe(this.mPlugin.C("MsgErrorOnLoadingDataWait"),exp);
             }
-            if(this.mDone||this.mRetry>RETRY_COUNT) return;
+            if(this.mDone||this.mRetry>RETRY_COUNT||!this.mPlugin.isEnabled()) return;
 
             User tUser=null;
             try{
