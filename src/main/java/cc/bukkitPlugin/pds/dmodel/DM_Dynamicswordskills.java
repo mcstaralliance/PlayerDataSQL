@@ -3,7 +3,6 @@ package cc.bukkitPlugin.pds.dmodel;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.commons.util.reflect.MethodUtil;
@@ -29,25 +28,16 @@ public class DM_Dynamicswordskills extends ADM_InVanilla{
     }
 
     @Override
-    public boolean initOnce(){
-        if(this.mInit!=null)
-            return this.mInit.booleanValue();
+    protected boolean initOnce() throws Exception{
+        this.initExProp();
 
-        try{
+        this.method_DSSPlayerInfo_onJoinWorld=MethodUtil.getMethod(this.mExPropClazz,"onJoinWorld",true);
 
-            this.initExProp();
+        // 动态剑技的TAG
+        this.mModelTags.add("DynamicSwordSkills");
+        this.mModelTags.add("receivedGear");
 
-            this.method_DSSPlayerInfo_onJoinWorld=MethodUtil.getMethod(this.mExPropClazz,"onJoinWorld",true);
-
-            // 动态剑技的TAG
-            this.mModelTags.add("DynamicSwordSkills");
-            this.mModelTags.add("receivedGear");
-        }catch(Exception exp){
-            if(!(exp instanceof ClassNotFoundException))
-                Log.severe("模块 "+this.getDesc()+" 初始化时发生了错误",exp);
-            return (this.mInit=false);
-        }
-        return (this.mInit=true);
+        return true;
     }
 
     @Override

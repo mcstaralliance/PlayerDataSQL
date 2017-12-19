@@ -33,7 +33,7 @@ public interface IDataModel{
      * 
      * @return 是否初始化成功
      */
-    public boolean initOnce();
+    public boolean init();
 
     /**
      * 获取该模块用户的序列化数据,用于存储

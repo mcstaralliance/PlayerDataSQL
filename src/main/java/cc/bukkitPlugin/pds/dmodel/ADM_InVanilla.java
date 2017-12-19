@@ -48,7 +48,6 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
     /** static void register(EntityPlayer) */
     protected Method method_ExProp_register;
 
-    protected Boolean mInit=null;
     protected Field field_NMSEntity_extendedProperties;
 
     public ADM_InVanilla(PlayerDataSQL pPlugin,String pExPropClass,String pExPropName){
@@ -282,7 +281,8 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
     public abstract String getDesc();
 
     @Override
-    public abstract boolean initOnce();
+    protected
+    abstract boolean initOnce() throws Exception;
 
     protected abstract void updateToAround(Object pNMSPlayer,Object pExProp);
 

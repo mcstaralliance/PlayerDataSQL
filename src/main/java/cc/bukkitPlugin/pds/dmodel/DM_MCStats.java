@@ -10,7 +10,6 @@ import java.util.Map;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.commons.util.CollUtil;
@@ -49,30 +48,22 @@ public class DM_MCStats extends ADataModel{
     }
 
     @Override
-    public boolean initOnce(){
-        if(this.mInit!=null)
-            return this.mInit.booleanValue();
-
-        try{
-            for(Method sMethod : NMSUtil.clazz_EntityPlayerMP.getDeclaredMethods()){
-                if(CollUtil.isEmpty(sMethod.getParameterTypes())&&sMethod.getReturnType().getSimpleName().toLowerCase().contains("statistic")){
-                    this.method_EntityPlayerMP_getStatisticMan=sMethod;
-                    break;
-                }
+    protected boolean initOnce() throws Exception{
+        for(Method sMethod : NMSUtil.clazz_EntityPlayerMP.getDeclaredMethods()){
+            if(CollUtil.isEmpty(sMethod.getParameterTypes())&&sMethod.getReturnType().getSimpleName().toLowerCase().contains("statistic")){
+                this.method_EntityPlayerMP_getStatisticMan=sMethod;
+                break;
             }
-            if(this.method_EntityPlayerMP_getStatisticMan==null)
-                return (this.mInit=false);
-
-            Class<?> tClazz=this.method_EntityPlayerMP_getStatisticMan.getReturnType();
-            this.method_StatisticsFile_loadStatistic=MethodUtil.getUnknowMethod(tClazz,Map.class,String.class,true).get(0);
-            this.method_StatisticsFile_saveStatistic=MethodUtil.getUnknowMethod(tClazz,String.class,Map.class,true).get(0);
-            this.field_StatFileWriter_stats=FieldUtil.getField(tClazz.getSuperclass(),Map.class,-1,true).get(0);
-        }catch(Throwable exp){
-            if(!(exp instanceof ClassNotFoundException))
-                Log.severe("模块 "+this.getDesc()+" 初始化时发生了错误",exp);
-            return (this.mInit=false);
         }
-        return (this.mInit=true);
+        if(this.method_EntityPlayerMP_getStatisticMan==null)
+            return (this.mInit=false);
+
+        Class<?> tClazz=this.method_EntityPlayerMP_getStatisticMan.getReturnType();
+        this.method_StatisticsFile_loadStatistic=MethodUtil.getUnknowMethod(tClazz,Map.class,String.class,true).get(0);
+        this.method_StatisticsFile_saveStatistic=MethodUtil.getUnknowMethod(tClazz,String.class,Map.class,true).get(0);
+        this.field_StatFileWriter_stats=FieldUtil.getField(tClazz.getSuperclass(),Map.class,-1,true).get(0);
+
+        return true;
     }
 
     @Override

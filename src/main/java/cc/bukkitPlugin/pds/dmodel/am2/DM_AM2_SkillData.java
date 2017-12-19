@@ -1,6 +1,5 @@
 package cc.bukkitPlugin.pds.dmodel.am2;
 
-import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 
 public class DM_AM2_SkillData extends ADM_AM2{
@@ -20,22 +19,14 @@ public class DM_AM2_SkillData extends ADM_AM2{
     }
 
     @Override
-    public boolean initOnce(){
-        if(this.mInit!=null)
-            return this.mInit.booleanValue();
+    protected boolean initOnce() throws Exception{
+        this.initExProp();
+        super.initOnce();
 
-        try{
-            this.initExProp();
-            super.initOnce();
+        // AM2 Skill TAG
+        this.mModelTags.add("SpellKnowledge");
 
-            // AM2 Skill TAG
-            this.mModelTags.add("SpellKnowledge");
-        }catch(Exception exp){
-            if(!(exp instanceof ClassNotFoundException))
-                Log.severe("模块 "+this.getDesc()+" 初始化时发生了错误",exp);
-            return (this.mInit=false);
-        }
-        return (this.mInit=true);
+        return true;
     }
 
 }

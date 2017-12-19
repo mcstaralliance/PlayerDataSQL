@@ -55,8 +55,6 @@ public class DM_AcademyCraft extends DM_Minecraft{
     public static Method method_DataPart_toNBT=null;
     private List<SubM> mDataModels=new ArrayList<>();
 
-    private Boolean mInit=null;
-
     public DM_AcademyCraft(PlayerDataSQL pPlugin){
         super(pPlugin);
     }
@@ -72,44 +70,36 @@ public class DM_AcademyCraft extends DM_Minecraft{
     }
 
     @Override
-    public boolean initOnce(){
-        if(this.mInit!=null)
-            return this.mInit.booleanValue();
+    protected boolean initOnce() throws Exception{
+        Class.forName("cn.academy.core.AcademyCraft");
+        Class<?> tClazz=Class.forName("cn.lambdalib.util.datapart.DataPart");
 
-        try{
-            Class.forName("cn.academy.core.AcademyCraft");
-            Class<?> tClazz=Class.forName("cn.lambdalib.util.datapart.DataPart");
+        method_DataPart_sync=tClazz.getDeclaredMethod("sync");
+        method_DataPart_fromNBT=tClazz.getDeclaredMethod("fromNBT",NBTUtil.clazz_NBTTagCompound);
+        method_DataPart_toNBT=tClazz.getDeclaredMethod("toNBT",NBTUtil.clazz_NBTTagCompound);
 
-            method_DataPart_sync=tClazz.getDeclaredMethod("sync");
-            method_DataPart_fromNBT=tClazz.getDeclaredMethod("fromNBT",NBTUtil.clazz_NBTTagCompound);
-            method_DataPart_toNBT=tClazz.getDeclaredMethod("toNBT",NBTUtil.clazz_NBTTagCompound);
-
-            List<Class<?>> tClazzes=ClassUtil.getPackageClasses("cn.academy",true,(pClazz)->{
-                if(tClazz.isAssignableFrom(pClazz)){
-                    for(Annotation sAnnotation : pClazz.getAnnotations()){
-                        if(sAnnotation.annotationType().getSimpleName().equals("SideOnly")&&sAnnotation.toString().contains("CLIENT")){
-                            return false;
-                        }
+        List<Class<?>> tClazzes=ClassUtil.getPackageClasses("cn.academy",true,(pClazz)->{
+            if(tClazz.isAssignableFrom(pClazz)){
+                for(Annotation sAnnotation : pClazz.getAnnotations()){
+                    if(sAnnotation.annotationType().getSimpleName().equals("SideOnly")&&sAnnotation.toString().contains("CLIENT")){
+                        return false;
                     }
-                    return true;
                 }
-                return false;
-            });
-
-            for(Class<?> sClazz : tClazzes){
-                Log.developInfo("Find sub model \""+sClazz.getName()+"\" of data model "+this.getModelId());
-                try{
-                    this.mDataModels.add(new SubM(sClazz));
-                }catch(IllegalStateException exp){
-                    Log.developInfo("The sub model of Data Model "+this.getModelId()+" don't have method to instance");
-                }
+                return true;
             }
-        }catch(Exception exp){
-            if(!(exp instanceof ClassNotFoundException))
-                Log.severe("模块 "+this.getDesc()+" 初始化时发生了错误",exp);
-            return (this.mInit=false);
+            return false;
+        });
+
+        for(Class<?> sClazz : tClazzes){
+            Log.developInfo("Find sub model \""+sClazz.getName()+"\" of data model "+this.getModelId());
+            try{
+                this.mDataModels.add(new SubM(sClazz));
+            }catch(IllegalStateException exp){
+                Log.developInfo("The sub model of Data Model "+this.getModelId()+" don't have method to instance");
+            }
         }
-        return (this.mInit=true);
+
+        return true;
     }
 
     @Override

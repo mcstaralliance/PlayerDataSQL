@@ -50,8 +50,6 @@ public abstract class ADM_WorldData extends ADataModel{
         }
     }
 
-    protected Boolean mInit=null;
-
     protected final String mWSDClassName;
     protected Class<?> mWSDClass;
 

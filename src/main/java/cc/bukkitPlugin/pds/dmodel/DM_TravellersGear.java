@@ -9,7 +9,6 @@ import java.util.UUID;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
 import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
@@ -53,37 +52,29 @@ public class DM_TravellersGear extends ADataModel{
     }
 
     @Override
-    public boolean initOnce(){
-        if(this.mInit!=null)
-            return this.mInit.booleanValue();
+    protected boolean initOnce() throws Exception{
+        Class tClazz=Class.forName("travellersgear.TravellersGear");
+        this.mPacketHandler=(SimpleNetworkWrapper)FieldUtil.getFieldValue(tClazz,"packetHandler",true,null);
+        this.method_SimpleNetworkWrapper_sendTo=MethodUtil.getMethodIgnoreParam(SimpleNetworkWrapper.class,"sendTo",true).get(0);
 
-        try{
-            Class tClazz=Class.forName("travellersgear.TravellersGear");
-            this.mPacketHandler=(SimpleNetworkWrapper)FieldUtil.getFieldValue(tClazz,"packetHandler",true,null);
-            this.method_SimpleNetworkWrapper_sendTo=MethodUtil.getMethodIgnoreParam(SimpleNetworkWrapper.class,"sendTo",true).get(0);
+        this.class_MessageNBTSync=Class.forName("travellersgear.common.network.MessageNBTSync");
 
-            this.class_MessageNBTSync=Class.forName("travellersgear.common.network.MessageNBTSync");
+        Class.forName("travellersgear.api.TravellersGearAPI");
+        this.method_TravellersGearAPI_getTravellersNBTData=MethodUtil.getMethod(TravellersGearAPI.class,
+                "getTravellersNBTData",
+                NMSUtil.clazz_EntityPlayer,
+                true);
 
-            Class.forName("travellersgear.api.TravellersGearAPI");
-            this.method_TravellersGearAPI_getTravellersNBTData=MethodUtil.getMethod(TravellersGearAPI.class,
-                    "getTravellersNBTData",
-                    NMSUtil.clazz_EntityPlayer,
-                    true);
+        Class.forName("travellersgear.api.TGSaveData");
+        this.method_TGSaveData_setPlayerData=MethodUtil.getMethod(TGSaveData.class,
+                "setPlayerData",
+                new Class<?>[]{NMSUtil.clazz_EntityPlayer,NBTUtil.clazz_NBTTagCompound},
+                true);
 
-            Class.forName("travellersgear.api.TGSaveData");
-            this.method_TGSaveData_setPlayerData=MethodUtil.getMethod(TGSaveData.class,
-                    "setPlayerData",
-                    new Class<?>[]{NMSUtil.clazz_EntityPlayer,NBTUtil.clazz_NBTTagCompound},
-                    true);
+        this.mTGSDInstance=(TGSaveData)FieldUtil.getStaticFieldValue(FieldUtil.getField(TGSaveData.class,TGSaveData.class,-1,true).get(0));
+        this.mTGSDMap=(HashMap<UUID,Object>)FieldUtil.getFieldValue(TGSaveData.class,"playerData",true,this.mTGSDInstance);
 
-            this.mTGSDInstance=(TGSaveData)FieldUtil.getStaticFieldValue(FieldUtil.getField(TGSaveData.class,TGSaveData.class,-1,true).get(0));
-            this.mTGSDMap=(HashMap<UUID,Object>)FieldUtil.getFieldValue(TGSaveData.class,"playerData",true,this.mTGSDInstance);
-        }catch(Exception exp){
-            if(!(exp instanceof ClassNotFoundException))
-                Log.severe("模块 "+this.getDesc()+" 初始化时发生了错误",exp);
-            return (this.mInit=false);
-        }
-        return (this.mInit=true);
+        return true;
     }
 
     @Override

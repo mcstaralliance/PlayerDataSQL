@@ -65,46 +65,38 @@ public class DM_Thaumcraft extends ADataModel{
     }
 
     @Override
-    public boolean initOnce(){
-        if(this.mInit!=null)
-            return this.mInit.booleanValue();
+    protected boolean initOnce() throws Exception{
+        Class<?> tClazz=null;
+        Class.forName("thaumcraft.common.Thaumcraft");
+        Class.forName("thaumcraft.common.CommonProxy");
 
-        try{
-            Class<?> tClazz=null;
-            Class.forName("thaumcraft.common.Thaumcraft");
-            Class.forName("thaumcraft.common.CommonProxy");
+        tClazz=Class.forName("thaumcraft.common.lib.research.PlayerKnowledge");
+        this.checkMethod(tClazz,new String[]{"getWarpCounter","getWarpPerm","getWarpSticky","getWarpTemp","wipePlayerKnowledge"},String.class);
 
-            tClazz=Class.forName("thaumcraft.common.lib.research.PlayerKnowledge");
-            this.checkMethod(tClazz,new String[]{"getWarpCounter","getWarpPerm","getWarpSticky","getWarpTemp","wipePlayerKnowledge"},String.class);
+        tClazz=Class.forName("thaumcraft.common.lib.research.ResearchManager");
+        this.method_ResearchManager_loadAspectNBT=tClazz.getDeclaredMethod("loadAspectNBT",NBTUtil.clazz_NBTTagCompound,NMSUtil.clazz_EntityPlayer);
+        this.method_ResearchManager_loadResearchNBT=tClazz.getDeclaredMethod("loadResearchNBT",NBTUtil.clazz_NBTTagCompound,NMSUtil.clazz_EntityPlayer);
+        this.method_ResearchManager_loadScannedNBT=tClazz.getDeclaredMethod("loadScannedNBT",NBTUtil.clazz_NBTTagCompound,NMSUtil.clazz_EntityPlayer);
+        this.method_ResearchManager_saveAspectNBT=tClazz.getDeclaredMethod("saveAspectNBT",NBTUtil.clazz_NBTTagCompound,NMSUtil.clazz_EntityPlayer);
+        this.method_ResearchManager_saveResearchNBT=tClazz.getDeclaredMethod("saveResearchNBT",NBTUtil.clazz_NBTTagCompound,NMSUtil.clazz_EntityPlayer);
+        this.method_ResearchManager_saveScannedNBT=tClazz.getDeclaredMethod("saveScannedNBT",NBTUtil.clazz_NBTTagCompound,NMSUtil.clazz_EntityPlayer);
+        this.method_ResearchManager_completeResearch=tClazz.getDeclaredMethod("completeResearch",NMSUtil.clazz_EntityPlayer,String.class);
+        this.method_ResearchManager_getResearchForPlayer=tClazz.getDeclaredMethod("getResearchForPlayer",String.class);
 
-            tClazz=Class.forName("thaumcraft.common.lib.research.ResearchManager");
-            this.method_ResearchManager_loadAspectNBT=tClazz.getDeclaredMethod("loadAspectNBT",NBTUtil.clazz_NBTTagCompound,NMSUtil.clazz_EntityPlayer);
-            this.method_ResearchManager_loadResearchNBT=tClazz.getDeclaredMethod("loadResearchNBT",NBTUtil.clazz_NBTTagCompound,NMSUtil.clazz_EntityPlayer);
-            this.method_ResearchManager_loadScannedNBT=tClazz.getDeclaredMethod("loadScannedNBT",NBTUtil.clazz_NBTTagCompound,NMSUtil.clazz_EntityPlayer);
-            this.method_ResearchManager_saveAspectNBT=tClazz.getDeclaredMethod("saveAspectNBT",NBTUtil.clazz_NBTTagCompound,NMSUtil.clazz_EntityPlayer);
-            this.method_ResearchManager_saveResearchNBT=tClazz.getDeclaredMethod("saveResearchNBT",NBTUtil.clazz_NBTTagCompound,NMSUtil.clazz_EntityPlayer);
-            this.method_ResearchManager_saveScannedNBT=tClazz.getDeclaredMethod("saveScannedNBT",NBTUtil.clazz_NBTTagCompound,NMSUtil.clazz_EntityPlayer);
-            this.method_ResearchManager_completeResearch=tClazz.getDeclaredMethod("completeResearch",NMSUtil.clazz_EntityPlayer,String.class);
-            this.method_ResearchManager_getResearchForPlayer=tClazz.getDeclaredMethod("getResearchForPlayer",String.class);
-
-            String tPackage="thaumcraft.common.lib.network.playerdata.";
-            String[] tPackets=new String[]{"PacketSyncAspects","PacketSyncResearch","PacketSyncScannedItems","PacketSyncScannedEntities","PacketSyncScannedPhenomena"};
-            for(String sClassStr : tPackets){
-                try{
-                    this.mSyncPackets.add(Class.forName(tPackage+sClassStr));
-                    Log.developInfo("find thaumcraft sync packet "+sClassStr);
-                }catch(ClassNotFoundException ignore){
-                }
+        String tPackage="thaumcraft.common.lib.network.playerdata.";
+        String[] tPackets=new String[]{"PacketSyncAspects","PacketSyncResearch","PacketSyncScannedItems","PacketSyncScannedEntities","PacketSyncScannedPhenomena"};
+        for(String sClassStr : tPackets){
+            try{
+                this.mSyncPackets.add(Class.forName(tPackage+sClassStr));
+                Log.developInfo("find thaumcraft sync packet "+sClassStr);
+            }catch(ClassNotFoundException ignore){
             }
-
-            tClazz=Class.forName("cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper");
-            this.method_SimpleNetworkWrapper_sendTo=MethodUtil.getMethodIgnoreParam(tClazz,"sendTo",true).get(0);
-        }catch(Exception exp){
-            if(!(exp instanceof ClassNotFoundException)&&!(exp instanceof NoSuchMethodException))
-                Log.severe("模块 "+this.getDesc()+" 初始化时发生了错误",exp);
-            return (this.mInit=false);
         }
-        return (this.mInit=true);
+
+        tClazz=Class.forName("cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper");
+        this.method_SimpleNetworkWrapper_sendTo=MethodUtil.getMethodIgnoreParam(tClazz,"sendTo",true).get(0);
+
+        return true;
     }
 
     @Override

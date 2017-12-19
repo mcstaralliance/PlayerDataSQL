@@ -2,7 +2,6 @@ package cc.bukkitPlugin.pds.dmodel;
 
 import java.util.Map;
 
-import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 
@@ -26,21 +25,13 @@ public class DM_TConstruct extends ADM_InVanilla{
     }
 
     @Override
-    public boolean initOnce(){
-        if(this.mInit!=null)
-            return this.mInit.booleanValue();
+    protected boolean initOnce() throws Exception{
+        this.initExProp();
 
-        try{
-            this.initExProp();
+        // 将魂TAG
+        this.mModelTags.add(TAG_MAIN);
 
-            // 将魂TAG
-            this.mModelTags.add(TAG_MAIN);
-        }catch(Exception exp){
-            if(!(exp instanceof ClassNotFoundException))
-                Log.severe("模块 "+this.getDesc()+" 初始化时发生了错误",exp);
-            return (this.mInit=false);
-        }
-        return (this.mInit=true);
+        return true;
     }
 
     @Override

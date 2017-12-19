@@ -42,7 +42,7 @@ public class DM_Minecraft extends ADataModel{
     }
 
     @Override
-    public boolean initOnce(){
+    protected boolean initOnce() throws Exception{
         return true;
     }
 

@@ -2,7 +2,6 @@ package cc.bukkitPlugin.pds.dmodel;
 
 import java.lang.reflect.Method;
 
-import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.commons.util.reflect.ClassUtil;
 import cc.commons.util.reflect.MethodUtil;
@@ -26,24 +25,15 @@ public class DM_ShinColle extends ADM_InVanilla{
     }
 
     @Override
-    public boolean initOnce(){
-        if(this.mInit!=null)
-            return this.mInit.booleanValue();
+    protected boolean initOnce() throws Exception{
+        this.initExProp();
 
-        try{
+        this.method_ExtendPlayerProps_syncShips=MethodUtil.getMethod(this.mExPropClazz,"syncShips",true);
 
-            this.initExProp();
+        // 舰娘的TAG
+        this.mModelTags.add(this.mExPropName);
 
-            this.method_ExtendPlayerProps_syncShips=MethodUtil.getMethod(this.mExPropClazz,"syncShips",true);
-
-            // 舰娘的TAG
-            this.mModelTags.add(this.mExPropName);
-        }catch(Exception exp){
-            if(!(exp instanceof ClassNotFoundException))
-                Log.severe("模块 "+this.getDesc()+" 初始化时发生了错误",exp);
-            return (this.mInit=false);
-        }
-        return (this.mInit=true);
+        return true;
     }
 
     @Override

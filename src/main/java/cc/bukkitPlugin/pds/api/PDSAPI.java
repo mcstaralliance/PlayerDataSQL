@@ -80,7 +80,7 @@ public class PDSAPI implements Listener,IConfigModel{
             PDSAPI.mEnabledModels.clear();
             for(IDataModel sModel : PDSAPI.mRegistedModels.values()){
                 try{
-                    if(sModel.getPlugin().isEnabled()&&sModel.initOnce()&&PDSAPI.mEnabledModelsStr.contains(sModel.getModelId().toLowerCase())){
+                    if(sModel.getPlugin().isEnabled()&&sModel.init()&&PDSAPI.mEnabledModelsStr.contains(sModel.getModelId().toLowerCase())){
                         PDSAPI.mEnabledModels.add(sModel);
                         if(pNotify) Log.info("成功启用数据模块: "+sModel.getDesc());
                     }
@@ -141,7 +141,7 @@ public class PDSAPI implements Listener,IConfigModel{
     public void addDefaults(CommentedYamlConfig pConfig){
         CommentedSection tSecMain=pConfig.getOrCreateSection("Sync","启用哪些同步模块");
         for(IDataModel sModel : PDSAPI.mRegistedModels.values()){
-            if(!sModel.initOnce()) continue;
+            if(!sModel.init()) continue;
             String[] tComments=null;
             if(StringUtil.isNotEmpty(sModel.getDesc())){
                 tComments=sModel.getDesc().split("\n");

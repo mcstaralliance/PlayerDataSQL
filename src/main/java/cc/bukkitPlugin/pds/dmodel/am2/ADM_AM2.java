@@ -15,7 +15,7 @@ public abstract class ADM_AM2 extends ADM_InVanilla{
     }
 
     @Override
-    public boolean initOnce(){
+    protected boolean initOnce() throws Exception{
         try{
             method_ExtendedProperties_forceSync=MethodUtil.getMethodIgnoreParam(this.mExPropClazz,"forceSync",true).get(0);
         }catch(IllegalStateException ignore){

@@ -9,7 +9,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
-import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
 import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
@@ -42,25 +41,16 @@ public class DM_Baubles extends ADataModel{
     }
 
     @Override
-    public boolean initOnce(){
-        if(this.mInit!=null)
-            return this.mInit.booleanValue();
-
-        try{
-            Class<?> tClazz=null;
-            Class.forName("baubles.common.Baubles");
-            tClazz=Class.forName("baubles.api.BaublesApi");
-            this.method_BaublesApi_getBaubles=tClazz.getMethod("getBaubles",NMSUtil.clazz_EntityPlayer);
-            tClazz=Class.forName("baubles.common.container.InventoryBaubles");
-            this.method_InventoryBaubles_readNBT=MethodUtil.getMethod(tClazz,"readNBT",NBTUtil.clazz_NBTTagCompound,true);
-            this.method_InventoryBaubles_saveNBT=MethodUtil.getMethod(tClazz,"saveNBT",NBTUtil.clazz_NBTTagCompound,true);
-            this.method_InventoryBaubles_syncSlotToClients=MethodUtil.getMethod(tClazz,"syncSlotToClients",int.class,true);
-        }catch(Exception exp){
-            if(!(exp instanceof ClassNotFoundException))
-                Log.severe("模块 "+this.getDesc()+" 初始化时发生了错误",exp);
-            return (this.mInit=false);
-        }
-        return (this.mInit=true);
+    public boolean initOnce() throws Exception{
+        Class<?> tClazz=null;
+        Class.forName("baubles.common.Baubles");
+        tClazz=Class.forName("baubles.api.BaublesApi");
+        this.method_BaublesApi_getBaubles=tClazz.getMethod("getBaubles",NMSUtil.clazz_EntityPlayer);
+        tClazz=Class.forName("baubles.common.container.InventoryBaubles");
+        this.method_InventoryBaubles_readNBT=MethodUtil.getMethod(tClazz,"readNBT",NBTUtil.clazz_NBTTagCompound,true);
+        this.method_InventoryBaubles_saveNBT=MethodUtil.getMethod(tClazz,"saveNBT",NBTUtil.clazz_NBTTagCompound,true);
+        this.method_InventoryBaubles_syncSlotToClients=MethodUtil.getMethod(tClazz,"syncSlotToClients",int.class,true);
+        return true;
     }
 
     @Override

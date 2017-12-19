@@ -2,7 +2,6 @@ package cc.bukkitPlugin.pds.dmodel;
 
 import java.lang.reflect.Method;
 
-import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.commons.util.reflect.MethodUtil;
 
@@ -27,25 +26,15 @@ public class DM_Witchery extends ADM_InVanilla{
     }
 
     @Override
-    public boolean initOnce(){
-        if(this.mInit!=null)
-            return this.mInit.booleanValue();
+    protected boolean initOnce() throws Exception{
+        this.initExProp();
 
-        try{
-            Class.forName("com.emoniph.witchery.Witchery");
+        method_ExtendedPlayer_sync=MethodUtil.getMethod(this.mExPropClazz,"sync",true);
 
-            this.initExProp();
+        // 巫术TAG
+        this.mModelTags.add(EXT_PROP_NAME);
 
-            method_ExtendedPlayer_sync=MethodUtil.getMethod(this.mExPropClazz,"sync",true);
-
-            // 巫术TAG
-            this.mModelTags.add(EXT_PROP_NAME);
-        }catch(Exception exp){
-            if(!(exp instanceof ClassNotFoundException))
-                Log.severe("模块 "+this.getDesc()+" 初始化时发生了错误",exp);
-            return (this.mInit=false);
-        }
-        return (this.mInit=true);
+        return true;
     }
 
     @Override
