@@ -51,7 +51,7 @@ public abstract class ADataModel implements IDataModel{
     }
 
     @Override
-    public final boolean init(){
+    public boolean init(){
         if(this.mInitSuccess!=null)
             return this.mInitSuccess.booleanValue();
 
