@@ -281,8 +281,7 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
     public abstract String getDesc();
 
     @Override
-    protected
-    abstract boolean initOnce() throws Exception;
+    protected abstract boolean initOnce() throws Exception;
 
     protected abstract void updateToAround(Object pNMSPlayer,Object pExProp);
 
