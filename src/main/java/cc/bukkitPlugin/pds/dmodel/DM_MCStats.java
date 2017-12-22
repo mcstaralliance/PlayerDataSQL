@@ -7,11 +7,9 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-
 import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
+import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.util.CollUtil;
 import cc.commons.util.FileUtil;
 import cc.commons.util.reflect.FieldUtil;
@@ -67,14 +65,14 @@ public class DM_MCStats extends ADataModel{
     }
 
     @Override
-    public byte[] getData(Player pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
+    public byte[] getData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
         Object tStatMan=this.getStatMan(pPlayer);
         String tJson=(String)MethodUtil.invokeMethod(this.method_StatisticsFile_saveStatistic,tStatMan,this.getManStatValue(tStatMan));
         return tJson.getBytes(UTF_8);
     }
 
     @Override
-    public void restore(Player pPlayer,byte[] pData) throws Exception{
+    public void restore(CPlayer pPlayer,byte[] pData) throws Exception{
         Object tStatMan=this.getStatMan(pPlayer);
         Map<Object,Object> tPlayerStatValue=this.getManStatValue(tStatMan);
         tPlayerStatValue.clear();
@@ -82,7 +80,7 @@ public class DM_MCStats extends ADataModel{
     }
 
     @Override
-    public byte[] loadFileData(OfflinePlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException{
+    public byte[] loadFileData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException{
         File tDataFile=this.getUUIDOrNameFile(pPlayer,this.mDataDir,"%name%.json");
         if(!tDataFile.isFile()) return new byte[0];
 
@@ -90,21 +88,21 @@ public class DM_MCStats extends ADataModel{
     }
 
     @Override
-    public void cleanData(Player pPlayer){
+    public void cleanData(CPlayer pPlayer){
         Object tStatMan=this.getStatMan(pPlayer);
         Map<Object,Object> tPlayerStatValue=this.getManStatValue(tStatMan);
         tPlayerStatValue.clear();
     }
 
-    protected void loadDataFromString(Player pToPlayer,String pData){
+    protected void loadDataFromString(CPlayer pToPlayer,String pData){
         Object tStatMan=this.getStatMan(pToPlayer);
         Map<Object,Object> tPlayerStatValue=this.getManStatValue(tStatMan);
         tPlayerStatValue.clear();
         tPlayerStatValue.putAll((Map<Object,Object>)MethodUtil.invokeMethod(this.method_StatisticsFile_loadStatistic,tStatMan,pData));
     }
 
-    private Object getStatMan(Player pPlayer){
-        return MethodUtil.invokeMethod(this.method_EntityPlayerMP_getStatisticMan,NMSUtil.getNMSPlayer(pPlayer));
+    private Object getStatMan(CPlayer pPlayer){
+        return MethodUtil.invokeMethod(this.method_EntityPlayerMP_getStatisticMan,NMSUtil.getNMSPlayer(pPlayer.getPlayer()));
     }
 
     private Map<Object,Object> getManStatValue(Object pStatMan){

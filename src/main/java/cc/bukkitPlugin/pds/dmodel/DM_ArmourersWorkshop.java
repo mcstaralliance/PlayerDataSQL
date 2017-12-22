@@ -3,17 +3,22 @@ package cc.bukkitPlugin.pds.dmodel;
 import java.lang.reflect.Method;
 
 import cc.bukkitPlugin.pds.PlayerDataSQL;
+import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.util.reflect.MethodUtil;
 
 public class DM_ArmourersWorkshop extends ADM_InVanilla{
 
     public static final String EXT_PROP_NAME="playerCustomEquipmentData";
 
-    private Method method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround;
-    private Method method_ExPropsPlayerEquipmentData_sendSkinData;
+    protected Method method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround;
+    protected Method method_ExPropsPlayerEquipmentData_sendSkinData;
 
     public DM_ArmourersWorkshop(PlayerDataSQL pPlugin){
         super(pPlugin,"riskyken.armourersWorkshop.common.skin.ExPropsPlayerEquipmentData",EXT_PROP_NAME);
+    }
+
+    public DM_ArmourersWorkshop(PlayerDataSQL pPlugin,String pExPropClass,String pExPropName){
+        super(pPlugin,pExPropClass,pExPropName);
     }
 
     @Override
@@ -52,7 +57,7 @@ public class DM_ArmourersWorkshop extends ADM_InVanilla{
     }
 
     @Override
-    protected void updateToAround(Object pNMSPlayer,Object pExProp){
+    protected void updateToAround(CPlayer pPlayer,Object pExProp){
         MethodUtil.invokeMethod(method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround,pExProp);
         MethodUtil.invokeMethod(method_ExPropsPlayerEquipmentData_sendSkinData,pExProp);
     }

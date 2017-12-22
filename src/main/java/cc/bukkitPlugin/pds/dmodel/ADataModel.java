@@ -2,12 +2,12 @@ package cc.bukkitPlugin.pds.dmodel;
 
 import java.io.File;
 
-import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
 
 import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.api.IDataModel;
+import cc.bukkitPlugin.pds.util.CPlayer;
 
 public abstract class ADataModel implements IDataModel{
 
@@ -42,7 +42,7 @@ public abstract class ADataModel implements IDataModel{
      *            文件名模式,%name%为被替换的UUID或Name参数
      * @return 玩家数据文件
      */
-    public File getUUIDOrNameFile(OfflinePlayer pPlayer,File pDir,String pNameParam){
+    public File getUUIDOrNameFile(CPlayer pPlayer,File pDir,String pNameParam){
         File tDataFile=new File(pDir,pNameParam.replace("%name%",pPlayer.getUniqueId().toString()));
         if(!tDataFile.isFile()){
             tDataFile=new File(pDir,pNameParam.replace("%name%",pPlayer.getName().toString()));

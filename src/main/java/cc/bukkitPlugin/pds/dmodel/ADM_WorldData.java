@@ -5,12 +5,11 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 
 import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
 import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
+import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.bukkitPlugin.pds.util.PDSNBTUtil;
 import cc.commons.util.reflect.ClassUtil;
 import cc.commons.util.reflect.MethodUtil;
@@ -68,13 +67,13 @@ public abstract class ADM_WorldData extends ADataModel{
     }
 
     @Override
-    public byte[] getData(Player pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
+    public byte[] getData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
         return PDSNBTUtil.compressNBT(
                 MethodUtil.invokeMethod(method_WorldSaeData_writeToNBT,this.loadWorldData(pPlayer),NBTUtil.newNBTTagCompound()));
     }
 
     @Override
-    public void restore(Player pPlayer,byte[] pData) throws Exception{
+    public void restore(CPlayer pPlayer,byte[] pData) throws Exception{
         Object tNBTData=PDSNBTUtil.decompressNBT(pData);
         Object tWorldData=this.loadWorldData(pPlayer);
         MethodUtil.invokeMethod(method_WorldSaeData_readFromNBT,tWorldData,tNBTData);
@@ -83,18 +82,18 @@ public abstract class ADM_WorldData extends ADataModel{
     }
 
     @Override
-    public byte[] loadFileData(OfflinePlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException{
+    public byte[] loadFileData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException{
         return PDSNBTUtil.compressNBT(
                 MethodUtil.invokeMethod(method_WorldSaeData_writeToNBT,this.loadWorldData(pPlayer),NBTUtil.newNBTTagCompound()));
     }
 
     @Override
-    public void cleanData(Player pPlayer){
+    public void cleanData(CPlayer pPlayer){
         Object tData=this.newWorldData(pPlayer);
         this.saveWorldData(pPlayer,tData);
     }
 
-    public String getDataKey(OfflinePlayer pPlayer){
+    public String getDataKey(CPlayer pPlayer){
         return pPlayer.getName();
     }
 
@@ -105,7 +104,7 @@ public abstract class ADM_WorldData extends ADataModel{
      *            玩家
      * @return 数据
      */
-    public Object loadWorldData(OfflinePlayer pPlayer){
+    public Object loadWorldData(CPlayer pPlayer){
         Object tData=MethodUtil.invokeMethod(method_World_loadItemData,this.mMainNMSWorld,this.mWSDClass,this.getDataKey(pPlayer));
         if(tData==null){
             tData=this.newWorldData(pPlayer);
@@ -122,7 +121,7 @@ public abstract class ADM_WorldData extends ADataModel{
      * @param pWData
      *            数据
      */
-    public void saveWorldData(OfflinePlayer pPlayer,Object pWData){
+    public void saveWorldData(CPlayer pPlayer,Object pWData){
         MethodUtil.invokeMethod(method_World_setItemData,this.mMainNMSWorld,this.getDataKey(pPlayer),pWData);
         MethodUtil.invokeMethod(method_WorldSaeData_setDirty,pWData,true);
     }
@@ -134,7 +133,7 @@ public abstract class ADM_WorldData extends ADataModel{
      *            玩家
      * @return 数据模型
      */
-    public Object newWorldData(OfflinePlayer pPlayer){
+    public Object newWorldData(CPlayer pPlayer){
         return ClassUtil.newInstance(this.mWSDClass,String.class,pPlayer.getName());
     }
 
@@ -149,6 +148,6 @@ public abstract class ADM_WorldData extends ADataModel{
         return pNBTData;
     }
 
-    public void syncToClient(Player pPlayer,Object pData){}
+    public void syncToClient(CPlayer pPlayer,Object pData){}
 
 }

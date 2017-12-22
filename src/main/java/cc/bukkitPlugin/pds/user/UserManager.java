@@ -22,6 +22,7 @@ import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.api.IDataModel;
 import cc.bukkitPlugin.pds.api.PDSAPI;
 import cc.bukkitPlugin.pds.task.DailySaveTask;
+import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.commentedyaml.CommentedYamlConfig;
 
 public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel{
@@ -182,12 +183,13 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
      */
     public ArrayList<User> getall() throws SQLException{
         ArrayList<User> users=new ArrayList(Bukkit.getOnlinePlayers().size());
-        for(Player p:Bukkit.getOnlinePlayers()){
+        for(Player p : Bukkit.getOnlinePlayers()){
             users.add(getUserData(p,true));
         }
         users.addAll(this.mPlugin.getStorage().getall());
         return users;
     }
+
     /**
      * 获取用户当前序列化的数据
      * 
@@ -228,9 +230,10 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
 
         User tUser=new User(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID")?pPlayer.getUniqueId().toString():pPlayer.getName());
         Map<String,byte[]> tDatas=tUser.getDataMap(true);
+        CPlayer tCPlayer=new CPlayer(pPlayer);
         for(IDataModel sModel : PDSAPI.getEnableModel()){
             try{
-                tDatas.put(sModel.getModelId().toLowerCase(),sModel.getData(pPlayer,tDatas));
+                tDatas.put(sModel.getModelId().toLowerCase(),sModel.getData(tCPlayer,tDatas));
             }catch(Throwable exp){
                 Log.severe(pReciver,this.mPlugin.C("MsgModelErrorOnSerializeData",new String[]{"%model%","%player%"},sModel.getDesc(),pPlayer.getName()),exp);
             }
@@ -253,12 +256,13 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
         if(tPlayer!=null&&tPlayer.isOnline()){
             Log.debug("Start restore data for user "+pUser.getName());
             Map<String,byte[]> tDatas=pUser.getDataMap(false);
+            CPlayer tCPlayer=new CPlayer(tPlayer);
             for(IDataModel sModel : PDSAPI.getEnableModel()){
                 byte[] tData=tDatas.get(sModel.getModelId().toLowerCase());
                 if(tData==null) tData=new byte[0];
 
                 try{
-                    sModel.restore(tPlayer,tData);
+                    sModel.restore(tCPlayer,tData);
                 }catch(Throwable exp){
                     Log.severe(pReciver,this.mPlugin.C("MsgModelErrorOndeserializeData",new String[]{"%model%","%player%"},sModel.getDesc(),pUser.getName()),exp);
                 }
@@ -333,9 +337,10 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
      *            玩家
      */
     public void cleanPlayerData(Player pPlayer){
+        CPlayer tPlayer=new CPlayer(pPlayer);
         for(IDataModel sModel : PDSAPI.getEnableModel()){
             try{
-                sModel.cleanData(pPlayer);
+                sModel.cleanData(tPlayer);
             }catch(Throwable exp){
                 Log.severe(this.mPlugin.C("MsgModelErrorOnClearData",new String[]{"%model%","%player%"},sModel.getDesc(),pPlayer.getName()),exp);
             }

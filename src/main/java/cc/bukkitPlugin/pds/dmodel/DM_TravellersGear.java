@@ -6,12 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-
 import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
 import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
+import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.bukkitPlugin.pds.util.PDSNBTUtil;
 import cc.commons.util.reflect.ClassUtil;
 import cc.commons.util.reflect.FieldUtil;
@@ -78,12 +76,12 @@ public class DM_TravellersGear extends ADataModel{
     }
 
     @Override
-    public byte[] getData(Player pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
+    public byte[] getData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
         return this.getData0(pPlayer);
     }
 
     @Override
-    public void restore(Player pPlayer,byte[] pData) throws Exception{
+    public void restore(CPlayer pPlayer,byte[] pData) throws Exception{
         Object tNBT=PDSNBTUtil.decompressNBT(pData);
         this.mTGSDMap.put(pPlayer.getUniqueId(),tNBT);
         TGSaveData.setDirty();
@@ -91,26 +89,28 @@ public class DM_TravellersGear extends ADataModel{
     }
 
     @Override
-    public byte[] loadFileData(OfflinePlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException{
+    public byte[] loadFileData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException{
         return this.getData0(pPlayer);
     }
 
-    private byte[] getData0(OfflinePlayer pPlayer){
+    private byte[] getData0(CPlayer pPlayer){
         Object tNBT=this.mTGSDMap.get(pPlayer.getUniqueId());
         if(tNBT==null) tNBT=NBTUtil.newNBTTagCompound();
         return PDSNBTUtil.compressNBT(tNBT);
     }
 
     @Override
-    public void cleanData(Player pPlayer){
+    public void cleanData(CPlayer pPlayer){
         Object tRemoved=this.mTGSDMap.remove(pPlayer.getUniqueId());
         if(tRemoved!=null) TGSaveData.setDirty();
     }
 
-    public void syncToClient(Player pPlayer){
-        Object tNMSPlaye=NMSUtil.getNMSPlayer(pPlayer);
-        Object tNBTSyncMsg=ClassUtil.newInstance(this.class_MessageNBTSync,NMSUtil.clazz_EntityPlayer,tNMSPlaye);
-        MethodUtil.invokeMethod(method_SimpleNetworkWrapper_sendTo,this.mPacketHandler,tNBTSyncMsg,tNMSPlaye);
+    public void syncToClient(CPlayer pPlayer){
+        Object tNMSPlayer=pPlayer.getNMSPlayer();
+        if(tNMSPlayer!=null){
+            Object tNBTSyncMsg=ClassUtil.newInstance(this.class_MessageNBTSync,NMSUtil.clazz_EntityPlayer,tNMSPlayer);
+            MethodUtil.invokeMethod(method_SimpleNetworkWrapper_sendTo,this.mPacketHandler,tNBTSyncMsg,tNMSPlayer);
+        }
     }
 
 }

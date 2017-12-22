@@ -5,6 +5,7 @@ import java.util.Map;
 
 import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
+import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.util.reflect.MethodUtil;
 
 public class DM_Dynamicswordskills extends ADM_InVanilla{
@@ -48,7 +49,7 @@ public class DM_Dynamicswordskills extends ADM_InVanilla{
     }
 
     @Override
-    protected void updateToAround(Object pNMSPlayer,Object pExProp){
+    protected void updateToAround(CPlayer pPlayer,Object pExProp){
         MethodUtil.invokeMethod(this.method_DSSPlayerInfo_onJoinWorld,pExProp);
     }
 

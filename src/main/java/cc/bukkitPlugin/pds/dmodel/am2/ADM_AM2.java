@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.dmodel.ADM_InVanilla;
+import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.util.reflect.MethodUtil;
 
 public abstract class ADM_AM2 extends ADM_InVanilla{
@@ -29,7 +30,7 @@ public abstract class ADM_AM2 extends ADM_InVanilla{
     }
 
     @Override
-    protected void updateToAround(Object pNMSPlayer,Object pExProp){
+    protected void updateToAround(CPlayer pPlayer,Object pExProp){
         if(method_ExtendedProperties_forceSync!=null){
             MethodUtil.invokeMethod(method_ExtendedProperties_forceSync,pExProp);
         }

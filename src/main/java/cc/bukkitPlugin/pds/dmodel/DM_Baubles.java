@@ -5,13 +5,12 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
 import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
+import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.bukkitPlugin.pds.util.PDSNBTUtil;
 import cc.commons.util.FileUtil;
 import cc.commons.util.reflect.ClassUtil;
@@ -54,7 +53,7 @@ public class DM_Baubles extends ADataModel{
     }
 
     @Override
-    public byte[] getData(Player pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
+    public byte[] getData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
         Object tNMSInv=this.getBaublesNMSInv(pPlayer);
         Object tNBTTag=NBTUtil.newNBTTagCompound();
         MethodUtil.invokeMethod(this.method_InventoryBaubles_saveNBT,tNMSInv,tNBTTag);
@@ -62,15 +61,15 @@ public class DM_Baubles extends ADataModel{
     }
 
     @Override
-    public void restore(Player pPlayer,byte[] pData) throws Exception{
+    public void restore(CPlayer pPlayer,byte[] pData) throws Exception{
         this.cleanData(pPlayer);
         Object tNMSInv=this.getBaublesNMSInv(pPlayer);
         MethodUtil.invokeMethod(this.method_InventoryBaubles_readNBT,tNMSInv,PDSNBTUtil.decompressNBT(pData));
-        this.updateToAround(NMSUtil.getNMSPlayer(pPlayer),tNMSInv);
+        this.updateToAround(pPlayer.getNMSPlayer(),tNMSInv);
     }
 
     @Override
-    public byte[] loadFileData(OfflinePlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException{
+    public byte[] loadFileData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException{
         File tDataFile=this.getUUIDOrNameFile(pPlayer,this.mPlayerDataDir,"%name%.baub");
         if(!tDataFile.isFile()) return new byte[0];
 
@@ -78,7 +77,7 @@ public class DM_Baubles extends ADataModel{
     }
 
     @Override
-    public void cleanData(Player pPlayer){
+    public void cleanData(CPlayer pPlayer){
         Object tNMSInv=this.getBaublesNMSInv(pPlayer);
         Inventory tInv=(Inventory)ClassUtil.newInstance(NMSUtil.clazz_CraftInventory,NMSUtil.clazz_IInventory,tNMSInv);
         for(int i=0;i<tInv.getSize();i++){
@@ -86,9 +85,8 @@ public class DM_Baubles extends ADataModel{
         }
     }
 
-    protected Object getBaublesNMSInv(Player pPlayer){
-        Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer);
-        return MethodUtil.invokeStaticMethod(this.method_BaublesApi_getBaubles,tNMSPlayer);
+    protected Object getBaublesNMSInv(CPlayer pPlayer){
+        return MethodUtil.invokeStaticMethod(this.method_BaublesApi_getBaubles,pPlayer.getNMSPlayer());
     }
 
     protected void updateToAround(Object pNMSPlayer,Object pBaublesInv){

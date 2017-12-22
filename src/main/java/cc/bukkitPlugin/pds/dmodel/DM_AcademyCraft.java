@@ -13,13 +13,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-
 import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
 import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
+import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.bukkitPlugin.pds.util.PDSNBTUtil;
 import cc.commons.util.IOUtil;
 import cc.commons.util.reflect.ClassUtil;
@@ -103,11 +101,10 @@ public class DM_AcademyCraft extends DM_Minecraft{
     }
 
     @Override
-    public byte[] getData(Player pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
-        Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer);
+    public byte[] getData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
         HashMap<String,Object> tNBTTags=new HashMap<>();
         for(SubM sSubM : this.mDataModels){
-            Object tModelInstance=MethodUtil.invokeStaticMethod(sSubM.mInstnceMethod,tNMSPlayer);
+            Object tModelInstance=MethodUtil.invokeStaticMethod(sSubM.mInstnceMethod,pPlayer.getNMSPlayer());
             if(tModelInstance==null) continue;
 
             Object tNBT=NBTUtil.newNBTTagCompound();
@@ -119,7 +116,7 @@ public class DM_AcademyCraft extends DM_Minecraft{
     }
 
     @Override
-    public void restore(Player pPlayer,byte[] pData) throws Exception{
+    public void restore(CPlayer pPlayer,byte[] pData) throws Exception{
         HashMap<String,Object> tNBTs=new HashMap<>();
         if(pData.length>0){
             ByteArrayInputStream tBAIStream=new ByteArrayInputStream(pData);
@@ -136,9 +133,8 @@ public class DM_AcademyCraft extends DM_Minecraft{
             }
         }
 
-        Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer);
         for(SubM sSubM : this.mDataModels){
-            Object tModelInstance=MethodUtil.invokeStaticMethod(sSubM.mInstnceMethod,tNMSPlayer);
+            Object tModelInstance=MethodUtil.invokeStaticMethod(sSubM.mInstnceMethod,pPlayer.getNMSPlayer());
             if(tModelInstance==null) continue;
 
             Object tNBT=tNBTs.get(sSubM.mModelClazzStr);
@@ -154,7 +150,7 @@ public class DM_AcademyCraft extends DM_Minecraft{
     }
 
     @Override
-    public byte[] loadFileData(OfflinePlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException{
+    public byte[] loadFileData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException{
         byte[] tData=pLoadedData.get(DM_Minecraft.ID.toLowerCase());
         if(tData==null) tData=super.loadFileData(pPlayer,pLoadedData);
 
@@ -174,8 +170,8 @@ public class DM_AcademyCraft extends DM_Minecraft{
     }
 
     @Override
-    public void cleanData(Player pPlayer){
-        Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer);
+    public void cleanData(CPlayer pPlayer){
+        Object tNMSPlayer=pPlayer.getNMSPlayer();
         for(SubM sSubM : this.mDataModels){
             Object tModelInstance=MethodUtil.invokeStaticMethod(sSubM.mInstnceMethod,tNMSPlayer);
             if(tModelInstance==null) continue;

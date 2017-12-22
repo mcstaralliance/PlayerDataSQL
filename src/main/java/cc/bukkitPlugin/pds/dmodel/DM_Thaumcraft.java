@@ -8,13 +8,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-
 import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
 import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
+import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.bukkitPlugin.pds.util.PDSNBTUtil;
 import cc.commons.util.FileUtil;
 import cc.commons.util.reflect.ClassUtil;
@@ -100,9 +98,9 @@ public class DM_Thaumcraft extends ADataModel{
     }
 
     @Override
-    public byte[] getData(Player pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
+    public byte[] getData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
         Object tNBTTagCompound=NBTUtil.newNBTTagCompound();
-        Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer);
+        Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer.getPlayer());
 
         MethodUtil.invokeStaticMethod(this.method_ResearchManager_saveAspectNBT,tNBTTagCompound,tNMSPlayer);
         MethodUtil.invokeStaticMethod(this.method_ResearchManager_saveResearchNBT,tNBTTagCompound,tNMSPlayer);
@@ -119,10 +117,10 @@ public class DM_Thaumcraft extends ADataModel{
     }
 
     @Override
-    public void restore(Player pPlayer,byte[] pData) throws Exception{
+    public void restore(CPlayer pPlayer,byte[] pData) throws Exception{
         this.cleanData(pPlayer);
         Object tNBT=PDSNBTUtil.decompressNBT(pData);
-        Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer);
+        Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer.getPlayer());
 
         if(pData.length==0){
             Log.debug("Init tc aspect for "+pPlayer.getName());
@@ -161,9 +159,9 @@ public class DM_Thaumcraft extends ADataModel{
     }
 
     @Override
-    public void cleanData(Player pPlayer){
+    public void cleanData(CPlayer pPlayer){
         Thaumcraft.proxy.getPlayerKnowledge().wipePlayerKnowledge(pPlayer.getName());
-        Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer);
+        Object tNMSPlayer=NMSUtil.getNMSPlayer(pPlayer.getPlayer());
 
         // 完成自动解锁的研究
         ResearchManager tMan=Thaumcraft.proxy.getResearchManager();
@@ -179,7 +177,7 @@ public class DM_Thaumcraft extends ADataModel{
     }
 
     @Override
-    public byte[] loadFileData(OfflinePlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException{
+    public byte[] loadFileData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException{
         File tDataFile=this.getUUIDOrNameFile(pPlayer,this.mPlayerDataDir,"%name%.thaum");
         if(!tDataFile.isFile()) return new byte[0];
 

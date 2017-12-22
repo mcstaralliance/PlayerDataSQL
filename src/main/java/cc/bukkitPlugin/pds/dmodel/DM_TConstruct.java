@@ -4,6 +4,7 @@ import java.util.Map;
 
 import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
+import cc.bukkitPlugin.pds.util.CPlayer;
 
 public class DM_TConstruct extends ADM_InVanilla{
 
@@ -44,6 +45,6 @@ public class DM_TConstruct extends ADM_InVanilla{
     }
 
     @Override
-    protected void updateToAround(Object pNMSPlayer,Object pExProp){}
+    protected void updateToAround(CPlayer pPlayer,Object pExProp){}
 
 }

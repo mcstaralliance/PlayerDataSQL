@@ -3,7 +3,7 @@ package cc.bukkitPlugin.pds.dmodel;
 import java.lang.reflect.Method;
 
 import cc.bukkitPlugin.pds.PlayerDataSQL;
-import cc.commons.util.reflect.ClassUtil;
+import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.util.reflect.MethodUtil;
 
 public class DM_ShinColle extends ADM_InVanilla{
@@ -37,12 +37,7 @@ public class DM_ShinColle extends ADM_InVanilla{
     }
 
     @Override
-    public Object newExProp(Object pNMSPlayer,Object pNMSWorld){
-        return ClassUtil.newInstance(this.mExPropClazz);
-    }
-
-    @Override
-    protected void updateToAround(Object pNMSPlayer,Object pExProp){
+    protected void updateToAround(CPlayer pPlayer,Object pExProp){
         MethodUtil.invokeMethod(this.method_ExtendPlayerProps_syncShips,pExProp);
     }
 
