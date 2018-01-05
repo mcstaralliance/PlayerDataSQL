@@ -45,6 +45,7 @@ public class DM_Thaumcraft extends ADataModel{
     private Method method_SimpleNetworkWrapper_sendTo;
 
     private List<Class<?>> mSyncPackets=new ArrayList<>();
+    private Class<?> clazz_PacketSyncWarp;
 
     private Boolean mInit=null;
 
@@ -90,6 +91,7 @@ public class DM_Thaumcraft extends ADataModel{
             }catch(ClassNotFoundException ignore){
             }
         }
+        this.clazz_PacketSyncWarp=Class.forName(tPackage+"PacketSyncWarp");
 
         tClazz=Class.forName("cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper");
         this.method_SimpleNetworkWrapper_sendTo=MethodUtil.getMethodIgnoreParam(tClazz,"sendTo",true).get(0);
@@ -154,6 +156,13 @@ public class DM_Thaumcraft extends ADataModel{
         // 同步到客户端
         for(Class<?> sClazz : this.mSyncPackets){
             IMessage tMsg=(IMessage)ClassUtil.newInstance(sClazz,NMSUtil.clazz_EntityPlayer,tNMSPlayer);
+            MethodUtil.invokeMethod(method_SimpleNetworkWrapper_sendTo,PacketHandler.INSTANCE,tMsg,tNMSPlayer);
+        }
+
+        for(byte i=0;i<3;i++){
+            IMessage tMsg=(IMessage)ClassUtil.newInstance(this.clazz_PacketSyncWarp,
+                    new Class<?>[]{NMSUtil.clazz_EntityPlayer,byte.class},
+                    new Object[]{tNMSPlayer,i});
             MethodUtil.invokeMethod(method_SimpleNetworkWrapper_sendTo,PacketHandler.INSTANCE,tMsg,tNMSPlayer);
         }
     }
