@@ -25,6 +25,7 @@ import cc.bukkitPlugin.pds.manager.LangManager;
 import cc.bukkitPlugin.pds.storage.IStorage;
 import cc.bukkitPlugin.pds.storage.MySQL;
 import cc.bukkitPlugin.pds.user.UserManager;
+import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.util.reflect.ClassUtil;
 
 public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
@@ -35,7 +36,7 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
      * @param pPlayer
      *            玩家名字
      */
-    public static void kickPlayerOnError(String pPlayer){
+    public static void kickPlayerOnError(CPlayer pPlayer){
         if(Bukkit.isPrimaryThread()){
             PlayerDataSQL.kickPlayerOnError0(pPlayer);
         }else{
@@ -43,11 +44,9 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
         }
     }
 
-    private static void kickPlayerOnError0(String pPlayer){
-        Player tPlayer=Bukkit.getPlayerExact(pPlayer);
-        PlayerDataSQL tPlugin=PlayerDataSQL.getInstance();
-        if(tPlayer!=null){
-            tPlayer.getPlayer().kickPlayer(tPlugin.C("MsgDataExpection"));
+    private static void kickPlayerOnError0(CPlayer pPlayer){
+        if(!pPlayer.isOnline()){
+            pPlayer.getPlayer().kickPlayer(PlayerDataSQL.getInstance().C("MsgDataExpection"));
         }
     }
 
@@ -87,7 +86,7 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
         PDSAPI.checkModels(true); // 先加载配置,再决定启用哪些配置
 
         for(Player sPlayer : BukkitUtil.getOnlinePlayers()){
-            this.mUserMan.createSaveTask(sPlayer.getName());
+            this.mUserMan.createSaveTask(new CPlayer(sPlayer));
         }
     }
 
@@ -107,7 +106,7 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
     @Override
     public void onDisable(){
         for(Player sPlayer : BukkitUtil.getOnlinePlayers()){
-            this.mUserMan.saveUser(sPlayer,false);
+            this.mUserMan.saveUser(new CPlayer(sPlayer),false);
         }
         super.onDisable();
     }

@@ -11,6 +11,7 @@ import cc.bukkitPlugin.commons.plugin.command.TACommandBase;
 import cc.bukkitPlugin.commons.util.BukkitUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.user.UserManager;
+import cc.bukkitPlugin.pds.util.CPlayer;
 
 public class CommandCopy extends TACommandBase<PlayerDataSQL,CommandExc>{
 
@@ -46,7 +47,7 @@ public class CommandCopy extends TACommandBase<PlayerDataSQL,CommandExc>{
 
         GameMode tMode=tCopyFor.getGameMode();
         UserManager tUserMan=this.mPlugin.getUserManager();
-        tUserMan.restoreUser(tUserMan.getUserData(tCopyFrom,false,pSender),tCopyFor.getName(),pSender);
+        tUserMan.restoreUser(new CPlayer(tCopyFor.getName()),tUserMan.getUserData(new CPlayer(tCopyFrom),false,pSender),pSender);
         tCopyFor.setGameMode(tMode);
 
         return send(pSender,C("MsgCopyDataForPlayer",

@@ -23,6 +23,7 @@ import cc.bukkitPlugin.commons.plugin.manager.AManager;
 import cc.bukkitPlugin.commons.plugin.manager.fileManager.IConfigModel;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.user.User;
+import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.commentedyaml.CommentedSection;
 import cc.commons.commentedyaml.CommentedYamlConfig;
 import cc.commons.util.IOUtil;
@@ -207,14 +208,14 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
     }
 
     @Override
-    public User get(String pPlayer) throws SQLException{
+    public User get(CPlayer pPlayer) throws SQLException{
         ResultSet tResult=null;
         User tUser=null;
         this.mLock.lock();
 
         try{
             PreparedStatement tStatement=this.getOrCreate(this.getConn(),"SELECT * FROM "+this.mTableName+" WHERE "+User.COL_NAME+"=? LIMIT 1");
-            tStatement.setString(1,pPlayer);
+            tStatement.setString(1,pPlayer.getUUIDOrName());
             tResult=tStatement.executeQuery();
             if(tResult.first()){
                 tUser=new User(pPlayer);
@@ -224,7 +225,7 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
         }finally{
             try{
                 IOUtil.closeStream(tResult);
-                Log.developInfo("Read user "+pPlayer+" at time "+System.nanoTime()+",hasdata="+(tUser!=null));
+                Log.developInfo("Read user "+pPlayer.getName()+" at time "+System.nanoTime()+",hasdata="+(tUser!=null));
             }finally{
                 this.mLock.unlock();
             }
@@ -247,9 +248,8 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
             tResult=tStatement.executeQuery();
 
             while (tResult.next()){
-                User tUser=null;
-                tUser=new User(tResult.getString(User.COL_NAME));
-                if(tOnlinePlayers.contains(tUser.getName())){
+                User tUser=new User(CPlayer.fromNameOrUUID(tResult.getString(User.COL_NAME)));
+                if(tOnlinePlayers.contains(tUser.getOwnerName().toLowerCase())){
                     continue;
                 }
                 tUser.mLocked=tResult.getBoolean(User.COL_LOCK);
@@ -267,24 +267,24 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
         return tUsers;
     }
     @Override
-    public boolean update(User pUser) throws SQLException{
+    public boolean update(CPlayer pPlayer,User pUser) throws SQLException{
         this.mLock.lock();
         try{
             PreparedStatement tStatement=this.getOrCreate(this.getConn(),"REPLACE INTO "
                     +this.mTableName+" ("+User.COL_NAME+","+User.COL_LOCK+","+User.COL_DATA+") "
                     +"VALUES (?,?,?)");
-            tStatement.setString(1,pUser.getName());
+            tStatement.setString(1,pPlayer.getUUIDOrName());
             tStatement.setBoolean(2,pUser.isLocked());
             tStatement.setBytes(3,pUser.getData());
             return tStatement.executeUpdate()!=0;
         }finally{
             this.mLock.unlock();
-            Log.developInfo("Update user "+pUser.getName()+" at time "+System.nanoTime());
+            Log.developInfo("Update user "+pUser.getOwnerName()+" at time "+System.nanoTime());
         }
     }
 
     @Override
-    public boolean update(String pPlayer,String[] pCols,Object...pValues) throws SQLException{
+    public boolean update(CPlayer pPlayer,String[] pCols,Object...pValues) throws SQLException{
         ValidData.valid(pCols.length!=0&&pCols.length==pValues.length,"SQL 参数错误,参数数量为0或不相等");
 
         StringBuilder tSBuilder=new StringBuilder();
@@ -298,7 +298,7 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
         this.mLock.lock();
         try{
             PreparedStatement tStatement=this.getOrCreate(this.getConn(),tSBuilder.toString());
-            tStatement.setString(pCols.length+1,pPlayer);
+            tStatement.setString(pCols.length+1,pPlayer.getUUIDOrName());
 
             for(int i=0;i<pCols.length;i++){
                 tStatement.setObject(i+1,pValues[i]);

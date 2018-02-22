@@ -11,6 +11,7 @@ public class ConfigManager extends TConfigManager<PlayerDataSQL>{
     public int mSyncDelay=20;
     public boolean mKickOnReadSQLError=true;
     public boolean mNoRestoreIfSQLDataNotExist=true;
+    public boolean mUUIDMode=false;
 
     public ConfigManager(PlayerDataSQL pPlugin){
         super(pPlugin,"1.0");
@@ -41,6 +42,7 @@ public class ConfigManager extends TConfigManager<PlayerDataSQL>{
         this.mSyncDelay=this.mConfig.getInt("Plugin.SyncDelay",this.mSyncDelay);
         this.mKickOnReadSQLError=this.mConfig.getBoolean("Plugin.KickOnReadSQLError",this.mKickOnReadSQLError);
         this.mNoRestoreIfSQLDataNotExist=this.mConfig.getBoolean("Plugin.NoRestoreIfSQLDataNotExist",this.mNoRestoreIfSQLDataNotExist);
+        this.mUUIDMode=this.mConfig.getBoolean("Plugin.UseUUID",this.mUUIDMode);
 
         this.reloadModles(pSender);
         Log.info(pSender,C("MsgConfigReloaded"));

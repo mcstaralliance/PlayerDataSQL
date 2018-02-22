@@ -21,6 +21,7 @@ import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.commons.plugin.command.TACommandBase;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.user.User;
+import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.bukkitPlugin.pds.util.PDSNBTUtil;
 
 /**
@@ -56,10 +57,10 @@ public class CommandRunscript extends TACommandBase<PlayerDataSQL,CommandExc>{
         try{
             jsInvoke.invokeFunction("run",pUser);
         }catch(ScriptException|NoSuchMethodException e){
-            send(pSender,C("MsgErrorOnRunScriptControlPlayer",new String[]{"%player%","%script_name%"},pUser.getName(),pScriptName)+": "+e.getLocalizedMessage());
+            send(pSender,C("MsgErrorOnRunScriptControlPlayer",new String[]{"%player%","%script_name%"},pUser.getOwnerName(),pScriptName)+": "+e.getLocalizedMessage());
         }
-        if(Bukkit.getPlayerExact(pUser.getName())!=null){
-            mPlugin.getUserManager().restoreUser(pUser,pUser.getName());
+        if(Bukkit.getPlayerExact(pUser.getOwnerName())!=null){
+            mPlugin.getUserManager().restoreUser(pUser);
         }
         mPlugin.getUserManager().saveUser(pUser,pUser.mLocked);
     }
@@ -97,7 +98,7 @@ public class CommandRunscript extends TACommandBase<PlayerDataSQL,CommandExc>{
                 }
             }else{
                 try{
-                    User u=mPlugin.getStorage().get(pArgs[1]);
+                    User u=mPlugin.getStorage().get(new CPlayer(pArgs[1]));
                     if(u!=null){
                         control(pSender,u,pArgs[0],tJs_engine);
                         send(pSender,C("MsgRunScriptSuccess",new String[]{"%script_name%","%pcount%"},pArgs[0],1));

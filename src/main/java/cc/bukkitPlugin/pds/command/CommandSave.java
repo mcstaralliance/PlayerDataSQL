@@ -13,6 +13,7 @@ import cc.bukkitPlugin.commons.util.BukkitUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.user.User;
 import cc.bukkitPlugin.pds.user.UserManager;
+import cc.bukkitPlugin.pds.util.CPlayer;
 
 public class CommandSave extends TACommandBase<PlayerDataSQL,CommandExc>{
 
@@ -48,11 +49,11 @@ public class CommandSave extends TACommandBase<PlayerDataSQL,CommandExc>{
             return send(pSender,C("MsgPlayerNotExist","%player%",pArgs[tSaveToIndex]));
 
         UserManager tUserMan=this.mPlugin.getUserManager();
-        User tUserData=tUserMan.getUserData(tSaveFrom,false);
+        User tUserData=tUserMan.getUserData(new CPlayer(tSaveFrom),false);
         Bukkit.getScheduler().runTaskAsynchronously(this.mPlugin,()->{
             User tOldData=null;
             try{
-                tOldData=tUserMan.loadUser(tSaveTo.getName());
+                tOldData=tUserMan.loadUser(new CPlayer(tSaveTo));
             }catch(SQLException e){
                 send(pSender,C("MsgErrorOnLoadSQLData","%player%",tSaveTo.getName())+": "+e.getLocalizedMessage());
                 return;

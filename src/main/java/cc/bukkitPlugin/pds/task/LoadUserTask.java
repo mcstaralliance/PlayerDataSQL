@@ -8,6 +8,7 @@ import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.user.User;
 import cc.bukkitPlugin.pds.user.UserManager;
+import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.util.ToolKit;
 
 /**
@@ -17,6 +18,7 @@ public class LoadUserTask implements Runnable{
 
     private final int RETRY_COUNT=5;
 
+    private final CPlayer mPlayer;
     private final String mName;
     private UserManager mUserMan;
 
@@ -27,11 +29,16 @@ public class LoadUserTask implements Runnable{
     private int mInterval;
 
     public LoadUserTask(Player pForPlayer,UserManager pUserMan){
-        this(pForPlayer==null?null:pForPlayer.getName(),pUserMan);
+        this(new CPlayer(pForPlayer),pUserMan);
     }
 
     public LoadUserTask(String pForPlayer,UserManager pUserMan){
-        this.mName=pForPlayer;
+        this(new CPlayer(pForPlayer),pUserMan);
+    }
+
+    public LoadUserTask(CPlayer pForPlayer,UserManager pUserMan){
+        this.mPlayer=pForPlayer;
+        this.mName=pForPlayer.getName();
 
         this.mUserMan=pUserMan;
         this.mPlugin=pUserMan.getPlugin();
@@ -40,9 +47,9 @@ public class LoadUserTask implements Runnable{
 
     @Override
     public void run(){
-        if(this.mName==null) return;
+        if(!this.mPlayer.isValid()) return;
 
-        while(this.mUserMan.isLocked(this.mName)){
+        while(this.mUserMan.isLocked(this.mPlayer.getName())){
             try{
                 Thread.sleep(this.mInterval);
             }catch(InterruptedException exp){
@@ -52,7 +59,7 @@ public class LoadUserTask implements Runnable{
 
             User tUser=null;
             try{
-                tUser=this.mUserMan.loadUser(this.mName);
+                tUser=this.mUserMan.loadUser(this.mPlayer);
             }catch(SQLException exp){
                 this.handleExcetion(exp);
                 if(this.mDone) return;
@@ -87,7 +94,7 @@ public class LoadUserTask implements Runnable{
 
     protected void handleExcetion(Throwable pExp){
         if(this.mPlugin.getConfigManager().mKickOnReadSQLError){
-            PlayerDataSQL.kickPlayerOnError(this.mName);
+            PlayerDataSQL.kickPlayerOnError(this.mPlayer);
             this.mDone=true;
             return;
         }
@@ -101,18 +108,18 @@ public class LoadUserTask implements Runnable{
         boolean tNoRestore=this.mPlugin.getConfigManager().mNoRestoreIfSQLDataNotExist;
         if(pUser==null&&(pException||!tNoRestore)){
             Log.debug("Use blank data restore for player "+this.mName);
-            pUser=new User(this.mName);
+            pUser=new User(this.mPlayer);
         }
 
         if(pUser!=null){
-            this.mUserMan.restoreUser(pUser,this.mName);
+            this.mUserMan.restoreUser(this.mPlayer,pUser);
         }else{
             Log.debug("duce setting NoRestoreIfSQLDataNotExist=true,plugin skip load user data");
         }
 
         if(this.mUserMan.isLocked(this.mName)){ //skip fo player quit
             this.mUserMan.unlockUser(this.mName,false);
-            this.mUserMan.createSaveTask(this.mName);
+            this.mUserMan.createSaveTask(this.mPlayer);
         }
     }
 

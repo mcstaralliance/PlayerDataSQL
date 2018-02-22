@@ -12,6 +12,7 @@ import java.util.zip.GZIPOutputStream;
 
 import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
+import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.util.ByteUtil;
 import cc.commons.util.IOUtil;
 
@@ -22,7 +23,7 @@ public class User{
     public static final String COL_DATA="data";
 
     /** 标识,玩家名字 */
-    private String mName;
+    private CPlayer mPlayer;
     /** 数据是否被锁定 */
     public boolean mLocked;
     /** 数据,key请保证小写 */
@@ -30,12 +31,20 @@ public class User{
     /** {@link #mData}的数据序列化缓存 */
     private transient byte[] mDataCache=null;
 
+    public User(CPlayer pPlayer){
+        this.mPlayer=pPlayer;
+    }
+
     public User(String pPlayer){
         this.setPlayer(pPlayer);
     }
 
     public void setPlayer(String pPlayer){
-        this.mName=pPlayer;
+        this.mPlayer=new CPlayer(pPlayer);
+    }
+    
+    public CPlayer getOwner(){
+        return this.mPlayer;
     }
 
     public byte[] getData(){
@@ -89,7 +98,7 @@ public class User{
         }catch(IOException exp){
             Log.severe("从SQL反序列化数据时发生错误",exp);
             if(PlayerDataSQL.getInstance().getConfigManager().mKickOnReadSQLError){
-                PlayerDataSQL.kickPlayerOnError(this.mName);
+                PlayerDataSQL.kickPlayerOnError(this.getOwner());
             }
         }finally{
             IOUtil.closeStream(tDIStream);
@@ -110,12 +119,12 @@ public class User{
         return this.mData;
     }
 
-    public String getName(){
-        return this.mName;
-    }
-
     public boolean isLocked(){
         return this.mLocked;
+    }
+    
+    public String getOwnerName(){
+        return this.mPlayer.getName();
     }
 
 }

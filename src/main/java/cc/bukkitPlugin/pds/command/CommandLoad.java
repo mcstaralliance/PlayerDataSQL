@@ -14,6 +14,7 @@ import cc.bukkitPlugin.commons.util.BukkitUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.user.User;
 import cc.bukkitPlugin.pds.user.UserManager;
+import cc.bukkitPlugin.pds.util.CPlayer;
 
 public class CommandLoad extends TACommandBase<PlayerDataSQL,CommandExc>{
 
@@ -52,12 +53,12 @@ public class CommandLoad extends TACommandBase<PlayerDataSQL,CommandExc>{
             try{
                 UserManager tUserMan=this.mPlugin.getUserManager();
                 GameMode tMode=tLoadFor.getGameMode();
-                User tUser=tUserMan.loadUser(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID")?tLoadFrom.getUniqueId().toString():mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID")?tLoadFrom.getUniqueId().toString():tLoadFrom.getName());
+                User tUser=tUserMan.loadUser(new CPlayer(tLoadFrom));
                 if(tUser==null){
                     send(pSender,C("MsgPlayerDataNotExist","%player%",pArgs[0]));
                     return;
                 }
-                tUserMan.restoreUser(tUserMan.loadUser(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID")?tLoadFrom.getUniqueId().toString():tLoadFrom.getName()),tLoadFor.getName(),pSender);
+                tUserMan.restoreUser(new CPlayer(tLoadFor),tUser,pSender);
                 tLoadFor.setGameMode(tMode);
             }catch(SQLException e){
                 send(pSender,C("MsgErrorOnLoadSQLData","%player%",tLoadFrom.getName())+": "+e.getLocalizedMessage());

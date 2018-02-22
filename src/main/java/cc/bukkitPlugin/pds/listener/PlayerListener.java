@@ -15,6 +15,7 @@ import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.task.LoadUserTask;
 import cc.bukkitPlugin.pds.user.User;
 import cc.bukkitPlugin.pds.user.UserManager;
+import cc.bukkitPlugin.pds.util.CPlayer;
 
 public class PlayerListener extends AListener<PlayerDataSQL>{
 
@@ -47,7 +48,7 @@ public class PlayerListener extends AListener<PlayerDataSQL>{
         Log.debug("Handle player quit");
         if(this.mUserMan.isNotLocked(tPlayer)){
             this.mUserMan.cancelSaveTask(tPlayer);
-            User tUser=this.mUserMan.getUserData(pEvent.getPlayer(),true);
+            User tUser=this.mUserMan.getUserData(new CPlayer(pEvent.getPlayer()),true);
             Bukkit.getScheduler().runTaskAsynchronously(this.mPlugin,()->{
                 int i=3;
                 do{
