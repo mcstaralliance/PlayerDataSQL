@@ -14,7 +14,7 @@ import cc.bukkitPlugin.pds.PlayerDataSQL;
 public class CPlayer{
 
     public static final String INVALID_NAME="InvalidUsername";
-    public static final UUID INVALID_UUID=UUID.nameUUIDFromBytes(INVALID_NAME.getBytes(Charset.forName("UTF_8")));
+    public static final UUID INVALID_UUID=UUID.nameUUIDFromBytes(INVALID_NAME.getBytes(Charset.forName("UTF-8")));
 
     public static CPlayer fromNameOrUUID(String pUUIDOrName){
         try{
