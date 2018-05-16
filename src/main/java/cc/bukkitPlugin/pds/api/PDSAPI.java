@@ -16,7 +16,7 @@ import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.plugin.manager.fileManager.IConfigModel;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.api.event.CallDataModelRegisterEvent;
-import cc.bukkitPlugin.pds.dmodel.IModelConfig;
+import cc.bukkitPlugin.pds.dmodel.IConfigedModel;
 import cc.commons.commentedyaml.CommentedSection;
 import cc.commons.commentedyaml.CommentedYamlConfig;
 import cc.commons.util.StringUtil;
@@ -83,7 +83,7 @@ public class PDSAPI implements Listener,IConfigModel{
                 try{
                     if(sModel.getPlugin().isEnabled()&&sModel.init()&&PDSAPI.mEnabledModelsStr.contains(sModel.getModelId().toLowerCase())){
                         PDSAPI.mEnabledModels.add(sModel);
-                        if(pNotify&&(!(sModel instanceof IModelConfig)||((IModelConfig)sModel).doNotify())){
+                        if(pNotify&&(!(sModel instanceof IConfigedModel)||((IConfigedModel)sModel).doNotify())){
                             Log.info("成功启用数据模块: "+sModel.getDesc());
                         }
                     }

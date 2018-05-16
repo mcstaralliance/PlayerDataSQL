@@ -1,6 +1,6 @@
 package cc.bukkitPlugin.pds.dmodel;
 
-public interface IModelConfig{
+public interface IConfigedModel{
 
     default boolean doNotify(){
         return false;
