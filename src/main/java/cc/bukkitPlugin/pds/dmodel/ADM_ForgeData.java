@@ -79,11 +79,6 @@ public abstract class ADM_ForgeData extends ADataModel{
         this.correctNBTData(tNBT);
     }
 
-    @Override
-    protected boolean initOnce() throws Exception{
-        return true;
-    }
-
     /**
      * 修正mod数据的NBT值,防止还原数据的时候报错
      * 
