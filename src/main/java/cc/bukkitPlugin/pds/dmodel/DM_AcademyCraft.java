@@ -22,6 +22,7 @@ import cc.bukkitPlugin.pds.util.PDSNBTUtil;
 import cc.commons.util.IOUtil;
 import cc.commons.util.reflect.ClassUtil;
 import cc.commons.util.reflect.MethodUtil;
+import cc.commons.util.reflect.filter.MethodFilter;
 
 public class DM_AcademyCraft extends DM_Minecraft{
 
@@ -36,7 +37,7 @@ public class DM_AcademyCraft extends DM_Minecraft{
         public SubM(Class<?> pModelClazz){
             this.mModelClazz=pModelClazz;
             this.mModelClazzStr=pModelClazz.getName();
-            this.mInstnceMethod=MethodUtil.getUnknowMethod(pModelClazz,pModelClazz,NMSUtil.clazz_EntityPlayer,true).get(0);
+            this.mInstnceMethod=MethodUtil.getDeclaredMethod(pModelClazz,MethodFilter.rpt(pModelClazz,NMSUtil.clazz_EntityPlayer)).first();
             if(!Modifier.isStatic(this.mInstnceMethod.getModifiers())){
                 throw new IllegalStateException();
             }

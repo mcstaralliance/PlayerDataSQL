@@ -14,6 +14,7 @@ import cc.bukkitPlugin.pds.util.PDSNBTUtil;
 import cc.commons.util.reflect.ClassUtil;
 import cc.commons.util.reflect.FieldUtil;
 import cc.commons.util.reflect.MethodUtil;
+import cc.commons.util.reflect.filter.FieldFilter;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import travellersgear.api.TGSaveData;
 import travellersgear.api.TravellersGearAPI;
@@ -69,7 +70,7 @@ public class DM_TravellersGear extends ADataModel{
                 new Class<?>[]{NMSUtil.clazz_EntityPlayer,NBTUtil.clazz_NBTTagCompound},
                 true);
 
-        this.mTGSDInstance=(TGSaveData)FieldUtil.getStaticFieldValue(FieldUtil.getField(TGSaveData.class,TGSaveData.class,-1,true).get(0));
+        this.mTGSDInstance=(TGSaveData)FieldUtil.getStaticFieldValue(FieldUtil.getDeclaredField(TGSaveData.class,FieldFilter.t(TGSaveData.class)).oneGet());
         this.mTGSDMap=(HashMap<UUID,Object>)FieldUtil.getFieldValue(TGSaveData.class,"playerData",true,this.mTGSDInstance);
 
         return true;

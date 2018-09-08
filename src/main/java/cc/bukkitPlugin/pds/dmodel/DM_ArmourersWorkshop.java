@@ -13,8 +13,16 @@ public class DM_ArmourersWorkshop extends ADM_InVanilla{
     protected Method method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround;
     protected Method method_ExPropsPlayerEquipmentData_sendSkinData;
 
+    private static String getExpClass(){
+        try{
+            return Class.forName("riskyken.armourersWorkshop.common.skin.ExPropsPlayerEquipmentData").getName();
+        }catch(ClassNotFoundException e){
+            return "riskyken.armourersWorkshop.common.skin.ExPropsPlayerSkinData";
+        }
+    }
+    
     public DM_ArmourersWorkshop(PlayerDataSQL pPlugin){
-        super(pPlugin,"riskyken.armourersWorkshop.common.skin.ExPropsPlayerEquipmentData",EXT_PROP_NAME);
+        super(pPlugin,getExpClass(),EXT_PROP_NAME);
     }
 
     public DM_ArmourersWorkshop(PlayerDataSQL pPlugin,String pExPropClass,String pExPropName){

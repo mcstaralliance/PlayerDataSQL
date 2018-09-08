@@ -56,10 +56,9 @@ public abstract class ADM_ForgeData extends ADataModel{
 
         Object tNBT=this.getEntityData(pPlayer);
         Map<String,Object> tNBTValue=NBTUtil.getNBTTagCompoundValue(tNBT);
-        Map<String,Object> tRestoreNBTValue=NBTUtil.getNBTTagCompoundValue(PDSNBTUtil.decompressNBT(pData));
+        Map<String,Object> tRestoreNBTValue=NBTUtil.getNBTTagCompoundValue(this.correctNBTData(PDSNBTUtil.decompressNBT(pData)));
 
         tNBTValue.putAll(tRestoreNBTValue);
-        this.correctNBTData(tNBT);
         this.updateToAround(pPlayer);
     }
 

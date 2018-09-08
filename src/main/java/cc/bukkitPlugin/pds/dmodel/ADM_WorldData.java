@@ -13,6 +13,7 @@ import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.bukkitPlugin.pds.util.PDSNBTUtil;
 import cc.commons.util.reflect.ClassUtil;
 import cc.commons.util.reflect.MethodUtil;
+import cc.commons.util.reflect.filter.MethodFilter;
 
 public abstract class ADM_WorldData extends ADataModel{
 
@@ -34,16 +35,17 @@ public abstract class ADM_WorldData extends ADataModel{
             try{
                 Class<?> tClazz=ClassUtil.getClass(tClazzName);
                 Object tNMSWorld=NMSUtil.getNMSWorld(Bukkit.getWorlds().get(0));
-                method_World_loadItemData=MethodUtil.getUnknowMethod(tNMSWorld.getClass(),
-                        tClazz,new Class<?>[]{Class.class,String.class},true).get(0);
-                method_World_setItemData=MethodUtil.getUnknowMethod(tNMSWorld.getClass(),
-                        void.class,new Class<?>[]{String.class,tClazz},true).get(0);
+                method_World_loadItemData=MethodUtil.getDeclaredMethod(tNMSWorld.getClass(),
+                        MethodFilter.rpt(tClazz,Class.class,String.class)).first();
+                method_World_setItemData=MethodUtil.getDeclaredMethod(tNMSWorld.getClass(),
+                        MethodFilter.rpt(void.class,String.class,tClazz)).first();
 
-                method_WorldSaeData_readFromNBT=MethodUtil.getMethodIgnoreParam(tClazz,
-                        new String[]{"func_76184_a","readFromNBT"},true).get(0);
-                method_WorldSaeData_readFromNBT=MethodUtil.getMethodIgnoreParam(tClazz,
-                        new String[]{"func_76187_b","writeToNBT"},true).get(0);
-                method_WorldSaeData_setDirty=MethodUtil.getUnknowMethod(tClazz,void.class,boolean.class,true).get(0);
+                method_WorldSaeData_readFromNBT=MethodUtil.getDeclaredMethod(tClazz,
+                        MethodFilter.pn("func_76184_a","readFromNBT")).first();
+                method_WorldSaeData_readFromNBT=MethodUtil.getDeclaredMethod(tClazz,
+                        MethodFilter.pn("func_76187_b","writeToNBT")).first();
+                method_WorldSaeData_setDirty=MethodUtil.getDeclaredMethod(tClazz,
+                        MethodFilter.rpt(void.class,boolean.class)).first();
             }catch(IllegalStateException ignore){
             }
         }
