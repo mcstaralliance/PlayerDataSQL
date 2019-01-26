@@ -1,4 +1,4 @@
-package cc.bukkitPlugin.pds.dmodel;
+package cc.bukkitPlugin.pds.dmodel.v1_7_10;
 
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 

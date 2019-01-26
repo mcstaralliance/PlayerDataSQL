@@ -82,7 +82,8 @@ public interface IDataModel{
      * 
      * @param pPlayer
      *            要清理数据的玩家
+     * @throws Exception 
      */
-    public void cleanData(CPlayer pPlayer);
+    public void cleanData(CPlayer pPlayer) throws Exception;
 
 }

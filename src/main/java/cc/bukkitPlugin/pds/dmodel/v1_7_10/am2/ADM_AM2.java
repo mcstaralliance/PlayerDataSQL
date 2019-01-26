@@ -1,9 +1,9 @@
-package cc.bukkitPlugin.pds.dmodel.am2;
+package cc.bukkitPlugin.pds.dmodel.v1_7_10.am2;
 
 import java.lang.reflect.Method;
 
 import cc.bukkitPlugin.pds.PlayerDataSQL;
-import cc.bukkitPlugin.pds.dmodel.ADM_InVanilla;
+import cc.bukkitPlugin.pds.dmodel.v1_7_10.ADM_InVanilla;
 import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.util.reflect.MethodUtil;
 

@@ -1,6 +1,8 @@
 package cc.bukkitPlugin.pds.dmodel;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Map;
 
 import org.bukkit.plugin.Plugin;
 
@@ -73,6 +75,11 @@ public abstract class ADataModel implements IDataModel{
             }
             return (this.mInitSuccess=false);
         }
+    }
+    
+    @Override
+    public byte[] loadFileData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws IOException {
+        throw new UnsupportedOperationException();
     }
 
     /**
