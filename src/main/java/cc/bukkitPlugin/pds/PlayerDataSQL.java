@@ -12,6 +12,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import cc.bukkitPlugin.commons.Log;
+import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
+import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.commons.plugin.ABukkitPlugin;
 import cc.bukkitPlugin.commons.util.BukkitUtil;
 import cc.bukkitPlugin.pds.api.PDSAPI;
@@ -60,6 +62,9 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
      * 调用操作请在reload函数中进行
      */
     public void onEnable(){
+        // 强制初始化工具类
+        NMSUtil.class.getName();
+        NBTUtil.class.getName();
         // 注册管理器
         this.setLangManager(new LangManager(this));
         this.registerManager(this.getLangManager());
