@@ -292,7 +292,10 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
             Map<String,byte[]> tDatas=pUser.getDataMap(false);
             for(IDataModel sModel : PDSAPI.getEnableModel()){
                 byte[] tData=tDatas.get(sModel.getModelId().toLowerCase());
-                if(tData==null) tData=new byte[0];
+                if(tData==null){
+                    if(this.mPlugin.getConfigManager().mNoRestoreIfSQLDataNotExist) continue;
+                    tData=new byte[0];
+                }
 
                 try{
                     sModel.restore(pPlayer,tData);
