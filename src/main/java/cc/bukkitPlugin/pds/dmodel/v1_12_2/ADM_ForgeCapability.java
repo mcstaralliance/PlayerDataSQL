@@ -39,11 +39,9 @@ public abstract class ADM_ForgeCapability extends ADataModel {
             Class tClazz;
             try {
                 tClazz = Class.forName(sPair.getKey());
-            } catch (IllegalStateException exp) {
-                if (exp.getCause() instanceof NoSuchFieldException) {
-                    Log.debug("no capability class found named \"" + sPair.getKey() + "\" at model " + this.getModelId());
-                }
-                continue;
+            } catch (NoClassDefFoundError exp) {
+                Log.debug("no capability class found named \"" + sPair.getKey() + "\" at model " + this.getModelId());
+                return false;
             }
             try {
                 this.mCapability.put(sPair.getKey() + "#" + sPair.getValue(), FieldUtil.getStaticFieldValue(tClazz, sPair.getKey()));
@@ -51,6 +49,7 @@ public abstract class ADM_ForgeCapability extends ADataModel {
                 if (exp.getCause() instanceof NoSuchFieldException) {
                     Log.debug("no field named \"" + sPair.getValue() + "\" for class " + sPair.getKey() + " at model " + this.getModelId());
                 }
+                return false;
             }
         }
         return true;
@@ -85,7 +84,7 @@ public abstract class ADM_ForgeCapability extends ADataModel {
             }
         } else {
             ByteArrayInputStream tBAIStream = new ByteArrayInputStream(pData);
-            DataInputStream tDIStream=new DataInputStream(tBAIStream);
+            DataInputStream tDIStream = new DataInputStream(tBAIStream);
             int tAmount = tDIStream.read();
             for (int i = 0; i < tAmount; i++) {
                 Object tCapability = this.mCapability.get(tDIStream.readUTF());
