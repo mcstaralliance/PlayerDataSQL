@@ -44,7 +44,7 @@ public abstract class ADM_ForgeCapability extends ADataModel {
                 return false;
             }
             try {
-                this.mCapability.put(sPair.getKey() + "#" + sPair.getValue(), FieldUtil.getStaticFieldValue(tClazz, sPair.getKey()));
+                this.mCapability.put(sPair.getKey() + "#" + sPair.getValue(), FieldUtil.getStaticFieldValue(tClazz, sPair.getValue()));
             } catch (IllegalStateException exp) {
                 if (exp.getCause() instanceof NoSuchFieldException) {
                     Log.debug("no field named \"" + sPair.getValue() + "\" for class " + sPair.getKey() + " at model " + this.getModelId());
