@@ -27,7 +27,7 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
     static{
         try{
             method_Entity_registerExtendedProperties=MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity,"registerExtendedProperties",true).get(0);
-            method_Entity_getExtendedProperties=MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity,"getExtendedProperties",true).get(0);
+            method_Entity_getExtendedProperties=MethodUtil.getMethod(NMSUtil.clazz_NMSEntity,"getExtendedProperties",String.class,true);
         }catch(IllegalStateException ignore){
         }
     }
