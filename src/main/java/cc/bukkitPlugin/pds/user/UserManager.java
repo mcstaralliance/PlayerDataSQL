@@ -105,7 +105,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
         try{
             return this.mPlugin.getStorage().get(pPlayer);
         }catch(SQLException exp){
-            Log.severe(this.mPlugin.C("MsgErrorOnLoadSQLData","player",pPlayer),exp);
+            Log.severe(this.mPlugin.C("MsgErrorOnLoadSQLData","%player%",pPlayer),exp);
             throw exp;
         }
     }
