@@ -35,18 +35,25 @@ public abstract class ADM_ForgeCapabilityProvider extends ADataModel {
 
         Class<?> tImp = Class.forName("net.minecraftforge.common.capabilities.ICapabilityProvider");
         for (String sName : mCapabilityPs_name) {
-            Class<?> tClazz = Class.forName(sName);
+            Class<?> tClazz;
+            try {
+                tClazz = Class.forName(sName);
+            } catch (ClassNotFoundException exp) {
+                Log.severe("模块 " + getModelId() + " 注册的CapabilityProvider " + sName + " 不存在");
+                continue;
+            }
+
             if (!tImp.isAssignableFrom(tClazz)) {
                 Log.severe("模块 " + getModelId() + " 注册了一个名为 " + sName + " 的非CapabilityProvider模块");
             } else this.mCapabilityPs.put(sName, tClazz);
         }
-        return true;
+        return !this.mCapabilityPs.isEmpty();
     }
 
     @Override
     public byte[] getData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws Exception {
         ByteArrayOutputStream tBAOStream = new ByteArrayOutputStream();
-        DataOutputStream tDOStream=new DataOutputStream(tBAOStream);
+        DataOutputStream tDOStream = new DataOutputStream(tBAOStream);
         tDOStream.write(this.mCapabilityPs.size());
         for (Map.Entry<String, Class<?>> sEntry : this.mCapabilityPs.entrySet()) {
             tDOStream.writeUTF(sEntry.getKey());
@@ -69,7 +76,7 @@ public abstract class ADM_ForgeCapabilityProvider extends ADataModel {
             }
         } else {
             ByteArrayInputStream tBAIStream = new ByteArrayInputStream(pData);
-            DataInputStream tDIStream=new DataInputStream(tBAIStream);
+            DataInputStream tDIStream = new DataInputStream(tBAIStream);
             int tAmount = tDIStream.read();
             for (int i = 0; i < tAmount; i++) {
                 String tProviderName = tDIStream.readUTF();
