@@ -15,6 +15,7 @@ import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
 import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.commons.plugin.ABukkitPlugin;
+import cc.bukkitPlugin.commons.plugin.manager.fileManager.IConfigModel;
 import cc.bukkitPlugin.commons.util.BukkitUtil;
 import cc.bukkitPlugin.pds.api.PDSAPI;
 import cc.bukkitPlugin.pds.api.event.CallDataModelRegisterEvent;
@@ -136,6 +137,11 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
             try{
                 ADataModel tModel=ClassUtil.newInstance((Class<? extends ADataModel>)tClass,PlayerDataSQL.class,this);
                 PDSAPI.registerModel(tModel);
+
+                if (IConfigModel.class.isAssignableFrom(tClass)) {
+                    this.getConfigManager().registerConfigModel((IConfigModel)tModel);
+                }
+
                 tRegisteredCount++;
             }catch(Throwable exp){
                 Log.severe("Error on auto register datamodel class: "+tClass.getName(),exp);
