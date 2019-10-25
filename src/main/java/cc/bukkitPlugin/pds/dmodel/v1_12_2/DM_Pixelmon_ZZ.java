@@ -10,8 +10,8 @@ import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.dmodel.ADataModel;
 import cc.bukkitPlugin.pds.util.CPlayer;
+import cc.bukkitPlugin.pds.util.CapabilityHelper;
 import cc.bukkitPlugin.pds.util.PDSNBTUtil;
-import cc.commons.util.reflect.ClassUtil;
 import cc.commons.util.reflect.FieldUtil;
 import cc.commons.util.reflect.MethodUtil;
 
@@ -39,7 +39,6 @@ public class DM_Pixelmon_ZZ extends ADataModel {
     /** static void TickHandler.registerStarterList(EntityPlayerMP) */
     private Method method_TickHandler_registerStarterList;
 
-    private Class<?> clazz_PlayerLoggedInEvent;
     private Method method_PixelmonPlayerTracker_onPlayerLogin;
 
     public DM_Pixelmon_ZZ(PlayerDataSQL pPlugin) {
@@ -122,7 +121,6 @@ public class DM_Pixelmon_ZZ extends ADataModel {
         method_PokemonStorage_writeToNBT = MethodUtil.getDeclaredMethod(tClazz, "writeToNBT", NBTUtil.clazz_NBTTagCompound);
         method_PokemonStorage_countAll = MethodUtil.getDeclaredMethod(tClazz, "countAll");
 
-        clazz_PlayerLoggedInEvent = Class.forName("net.minecraftforge.fml.common.gameevent.PlayerEvent$PlayerLoggedInEvent");
         method_PixelmonPlayerTracker_onPlayerLogin = MethodUtil.getMethodIgnoreParam(
                 Class.forName("com.pixelmonmod.pixelmon.listener.PixelmonPlayerTracker"),
                 "onPlayerLogin", true).oneGet();
@@ -140,8 +138,7 @@ public class DM_Pixelmon_ZZ extends ADataModel {
         MethodUtil.invokeMethod(method_IStorageManager_initializePCForPlayer, fieldValue_storageManager,
                 pPlayer.getNMSPlayer(), this.getPCStorage(pPlayer));
 
-        Object tEvent = ClassUtil.newInstance(clazz_PlayerLoggedInEvent, NMSUtil.clazz_EntityPlayer, pPlayer.getNMSPlayer());
-        MethodUtil.invokeStaticMethod(method_PixelmonPlayerTracker_onPlayerLogin, tEvent);
+        MethodUtil.invokeStaticMethod(method_PixelmonPlayerTracker_onPlayerLogin, CapabilityHelper.newLoginEvent(pPlayer));
     }
 
     public ArrayList<Object> getPlayerAllStorage(CPlayer pPlayer) {

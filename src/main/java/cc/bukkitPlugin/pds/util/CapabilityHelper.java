@@ -34,6 +34,8 @@ public class CapabilityHelper {
     /** void readNBT(T instance, EnumFacing side, NBTBase nbt); */
     private static Method method_Capability_readNBT;
 
+    private static Class<?> clazz_PlayerLoggedInEvent;
+
     static {
         try {
             field_NMSEntity_capabilities = FieldUtil.getDeclaredField(NMSUtil.clazz_NMSEntity, "capabilities");
@@ -66,6 +68,12 @@ public class CapabilityHelper {
             Class<?> tClazz = ClassUtil.getClass("net.minecraftforge.common.capabilities.Capability");
             method_Capability_writeNBT = MethodUtil.getMethodIgnoreParam(tClazz, "writeNBT", true).oneGet();
             method_Capability_readNBT = MethodUtil.getMethodIgnoreParam(tClazz, "readNBT", true).oneGet();
+        } catch (IllegalStateException | NullPointerException exp) {
+            mInitSuccess = false;
+        }
+
+        try {
+            clazz_PlayerLoggedInEvent = ClassUtil.getClass("net.minecraftforge.fml.common.gameevent.PlayerEvent$PlayerLoggedInEvent");
         } catch (IllegalStateException | NullPointerException exp) {
             mInitSuccess = false;
         }
@@ -172,6 +180,10 @@ public class CapabilityHelper {
         Object tCap = getCapability(pNMSEntity, pCapabilityEntry, pFacing);
         if (tCap == null) return NBTUtil.newNBTTagCompound();
         return MethodUtil.invokeMethod(method_Capability_writeNBT, pCapabilityEntry, tCap, pFacing);
+    }
+
+    public static Object newLoginEvent(CPlayer pPlayer) {
+        return ClassUtil.newInstance(clazz_PlayerLoggedInEvent, NMSUtil.clazz_EntityPlayer, pPlayer.getNMSPlayer());
     }
 
 }
