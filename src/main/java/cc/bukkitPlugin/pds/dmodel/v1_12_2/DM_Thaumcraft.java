@@ -2,13 +2,14 @@ package cc.bukkitPlugin.pds.dmodel.v1_12_2;
 
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 
-public class DM_Thaumcraft extends ADM_ForgeCapability {
+public class DM_Thaumcraft extends ADM_CapabilityProvider {
 
     public DM_Thaumcraft(PlayerDataSQL pPlugin) {
         super(pPlugin);
 
-        this.addCapability("thaumcraft.api.capabilities.ThaumcraftCapabilities", "KNOWLEDGE");
-        this.addCapability("thaumcraft.api.capabilities.ThaumcraftCapabilities", "WARP");
+        this.addModCheckClass("thaumcraft.Thaumcraft");
+        this.addCapabilityP("thaumcraft.common.lib.capabilities.PlayerKnowledge.Provider");
+        this.addCapabilityP("thaumcraft.common.lib.capabilities.PlayerWarp.Provider");
     }
 
     @Override

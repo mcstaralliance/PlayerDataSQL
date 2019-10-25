@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -16,12 +18,16 @@ import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.bukkitPlugin.pds.util.CapabilityHelper;
 import cc.bukkitPlugin.pds.util.PDSNBTUtil;
 
-public abstract class ADM_ForgeCapabilityProvider extends ADataModel {
+public abstract class ADM_CapabilityProvider extends ADataModel {
 
+    /** Provider的类全名 */
     protected HashSet<String> mCapabilityPs_name = new HashSet<>();
+    /** 根据Provider的类全名获的Provider类 */
     private HashMap<String, Class<?>> mCapabilityPs = new HashMap<>();
+    /** 判断mod是否加载的类全名 */
+    protected HashSet<String> mModClass = new HashSet<String>();
 
-    public ADM_ForgeCapabilityProvider(PlayerDataSQL pPlugin) {
+    public ADM_CapabilityProvider(PlayerDataSQL pPlugin) {
         super(pPlugin);
     }
 
@@ -29,9 +35,22 @@ public abstract class ADM_ForgeCapabilityProvider extends ADataModel {
         this.mCapabilityPs_name.add(pClass);
     }
 
+    protected void addModCheckClass(String pClazz) {
+        this.mModClass.add(pClazz);
+    }
+
     @Override
     protected boolean initOnce() throws Exception {
         if (!CapabilityHelper.isInisSuccess()) return false;
+
+        try {
+            for (String sClazz : this.mModClass) {
+                Class.forName(sClazz);
+            }
+        } catch (ClassNotFoundException exp) {
+            Log.developInfo("Model " + this.getModelId() + " check fail by \"" + exp.getMessage() + "\"");
+            throw exp;
+        }
 
         Class<?> tImp = Class.forName("net.minecraftforge.common.capabilities.ICapabilityProvider");
         for (String sName : mCapabilityPs_name) {
@@ -39,12 +58,12 @@ public abstract class ADM_ForgeCapabilityProvider extends ADataModel {
             try {
                 tClazz = Class.forName(sName);
             } catch (ClassNotFoundException exp) {
-                Log.severe("模块 " + getModelId() + " 注册的CapabilityProvider " + sName + " 不存在");
+                Log.debug("§4模块 " + getModelId() + " 注册的CapabilityProvider " + sName + " 不存在");
                 continue;
             }
 
             if (!tImp.isAssignableFrom(tClazz)) {
-                Log.severe("模块 " + getModelId() + " 注册了一个名为 " + sName + " 的非CapabilityProvider模块");
+                Log.debug("§4模块 " + getModelId() + " 注册了一个名为 " + sName + " 的非CapabilityProvider模块");
             } else this.mCapabilityPs.put(sName, tClazz);
         }
         return !this.mCapabilityPs.isEmpty();
@@ -87,6 +106,7 @@ public abstract class ADM_ForgeCapabilityProvider extends ADataModel {
                 if (tProvider != null) {
                     Object tNBT = this.correctNBTData(tProviderName, PDSNBTUtil.decompressNBT(tData));
                     CapabilityHelper.deserializeCapability(pPlayer.getNMSPlayer(), tProvider, tNBT);
+                    this.updateAround(pPlayer, tProvider);
                 }
             }
         }
@@ -106,6 +126,12 @@ public abstract class ADM_ForgeCapabilityProvider extends ADataModel {
      */
     public Object correctNBTData(String pProvider, Object pNBTTag) {
         return pNBTTag;
+    }
+
+    public void updateAround(CPlayer pPlayer, Object pProvider) {}
+
+    public Collection<String> getProviderClazz() {
+        return Collections.unmodifiableCollection(this.mCapabilityPs_name);
     }
 
 }

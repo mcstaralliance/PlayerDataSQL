@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 
-public class DM_Baubles extends ADM_ForgeCapabilityProvider {
+public class DM_Baubles extends ADM_CapabilityProvider {
 
     private Method method_BaublesApi_getBaubles = null;
     private Method method_InventoryBaubles_readNBT = null;
@@ -16,6 +16,7 @@ public class DM_Baubles extends ADM_ForgeCapabilityProvider {
     public DM_Baubles(PlayerDataSQL pPlugin) {
         super(pPlugin);
 
+        this.addModCheckClass("baubles.Baubles");
         this.addCapabilityP("baubles.api.cap.BaublesContainerProvider");
     }
 
