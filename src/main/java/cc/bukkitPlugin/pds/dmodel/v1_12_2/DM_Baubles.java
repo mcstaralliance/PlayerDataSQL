@@ -29,12 +29,4 @@ public class DM_Baubles extends ADM_CapabilityProvider {
     public String getDesc() {
         return "饰品背包";
     }
-
-    @Override
-    public boolean initOnce() throws Exception {
-        Class.forName("baubles.common.Baubles");
-
-        return super.initOnce();
-    }
-
 }
