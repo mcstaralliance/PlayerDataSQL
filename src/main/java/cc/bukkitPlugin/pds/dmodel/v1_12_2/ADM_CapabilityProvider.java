@@ -66,7 +66,7 @@ public abstract class ADM_CapabilityProvider extends ADataModel {
                 Log.debug("§4模块 " + getModelId() + " 注册了一个名为 " + sName + " 的非CapabilityProvider模块");
             } else this.mCapabilityPs.put(sName, tClazz);
         }
-        return !this.mCapabilityPs.isEmpty();
+        return !this.mCapabilityPs.isEmpty()&&this.initCapability();
     }
 
     @Override
@@ -128,10 +128,33 @@ public abstract class ADM_CapabilityProvider extends ADataModel {
         return pNBTTag;
     }
 
+    /**
+     * 用于在数据还原后,同步到客户端时调用
+     * 
+     * @param pPlayer
+     *            玩家
+     * @param pProvider
+     *            特性提供器
+     */
     public void updateAround(CPlayer pPlayer, Object pProvider) {}
 
+    /**
+     * 获取当前模块所注册的所有特性提供器全限定名
+     * 
+     * @return 特性提供器全限定名,无法编辑
+     */
     public Collection<String> getProviderClazz() {
         return Collections.unmodifiableCollection(this.mCapabilityPs_name);
+    }
+
+    /**
+     * 初始化模块
+     * <p>
+     * 子模块的初始化代码应写在此处
+     * </p>
+     */
+    protected boolean initCapability() throws Exception{
+        return true;
     }
 
 }
