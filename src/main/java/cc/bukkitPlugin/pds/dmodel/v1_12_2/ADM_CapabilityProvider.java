@@ -136,7 +136,7 @@ public abstract class ADM_CapabilityProvider extends ADataModel {
      * @param pProvider
      *            特性提供器
      */
-    public void updateAround(CPlayer pPlayer, Object pProvider) {}
+    public void updateAround(CPlayer pPlayer, Class<?> pProvider) {}
 
     /**
      * 获取当前模块所注册的所有特性提供器全限定名
