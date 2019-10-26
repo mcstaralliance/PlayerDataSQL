@@ -2,7 +2,7 @@ package cc.bukkitPlugin.pds.dmodel.v1_12_2;
 
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 
-public class DM_ArmourersWorkshop extends ADM_CapabilityProvider{
+public class DM_ArmourersWorkshop extends ADM_CapabilityProvider {
 
     public DM_ArmourersWorkshop(PlayerDataSQL pPlugin) {
         super(pPlugin);
@@ -21,13 +21,6 @@ public class DM_ArmourersWorkshop extends ADM_CapabilityProvider{
     @Override
     public String getDesc() {
         return "时装工坊";
-    }
-    
-    @Override
-    public boolean initOnce() throws Exception {
-        Class.forName("moe.plushie.armourers_workshop.ArmourersWorkshop");
-
-        return super.initOnce();
     }
 
 }
