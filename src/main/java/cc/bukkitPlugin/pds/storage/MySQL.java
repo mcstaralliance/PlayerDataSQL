@@ -177,7 +177,7 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
                     tStat.execute("CREATE TABLE IF NOT EXISTS "+this.mTableName+"("
                             +User.COL_NAME+" varchar(64) primary key,"
                             +User.COL_LOCK+" tinyint(1),"
-                            +User.COL_DATA+" BLOB"
+                            +User.COL_DATA+" LONGBLOB"
                             +")");
                     if(this.mNetworkTimeout>0){
                         try{
