@@ -8,8 +8,8 @@ public class DM_Thaumcraft extends ADM_CapabilityProvider {
         super(pPlugin);
 
         this.addModCheckClass("thaumcraft.Thaumcraft");
-        this.addCapabilityP("thaumcraft.common.lib.capabilities.PlayerKnowledge.Provider");
-        this.addCapabilityP("thaumcraft.common.lib.capabilities.PlayerWarp.Provider");
+        this.addCapabilityP("thaumcraft.common.lib.capabilities.PlayerKnowledge$Provider");
+        this.addCapabilityP("thaumcraft.common.lib.capabilities.PlayerWarp$Provider");
     }
 
     @Override

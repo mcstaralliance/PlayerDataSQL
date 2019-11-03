@@ -16,7 +16,7 @@ public class DM_Baubles extends ADM_CapabilityProvider {
     public DM_Baubles(PlayerDataSQL pPlugin) {
         super(pPlugin);
 
-        this.addModCheckClass("baubles.Baubles");
+        this.addModCheckClass("baubles.common.Baubles");
         this.addCapabilityP("baubles.api.cap.BaublesContainerProvider");
     }
 
