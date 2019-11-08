@@ -1,7 +1,9 @@
 package cc.bukkitPlugin.pds.dmodel.v1_12_2;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
@@ -19,6 +21,7 @@ public class DM_Pixelmon_ZZ extends ADataModel {
 
     /** Pixelmon.storageManager */
     private Object fieldValue_storageManager;
+    private Collection<?> fieldValue_ReforgedStorageManager_playersWithSyncedPCs;
 
     /** PlayerPartyStorage IStorageManager.getParty(UUID) */
     private Method method_IStorageManager_getParty;
@@ -33,6 +36,8 @@ public class DM_Pixelmon_ZZ extends ADataModel {
     private Method method_PokemonStorage_writeToNBT;
     /** int PokemonStorage.countAll() */
     private Method method_PokemonStorage_countAll;
+    private Field field_PokemonStorage_hasChanged;
+    private Field field_PokemonStorage_shouldSendUpdates;
 
     /** static void TickHandler.deregisterStarterList(EntityPlayerMP) */
     private Method method_TickHandler_deregisterStarterList;
@@ -65,6 +70,10 @@ public class DM_Pixelmon_ZZ extends ADataModel {
             MethodUtil.invokeMethod(method_PokemonStorage_writeToNBT, sObj, tOut);
             tValue.put(sObj.getClass().getName(), tOut);
         }
+
+        // 防止被宝可梦标记为已同步数据
+        this.fieldValue_ReforgedStorageManager_playersWithSyncedPCs.remove(pPlayer.getUniqueId());
+
         return PDSNBTUtil.compressNBT(tNBT);
     }
 
@@ -75,13 +84,14 @@ public class DM_Pixelmon_ZZ extends ADataModel {
 
         Object tPPS = this.getPartyStorage(pPlayer);
         boolean tLocalhas = this.getPixelmonCount(tPPS) != 0;
-        ArrayList<Object> tStorages = this.getPlayerAllStorage(pPlayer);
-        for (Object sStorage : tStorages) {
-            Object tStorageData = tValue.get(sStorage.getClass().getName());
-            if (tStorageData != null) {
-                MethodUtil.invokeMethod(method_PokemonStorage_readFromNBT, sStorage, tStorageData);
-            } else this.cleanStorage(sStorage);
-        }
+        this.readStorageData(tValue, tPPS);
+        // 同步快捷栏宝可梦到客户端
+        MethodUtil.invokeStaticMethod(method_PixelmonPlayerTracker_onPlayerLogin, CapabilityHelper.newLoginEvent(pPlayer));
+
+        this.readStorageData(tValue, this.getPCStorage(pPlayer));
+        // 同步PC宝可梦到客户端
+        MethodUtil.invokeMethod(method_IStorageManager_initializePCForPlayer, fieldValue_storageManager,
+                pPlayer.getNMSPlayer(), this.getPCStorage(pPlayer));
 
         boolean tDBhas = this.getPixelmonCount(tPPS) != 0;
         if (tLocalhas && !tDBhas) {
@@ -92,8 +102,16 @@ public class DM_Pixelmon_ZZ extends ADataModel {
             MethodUtil.invokeStaticMethod(method_TickHandler_deregisterStarterList, pPlayer.getNMSPlayer());
             pPlayer.getPlayer().closeInventory();
         }
+    }
 
-        this.updateToAround(pPlayer);
+    protected void readStorageData(Map<String, Object> pDatas, Object pStorage) {
+        Object tStorageData = pDatas.get(pStorage.getClass().getName());
+        if (tStorageData != null) {
+            MethodUtil.invokeMethod(method_PokemonStorage_readFromNBT, pStorage, tStorageData);
+        } else this.cleanStorage(pStorage);
+
+        FieldUtil.setFieldValue(field_PokemonStorage_hasChanged, pStorage, true);
+        FieldUtil.setFieldValue(field_PokemonStorage_shouldSendUpdates, pStorage, true);
     }
 
     @Override
@@ -110,6 +128,8 @@ public class DM_Pixelmon_ZZ extends ADataModel {
     protected boolean initOnce() throws Exception {
         Class<?> tClazz = Class.forName("com.pixelmonmod.pixelmon.Pixelmon");
         fieldValue_storageManager = FieldUtil.getStaticFieldValue(tClazz, "storageManager");
+        fieldValue_ReforgedStorageManager_playersWithSyncedPCs = (Collection<?>)FieldUtil.getDeclaredFieldValue(
+                fieldValue_storageManager.getClass(), "playersWithSyncedPCs", fieldValue_storageManager);
 
         tClazz = Class.forName("com.pixelmonmod.pixelmon.api.storage.IStorageManager");
         method_IStorageManager_getParty = MethodUtil.getDeclaredMethod(tClazz, "getParty", UUID.class);
@@ -120,6 +140,8 @@ public class DM_Pixelmon_ZZ extends ADataModel {
         method_PokemonStorage_readFromNBT = MethodUtil.getDeclaredMethod(tClazz, "readFromNBT", NBTUtil.clazz_NBTTagCompound);
         method_PokemonStorage_writeToNBT = MethodUtil.getDeclaredMethod(tClazz, "writeToNBT", NBTUtil.clazz_NBTTagCompound);
         method_PokemonStorage_countAll = MethodUtil.getDeclaredMethod(tClazz, "countAll");
+        field_PokemonStorage_hasChanged = FieldUtil.getField(tClazz, "hasChanged");
+        field_PokemonStorage_shouldSendUpdates = FieldUtil.getField(tClazz, "shouldSendUpdates");
 
         method_PixelmonPlayerTracker_onPlayerLogin = MethodUtil.getMethodIgnoreParam(
                 Class.forName("com.pixelmonmod.pixelmon.listener.PixelmonPlayerTracker"),
@@ -132,13 +154,6 @@ public class DM_Pixelmon_ZZ extends ADataModel {
                 "registerStarterList", NMSUtil.clazz_EntityPlayerMP);
 
         return true;
-    }
-
-    protected void updateToAround(CPlayer pPlayer) {
-        MethodUtil.invokeMethod(method_IStorageManager_initializePCForPlayer, fieldValue_storageManager,
-                pPlayer.getNMSPlayer(), this.getPCStorage(pPlayer));
-
-        MethodUtil.invokeStaticMethod(method_PixelmonPlayerTracker_onPlayerLogin, CapabilityHelper.newLoginEvent(pPlayer));
     }
 
     public ArrayList<Object> getPlayerAllStorage(CPlayer pPlayer) {
