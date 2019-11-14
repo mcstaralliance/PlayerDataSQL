@@ -162,7 +162,7 @@ public class PDSAPI implements Listener,IConfigModel{
 
         for(String sKey : tSecMain.getKeys(false)){
             CommentedSection tSec = tSecMain.getSection(sKey);
-            if((tSec==null&&tSecMain.getBoolean(sKey,false))||tSec.getBoolean("Enable", false)){
+            if((tSec==null&&tSecMain.getBoolean(sKey,false))||(tSec!=null&&tSec.getBoolean("Enable", false))){
                 PDSAPI.mEnabledModelsStr.add(sKey.toLowerCase());
             }
         }
