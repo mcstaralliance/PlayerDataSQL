@@ -180,7 +180,7 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel,INeed
                             +User.COL_DATA+" LONGBLOB"
                             +")");
                     // 强制更改data字段类型
-                    tStat.execute("ALTER TABLE "+this.mDatabase+" MODIFY COLUMN "+User.COL_DATA+" LONGBLOB;");
+                    tStat.execute("ALTER TABLE "+this.mTableName+" MODIFY COLUMN "+User.COL_DATA+" LONGBLOB;");
                     if(this.mNetworkTimeout>0){
                         try{
                             this.mConn.setNetworkTimeout((callback)->callback.run(),this.mNetworkTimeout*1000);
