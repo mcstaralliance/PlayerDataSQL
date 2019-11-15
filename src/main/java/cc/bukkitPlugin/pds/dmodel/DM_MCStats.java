@@ -15,6 +15,7 @@ import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.util.CollUtil;
 import cc.commons.util.FileUtil;
+import cc.commons.util.StringUtil;
 import cc.commons.util.extra.CList;
 import cc.commons.util.reflect.FieldUtil;
 import cc.commons.util.reflect.MethodUtil;
@@ -98,12 +99,12 @@ public class DM_MCStats extends ADataModel {
 
     @Override
     public byte[] getData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws Exception {
-        StringBuilder tSBuilder=new StringBuilder(MARK_STAT);
+        StringBuilder tSBuilder = new StringBuilder(MARK_STAT);
         Object tStatMan = this.getStatMan(pPlayer);
         String tJson = (String)MethodUtil.invokeMethod(this.method_StatisticsFile_saveStatistic, tStatMan, this.getManStatValue(tStatMan));
         tSBuilder.append(tJson);
         tSBuilder.append(MARK_ADVANCE);
-        
+
         if (this.method_EntityPlayerMP_getAdvancementsMan != null) {
             Object tAdvance = MethodUtil.invokeMethod(method_EntityPlayerMP_getAdvancementsMan, pPlayer.getNMSPlayer());
             if (!this.mAdvancementAlreadyDetected) this.detectAdvancementDataMethod(tAdvance);
@@ -128,8 +129,8 @@ public class DM_MCStats extends ADataModel {
         tPlayerStatValue.clear();
         String tDataStr = new String(pData, UTF_8);
         String tStat, tAdvancement;
-        if (tDataStr.startsWith("stat:")) {
-            int tIndex = tDataStr.indexOf("\nadvance:");
+        if (tDataStr.startsWith(MARK_STAT)) {
+            int tIndex = tDataStr.indexOf(MARK_ADVANCE);
             if (tIndex == -1) tIndex = tDataStr.length();
             tStat = tDataStr.substring(MARK_STAT.length(), tIndex);
             tAdvancement = tDataStr.substring(Math.min(tIndex + MARK_ADVANCE.length(), tDataStr.length()));
@@ -144,6 +145,7 @@ public class DM_MCStats extends ADataModel {
             if (!this.mAdvancementAlreadyDetected) this.detectAdvancementDataMethod(tAdvance);
 
             if (this.method_AdvancementData_reload != null) {
+                if (StringUtil.isBlank(tAdvancement)) tAdvancement = "{}";
                 try {
                     File tAdvFile = (File)FieldUtil.getFieldValue(field_AdvancementData_file, tAdvance);
                     FileUtil.writeData(tAdvFile, tAdvancement.getBytes(UTF_8));
@@ -168,10 +170,10 @@ public class DM_MCStats extends ADataModel {
         Object tStatMan = this.getStatMan(pPlayer);
         Map<Object, Object> tPlayerStatValue = this.getManStatValue(tStatMan);
         tPlayerStatValue.clear();
-        
-        if(this.method_EntityPlayerMP_getAdvancementsMan!=null){
+
+        if (this.method_EntityPlayerMP_getAdvancementsMan != null) {
             Object tAdvance = MethodUtil.invokeMethod(method_EntityPlayerMP_getAdvancementsMan, pPlayer.getNMSPlayer());
-            Map<Object,Object> tAdvcData=(Map<Object, Object>)FieldUtil.getFieldValue(field_AdvancementData_progress, tAdvance);
+            Map<Object, Object> tAdvcData = (Map<Object, Object>)FieldUtil.getFieldValue(field_AdvancementData_progress, tAdvance);
             tAdvcData.clear();
         }
     }
@@ -200,38 +202,49 @@ public class DM_MCStats extends ADataModel {
         this.mAdvancementAlreadyDetected = true;
 
         Class<?> tClazz = pObj.getClass();
-        Object tOriginAdvc=FieldUtil.getFieldValue(field_AdvancementData_progress, pObj);
+        Object tOriginAdvc = FieldUtil.getFieldValue(field_AdvancementData_progress, pObj);
         FieldUtil.setFieldValue(field_AdvancementData_progress, pObj, new HashMap<>());
         File tOriginFile = (File)FieldUtil.getFieldValue(field_AdvancementData_file, pObj);
         CFile tTestFile = new CFile(tOriginFile.getParentFile(), "pds_test.dat");
         FieldUtil.setFieldValue(field_AdvancementData_file, pObj, tTestFile);
+        int tStep = 0;
         try {
+            String tTestContent = "\n\n{\n\n}\n\n";
             FileUtil.createNewFile(tTestFile, true);
+            FileUtil.writeData(tTestFile, tTestContent.getBytes(UTF_8));
             CList<Method> tMethods = MethodUtil.getDeclaredMethod(tClazz, MethodFilter.rpt(void.class)
                     .addPossModifer(Modifier.PUBLIC)
                     .addDeniedModifer(Modifier.STATIC));
 
             for (Method sMethod : tMethods) {
-                long lastModified = tTestFile.lastModified();
-                tTestFile.mReadMark=false;
+                if (tStep == 3) break;
+
+                tTestFile.mReadMark = false;
                 try {
                     MethodUtil.invokeMethod(sMethod, pObj);
                 } catch (NullPointerException ignore) {
                 }
+                boolean tReadMark = tTestFile.mReadMark;
 
-                if (tTestFile.lastModified() != lastModified) {
+                if (this.method_AdvancementData_save == null && !FileUtil.readContent(tTestFile, "UTF-8").equals(tTestContent)) {
                     this.method_AdvancementData_save = sMethod;
+                    tStep |= 1;
+                    continue;
                 }
-                if(tTestFile.mReadMark){
+                if (this.method_AdvancementData_reload == null && tReadMark) {
                     this.method_AdvancementData_reload = sMethod;
+                    tStep |= 2;
+                    continue;
                 }
             }
         } catch (IOException e) {
-            Log.warn("&c成就模块部分初始化失败,成就数据无法同步: " + e.getLocalizedMessage());
+            Log.warn("§c成就模块部分初始化失败,成就数据无法同步: " + e.getLocalizedMessage());
         } finally {
             FieldUtil.setFieldValue(field_AdvancementData_progress, pObj, tOriginAdvc);
             FieldUtil.setFieldValue(field_AdvancementData_file, pObj, tOriginFile);
         }
+
+        if (tStep != 3) Log.warn("§c成就模块部分初始化失败,成就数据无法同步");
     }
 
     public static class CFile extends File {
