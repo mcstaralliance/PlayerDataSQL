@@ -67,10 +67,13 @@ public abstract class ADataModel implements IDataModel{
                     tSource=exp.getCause();
                 }
 
+                String tName=this.getDesc()+"("+this.getModelId()+")";
                 if(tSource instanceof NoSuchMethodException||tSource instanceof NoSuchFieldException){
-                    Log.severe("模块 "+this.getDesc()+" 可能不支持你当前MOD版本",tSource);
+                    Log.severe("模块 "+tName+" 可能不支持你当前MOD版本");
+                    if(Log.isDebug()) Log.severe(exp);
                 }else{
-                    Log.severe("模块 "+this.getDesc()+" 初始化时发生了错误",exp);
+                    Log.severe("模块 "+tName+" 初始化时发生了错误: "+exp.getLocalizedMessage());
+                    if(Log.isDebug()) Log.severe(exp);
                 }
             }
             return (this.mInitSuccess=false);
