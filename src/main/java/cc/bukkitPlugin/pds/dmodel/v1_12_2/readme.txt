@@ -23,3 +23,12 @@ CapabilityProvider型,特性提供器
           接口net.minecraftforge.common.capabilities.ICapabilitySerializable已经实现接口INBTSerializable
           对于已经实现INBTSerializable的提供器,模板都能自动序列化数据,但是对于未实现的模组,需要自己重写序列化与
           反序列化方法或者替换相应的方法
+
+
+
+关于Capability<T>
+特性由模组主动注册产生,注册方法为CapabilityManager.register
+在此注册过程中,同时为特性实例提供了序列化方法与特性生成方法
+
+关于ICapabilitySerializable
+此为特性的统一化序列化方法,默认调用CapabilityManager.register中注册的序列化方法
