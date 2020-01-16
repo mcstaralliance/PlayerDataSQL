@@ -23,13 +23,18 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
 
     protected static Method method_Entity_getExtendedProperties;
     protected static Method method_Entity_registerExtendedProperties;
+    public final static boolean INIT_SUCCESS;
 
     static{
+        boolean tSuccess = true;
         try{
             method_Entity_registerExtendedProperties=MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity,"registerExtendedProperties",true).get(0);
             method_Entity_getExtendedProperties=MethodUtil.getMethod(NMSUtil.clazz_NMSEntity,"getExtendedProperties",String.class,true);
         }catch(IllegalStateException ignore){
+            tSuccess = false;
         }
+
+        INIT_SUCCESS = tSuccess;
     }
 
     /**
@@ -79,6 +84,7 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
      * @throws Exception
      */
     protected void initExProp() throws Exception{
+        if(!INIT_SUCCESS) throw new ClassNotFoundException("Minecraft version not match");
         this.mExPropClazz=Class.forName(this.mExPropClass);
 
         this.method_ExProp_loadNBTData=MethodUtil.getMethod(this.mExPropClazz,"loadNBTData",NBTUtil.clazz_NBTTagCompound,true);
