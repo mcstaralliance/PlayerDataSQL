@@ -126,6 +126,7 @@ public class DM_Pixelmon_ZZ extends ADataModel {
 
     @Override
     protected boolean initOnce() throws Exception {
+        Class.forName("com.pixelmonmod.pixelmon.api.storage.IStorageManager");
         Class<?> tClazz = Class.forName("com.pixelmonmod.pixelmon.Pixelmon");
         fieldValue_storageManager = FieldUtil.getStaticFieldValue(tClazz, "storageManager");
         fieldValue_ReforgedStorageManager_playersWithSyncedPCs = (Collection<?>)FieldUtil.getDeclaredFieldValue(
