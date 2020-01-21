@@ -22,19 +22,19 @@ import cc.commons.commentedyaml.CommentedYamlConfig;
 import cc.commons.util.StringUtil;
 import cc.commons.util.ValidData;
 
-public class PDSAPI implements Listener,IConfigModel{
+public class PDSAPI implements Listener, IConfigModel {
 
     /** 插件实例 */
-    private static PlayerDataSQL mPlugin=null;
+    private static PlayerDataSQL mPlugin = null;
 
     /** 注册的模块 */
-    private static LinkedHashMap<String,IDataModel> mRegistedModels=new LinkedHashMap<>();
+    private static LinkedHashMap<String, IDataModel> mRegistedModels = new LinkedHashMap<>();
     /** 启用的模块 */
-    private static ArrayList<IDataModel> mEnabledModels=new ArrayList<>();
+    private static ArrayList<IDataModel> mEnabledModels = new ArrayList<>();
     /** 配置中启用的模块 */
-    private static HashSet<String> mEnabledModelsStr=new HashSet<>();
+    private static HashSet<String> mEnabledModelsStr = new HashSet<>();
     /** 启用的模块数组 */
-    private static IDataModel[] mEnabledModelsA=null;
+    private static IDataModel[] mEnabledModelsA = null;
 
     /**
      * 获取插件实例
@@ -43,10 +43,10 @@ public class PDSAPI implements Listener,IConfigModel{
      * @throws IllegalStateException
      *             插件未实例化
      */
-    public static PlayerDataSQL getPlugin(){
-        synchronized(PDSAPI.class){
-            if(PDSAPI.mPlugin==null){
-                PDSAPI.mPlugin=PlayerDataSQL.getInstance();
+    public static PlayerDataSQL getPlugin() {
+        synchronized(PDSAPI.class) {
+            if (PDSAPI.mPlugin == null) {
+                PDSAPI.mPlugin = PlayerDataSQL.getInstance();
             }
         }
         return PDSAPI.mPlugin;
@@ -62,12 +62,12 @@ public class PDSAPI implements Listener,IConfigModel{
      * @param pModel
      *            模块
      */
-    public static void registerModel(IDataModel pModel){
-        ValidData.notNull(pModel.getPlugin(),"模块的插件不能为空");
-        ValidData.notEmpty(pModel.getModelId(),"模块名称不能为空");
-        String tLowerCase=pModel.getModelId().toLowerCase();
-        ValidData.valid(!PDSAPI.mRegistedModels.containsKey(tLowerCase),"模块名称 "+pModel.getModelId()+" 已经被注册");
-        PDSAPI.mRegistedModels.put(tLowerCase,pModel);
+    public static void registerModel(IDataModel pModel) {
+        ValidData.notNull(pModel.getPlugin(), "模块的插件不能为空");
+        ValidData.notEmpty(pModel.getModelId(), "模块名称不能为空");
+        String tLowerCase = pModel.getModelId().toLowerCase();
+        ValidData.valid(!PDSAPI.mRegistedModels.containsKey(tLowerCase), "模块名称 " + pModel.getModelId() + " 已经被注册");
+        PDSAPI.mRegistedModels.put(tLowerCase, pModel);
     }
 
     /**
@@ -76,104 +76,106 @@ public class PDSAPI implements Listener,IConfigModel{
      * @param pNotify
      *            是否发送模块注册成功通知
      */
-    public static void checkModels(boolean pNotify){
-        synchronized(PDSAPI.class){
+    public static void checkModels(boolean pNotify) {
+        synchronized(PDSAPI.class) {
             PDSAPI.mEnabledModels.clear();
-            for(IDataModel sModel : PDSAPI.mRegistedModels.values()){
-                try{
-                    if(sModel.getPlugin().isEnabled()&&sModel.init()&&PDSAPI.mEnabledModelsStr.contains(sModel.getModelId().toLowerCase())){
+            for (IDataModel sModel : PDSAPI.mRegistedModels.values()) {
+                try {
+                    if (sModel.getPlugin().isEnabled() && sModel.init() && PDSAPI.mEnabledModelsStr.contains(sModel.getModelId().toLowerCase())) {
                         PDSAPI.mEnabledModels.add(sModel);
-                        if(pNotify&&(!(sModel instanceof IConfigedModel)||((IConfigedModel)sModel).doNotify())){
-                            Log.info("成功启用数据模块: "+sModel.getDesc());
+                        if (pNotify && (!(sModel instanceof IConfigedModel) || ((IConfigedModel)sModel).doNotify())) {
+                            Log.info("成功启用数据模块: " + sModel.getDesc());
                         }
                     }
-                }catch(Throwable exp){
-                    Log.severe("在初始化数据模块 "+sModel.getModelId()+" 时发生错误",exp);
+                } catch (Throwable exp) {
+                    Log.severe("在初始化数据模块 " + sModel.getModelId() + " 时发生错误", exp);
                 }
             }
-            PDSAPI.mEnabledModelsA=null;
+            PDSAPI.mEnabledModelsA = null;
         }
     }
 
-    public static IDataModel remove(String pModelName){
-        IDataModel tRemoved=PDSAPI.mRegistedModels.remove(pModelName.toLowerCase());
-        if(tRemoved!=null){
-            synchronized(PDSAPI.class){
+    public static IDataModel remove(String pModelName) {
+        IDataModel tRemoved = PDSAPI.mRegistedModels.remove(pModelName.toLowerCase());
+        if (tRemoved != null) {
+            synchronized(PDSAPI.class) {
                 PDSAPI.mEnabledModels.remove(tRemoved);
-                PDSAPI.mEnabledModelsA=null;
+                PDSAPI.mEnabledModelsA = null;
             }
         }
         return tRemoved;
     }
 
-    public static void remove(Plugin pPlugin){
-        synchronized(PDSAPI.class){
-            Iterator<Entry<String,IDataModel>> tIt=PDSAPI.mRegistedModels.entrySet().iterator();
-            boolean tChange=false;
-            while(tIt.hasNext()){
-                IDataModel tModel=tIt.next().getValue();
-                if(tModel.getPlugin()==pPlugin){
+    public static void remove(Plugin pPlugin) {
+        synchronized(PDSAPI.class) {
+            Iterator<Entry<String, IDataModel>> tIt = PDSAPI.mRegistedModels.entrySet().iterator();
+            boolean tChange = false;
+            while (tIt.hasNext()) {
+                IDataModel tModel = tIt.next().getValue();
+                if (tModel.getPlugin() == pPlugin) {
                     tIt.remove();
                     PDSAPI.mEnabledModels.remove(tModel);
-                    tChange=true;
+                    tChange = true;
                 }
             }
 
-            if(tChange) PDSAPI.mEnabledModelsA=null;
+            if (tChange) PDSAPI.mEnabledModelsA = null;
         }
     }
 
-    public static IDataModel[] getEnableModel(){
-        synchronized(PDSAPI.class){
-            if(PDSAPI.mEnabledModelsA==null){
-                if(PDSAPI.mEnabledModels.isEmpty()) PDSAPI.checkModels(false);
-                PDSAPI.mEnabledModelsA=PDSAPI.mEnabledModels.toArray(new IDataModel[PDSAPI.mEnabledModels.size()]);
+    public static IDataModel[] getEnableModel() {
+        synchronized(PDSAPI.class) {
+            if (PDSAPI.mEnabledModelsA == null) {
+                if (PDSAPI.mEnabledModels.isEmpty()) PDSAPI.checkModels(false);
+                PDSAPI.mEnabledModelsA = PDSAPI.mEnabledModels.toArray(new IDataModel[PDSAPI.mEnabledModels.size()]);
             }
         }
         return PDSAPI.mEnabledModelsA;
     }
 
-    private boolean mFirtInit=true;
+    private boolean mFirtInit = true;
 
-    public PDSAPI(PlayerDataSQL pPlugin){
+    public PDSAPI(PlayerDataSQL pPlugin) {
         pPlugin.registerEvents(this);
         pPlugin.getConfigManager().registerConfigModel(this);
     }
 
     @Override
-    public void addDefaults(CommentedYamlConfig pConfig){
-        CommentedSection tSecMain=pConfig.getOrCreateSection("Sync","启用哪些同步模块");
-        for(IDataModel sModel : PDSAPI.mRegistedModels.values()){
-            if(!sModel.init()) continue;
-            String[] tComments=null;
-            if(StringUtil.isNotEmpty(sModel.getDesc())){
-                tComments=sModel.getDesc().split("\n");
-            }else{
-                tComments=new String[0];
+    public void addDefaults(CommentedYamlConfig pConfig) {
+        CommentedSection tSecMain = pConfig.getOrCreateSection("Sync", "启用哪些同步模块");
+        for (IDataModel sModel : PDSAPI.mRegistedModels.values()) {
+            if (!sModel.init()) continue;
+            String[] tComments = null;
+            if (StringUtil.isNotEmpty(sModel.getDesc())) {
+                tComments = sModel.getDesc().split("\n");
+            } else {
+                tComments = new String[0];
             }
-            tSecMain.addDefault(sModel.getModelId(),true,tComments);
+            if (sModel instanceof IConfigModel) {
+                tSecMain.addDefault(sModel.getModelId() + ".Enable", true, tComments);
+            } else tSecMain.addDefault(sModel.getModelId(), true, tComments);
         }
     }
 
     @Override
-    public void setConfig(CommandSender pSender,CommentedYamlConfig pConfig){
-        CommentedSection tSecMain=pConfig.getOrCreateSection("Sync");
+    public void setConfig(CommandSender pSender, CommentedYamlConfig pConfig) {
+        CommentedSection tSecMain = pConfig.getOrCreateSection("Sync");
         PDSAPI.mEnabledModelsStr.clear();
 
-        for(String sKey : tSecMain.getKeys(false)){
+        for (String sKey : tSecMain.getKeys(false)) {
             CommentedSection tSec = tSecMain.getSection(sKey);
-            if((tSec==null&&tSecMain.getBoolean(sKey,false))||(tSec!=null&&tSec.getBoolean("Enable", false))){
+            if ((tSec == null && tSecMain.getBoolean(sKey, false)) || (tSec != null && tSec.getBoolean("Enable", false))) {
                 PDSAPI.mEnabledModelsStr.add(sKey.toLowerCase());
             }
         }
 
         PDSAPI.checkModels(!this.mFirtInit);
-        this.mFirtInit=false;
+        this.mFirtInit = false;
     }
 
     @EventHandler
-    public void onPluginDisable(PluginDisableEvent pEvent){
-        if(pEvent.getPlugin()==PDSAPI.getPlugin())
+    public void onPluginDisable(PluginDisableEvent pEvent) {
+        if (pEvent.getPlugin() == PDSAPI.getPlugin())
             return;
 
         PDSAPI.remove(pEvent.getPlugin());
