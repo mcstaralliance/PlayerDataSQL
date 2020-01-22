@@ -34,7 +34,7 @@ public class CapabilityHelper {
     /** void readNBT(T instance, EnumFacing side, NBTBase nbt); */
     private static Method method_Capability_readNBT;
 
-    private static Class<?> clazz_PlayerLoggedInEvent;
+    public final static Class<?> clazz_PlayerLoggedInEvent;
 
     static {
         try {
@@ -72,11 +72,14 @@ public class CapabilityHelper {
             mInitSuccess = false;
         }
 
+        Class<?> tClazz = null;
         try {
-            clazz_PlayerLoggedInEvent = ClassUtil.getClass("net.minecraftforge.fml.common.gameevent.PlayerEvent$PlayerLoggedInEvent");
+            tClazz = ClassUtil.getClass("net.minecraftforge.fml.common.gameevent.PlayerEvent$PlayerLoggedInEvent");
         } catch (IllegalStateException | NullPointerException exp) {
+            tClazz = null;
             mInitSuccess = false;
         }
+        clazz_PlayerLoggedInEvent = tClazz;
     }
 
     public static boolean isInisSuccess() {
