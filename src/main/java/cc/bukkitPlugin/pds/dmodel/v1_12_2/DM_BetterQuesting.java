@@ -19,16 +19,18 @@ import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.commons.plugin.manager.fileManager.IConfigModel;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.util.CPlayer;
+import cc.bukkitPlugin.pds.util.CapabilityHelper;
 import cc.bukkitPlugin.pds.util.PDSNBTUtil;
 import cc.commons.commentedyaml.CommentedYamlConfig;
 import cc.commons.util.reflect.FieldUtil;
 import cc.commons.util.reflect.MethodUtil;
+import cc.commons.util.reflect.filter.MethodFilter;
 
 public class DM_BetterQuesting extends ADM_CapabilityProvider implements IConfigModel {
 
     /** 用于检查是否为集合的KEY,判定此节点是否为空节点 */
     public static final HashSet<String> NBT_COL_KEY = new HashSet<String>();
-    /** 已知的,可以用户忽视空集合检查的节点 */
+    /** 已知的,可以忽视检查的节点 */
     public static final HashSet<String> NBT_IGNORE_KEY = new HashSet<String>();
 
     static {
@@ -44,10 +46,20 @@ public class DM_BetterQuesting extends ADM_CapabilityProvider implements IConfig
 
     private boolean mRmoveEmptyData = true;
 
+    //-------------------------  about sync start-----------------------
+    //-------------------------  version 3.5.307 and above start-----------------------
     /** public static void sendReset(@Nonnull EntityPlayerMP,boolean,boolean) */
-    private Method method_NetBulkSync_sendReset;
+    private Method method_NetBulkSync_sendReset = null;
     /** public static void sendSync(@Nonnull EntityPlayerMP) */
-    private Method method_NetBulkSync_sendSync;
+    private Method method_NetBulkSync_sendSync = null;
+    //-------------------------  version 3.5.307 and above end-----------------------
+    //-------------------------  version 3.5.300 and below start-----------------------
+    private Object instance_EventHandler = null;
+    /** public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent) */
+    private Method method_EventHandler_onPlayerJoin = null;
+    //-------------------------  version 3.5.300 and below end-----------------------
+
+    //-------------------------  about sync over-----------------------
 
     public static String KEY_QuestDatabase = "QuestDatabase";
     private Object instance_QuestDatabase_INSTANCE;
@@ -72,7 +84,7 @@ public class DM_BetterQuesting extends ADM_CapabilityProvider implements IConfig
 
     @Override
     public String getModelId() {
-        return "BetterQuesting";
+        return "BetterQuesting_v1_12_2";
     }
 
     @Override
@@ -137,17 +149,29 @@ public class DM_BetterQuesting extends ADM_CapabilityProvider implements IConfig
         }
 
         Object tNMSPlayer = pPlayer.getNMSPlayer();
-        if (NMSUtil.clazz_EntityPlayerMP.isInstance(tNMSPlayer)) {
+        if (method_NetBulkSync_sendReset != null && NMSUtil.clazz_EntityPlayerMP.isInstance(tNMSPlayer)) {
             MethodUtil.invokeStaticMethod(method_NetBulkSync_sendReset, tNMSPlayer, true, false);
             MethodUtil.invokeStaticMethod(method_NetBulkSync_sendSync, tNMSPlayer);
+        } else if (method_EventHandler_onPlayerJoin != null) {
+            MethodUtil.invokeMethod(method_EventHandler_onPlayerJoin, instance_EventHandler, CapabilityHelper.newLoginEvent(pPlayer));
         }
     }
 
     @Override
     protected boolean initCapability() throws Exception {
-        Class<?> tClazz = Class.forName("betterquesting.network.handlers.NetBulkSync");
-        this.method_NetBulkSync_sendReset = MethodUtil.getMethodIgnoreParam(tClazz, "sendReset", true).oneGet();
-        this.method_NetBulkSync_sendSync = MethodUtil.getDeclaredMethod(tClazz, "sendSync", NMSUtil.clazz_EntityPlayerMP);
+        Class<?> tClazz;
+
+        try {
+            // 版本3.5.307及以上
+            tClazz = Class.forName("betterquesting.network.handlers.NetBulkSync");
+            this.method_NetBulkSync_sendReset = MethodUtil.getMethodIgnoreParam(tClazz, "sendReset", true).oneGet();
+            this.method_NetBulkSync_sendSync = MethodUtil.getDeclaredMethod(tClazz, "sendSync", NMSUtil.clazz_EntityPlayerMP);
+        } catch (ClassNotFoundException exp) {
+            // 版本 3.5.300 以下
+            tClazz = Class.forName("betterquesting.handlers.EventHandler");
+            this.instance_EventHandler = FieldUtil.getStaticFieldValue(tClazz, "INSTANCE");
+            this.method_EventHandler_onPlayerJoin = MethodUtil.getDeclaredMethod(tClazz, "onPlayerJoin", CapabilityHelper.clazz_PlayerLoggedInEvent);
+        }
 
         tClazz = Class.forName("betterquesting.questing.QuestDatabase");
         this.instance_QuestDatabase_INSTANCE = FieldUtil.getStaticDeclaredFieldValue(tClazz, "INSTANCE");
@@ -158,10 +182,11 @@ public class DM_BetterQuesting extends ADM_CapabilityProvider implements IConfig
 
         tClazz = Class.forName("betterquesting.storage.LifeDatabase");
         this.instance_LifeDatabase_INSTANCE = FieldUtil.getStaticDeclaredFieldValue(tClazz, "INSTANCE");
-        this.method_LifeDatabase_writeToNBT = MethodUtil.getDeclaredMethod(tClazz, "writeToNBT",
-                NBTUtil.clazz_NBTTagCompound, List.class);
-        this.method_LifeDatabase_readFromNBT = MethodUtil.getDeclaredMethod(tClazz, "readFromNBT",
-                NBTUtil.clazz_NBTTagCompound, boolean.class);
+        this.method_LifeDatabase_writeToNBT = MethodUtil.getDeclaredMethod(tClazz,
+                MethodFilter.pn("writeToNBT", "writeProgressToNBT").setParamType(NBTUtil.clazz_NBTTagCompound, List.class)).oneGet();
+
+        this.method_LifeDatabase_readFromNBT = MethodUtil.getDeclaredMethod(tClazz,
+                MethodFilter.pn("readFromNBT", "readProgressFromNBT").setParamType(NBTUtil.clazz_NBTTagCompound, boolean.class)).oneGet();
 
         return super.initCapability();
     }
@@ -201,7 +226,6 @@ public class DM_BetterQuesting extends ADM_CapabilityProvider implements IConfig
                     }
                 } else {
                     tForceNotEmpty = true;
-                    break;
                 }
             }
 
