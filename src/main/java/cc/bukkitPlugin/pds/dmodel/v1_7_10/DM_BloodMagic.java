@@ -1,6 +1,7 @@
 package cc.bukkitPlugin.pds.dmodel.v1_7_10;
 
 import cc.bukkitPlugin.pds.PlayerDataSQL;
+import cc.bukkitPlugin.pds.dmodel.ADM_WorldData;
 
 public class DM_BloodMagic extends ADM_WorldData{
 
