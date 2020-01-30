@@ -35,6 +35,28 @@ public abstract class ADM_CapabilityProvider extends ADataModel {
         this.mCapabilityPs_name.add(pClass);
     }
 
+    /**
+     * 添加此类下的匿名类为特性提供器
+     * <p>
+     * 插件会判定匿名类是否继承自特性提供器
+     * </p>
+     * 
+     * @param pClass
+     *            类
+     */
+    protected void addInnerCapabilityP(String pClass) {
+        if (!CapabilityHelper.isInisSuccess()) return;
+        try {
+            Class<?> tImp = Class.forName("net.minecraftforge.common.capabilities.ICapabilityProvider");
+            for (int i = 1;; i++) {
+                String tClazzPName = pClass + "$" + i;
+                Class<?> tClazzP = Class.forName(tClazzPName);
+                if (tImp.isAssignableFrom(tClazzP)) this.addCapabilityP(tClazzPName);
+            }
+        } catch (ClassNotFoundException exp) {
+        }
+    }
+
     protected void addModCheckClass(String pClazz) {
         this.mModClass.add(pClazz);
     }
@@ -66,7 +88,7 @@ public abstract class ADM_CapabilityProvider extends ADataModel {
                 Log.debug("§4模块 " + getModelId() + " 注册了一个名为 " + sName + " 的非CapabilityProvider模块");
             } else this.mCapabilityPs.put(sName, tClazz);
         }
-        return !this.mCapabilityPs.isEmpty()&&this.initCapability();
+        return !this.mCapabilityPs.isEmpty() && this.initCapability();
     }
 
     @Override
@@ -153,7 +175,7 @@ public abstract class ADM_CapabilityProvider extends ADataModel {
      * 子模块的初始化代码应写在此处
      * </p>
      */
-    protected boolean initCapability() throws Exception{
+    protected boolean initCapability() throws Exception {
         return true;
     }
 
