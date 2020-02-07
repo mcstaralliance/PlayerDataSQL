@@ -59,7 +59,7 @@ public class PlayerListener extends AListener<PlayerDataSQL>{
                 }
                 this.mUserMan.unlockUser(tPlayer,true);
             });
-        }
+        } else this.mUserMan.unlockUser(tPlayer, false);
     }
 
 }
