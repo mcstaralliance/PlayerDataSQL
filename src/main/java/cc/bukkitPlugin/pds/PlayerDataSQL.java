@@ -48,7 +48,7 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
     }
 
     private static void kickPlayerOnError0(CPlayer pPlayer){
-        if(!pPlayer.isOnline()){
+        if(pPlayer.isOnline()){
             pPlayer.getPlayer().kickPlayer(PlayerDataSQL.getInstance().C("MsgDataExpection"));
         }
     }
