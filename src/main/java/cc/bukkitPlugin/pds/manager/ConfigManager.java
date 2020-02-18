@@ -12,6 +12,7 @@ public class ConfigManager extends TConfigManager<PlayerDataSQL>{
     public boolean mKickOnReadSQLError=true;
     public boolean mNoRestoreIfSQLDataNotExist=true;
     public boolean mUUIDMode=false;
+    public boolean mForceUseLockData=false;
 
     public ConfigManager(PlayerDataSQL pPlugin){
         super(pPlugin,"1.0");
@@ -27,6 +28,8 @@ public class ConfigManager extends TConfigManager<PlayerDataSQL>{
                 "如果数据库玩家数据不存在(在等待足够长时间后),PDS将不会从数据库还原玩家数据",
                 "此项配置的目的为可以自动导入数据未在数据库中的玩家,如果未开启,PDS将使用空白数据还原玩家",
                 "如果想使用此功能导入玩家数据,注意,数据库内一定要不存在该玩家的数据文件,并且玩家首次登录并且使用了此插件的服务器一定要有玩家的正确存档");
+        this.mConfig.addDefault("Plugin.ForceUseLockData",this.mForceUseLockData,"在指定超时时间读取数据仍然锁定,使用锁定的数据还原玩家"
+                + "否则会将会以读取SQL错误为由踢出玩家");
 
     }
 
@@ -43,6 +46,7 @@ public class ConfigManager extends TConfigManager<PlayerDataSQL>{
         this.mKickOnReadSQLError=this.mConfig.getBoolean("Plugin.KickOnReadSQLError",this.mKickOnReadSQLError);
         this.mNoRestoreIfSQLDataNotExist=this.mConfig.getBoolean("Plugin.NoRestoreIfSQLDataNotExist",this.mNoRestoreIfSQLDataNotExist);
         this.mUUIDMode=this.mConfig.getBoolean("Plugin.UseUUID",this.mUUIDMode);
+        this.mForceUseLockData=this.mConfig.getBoolean("Plugin.ForceUseLockData",this.mForceUseLockData);
 
         this.reloadModles(pSender);
         Log.info(pSender,C("MsgConfigReloaded"));

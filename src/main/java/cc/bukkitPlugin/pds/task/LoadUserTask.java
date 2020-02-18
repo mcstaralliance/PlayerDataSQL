@@ -70,7 +70,7 @@ public class LoadUserTask implements Runnable {
                     Log.debug("Load user data " + this.mName + " fail " + mRetry + (tUser == null ? "(no data and wait)" : "(Locked)"));
                 } else {
                     if (tUser != null && tUser.isLocked()) {
-                        if (this.tryKickIfError()) return;
+                        if (!this.mPlugin.getConfigManager().mForceUseLockData && this.tryKickIfError()) return;
                         else Log.warn("Use locked data to restore user " + this.mName);
                     }
                     this.restoreUser(tUser, false);
