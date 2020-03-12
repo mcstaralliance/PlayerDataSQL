@@ -12,7 +12,7 @@ public class ConfigManager extends TConfigManager<PlayerDataSQL>{
     public boolean mKickOnReadSQLError=true;
     public boolean mNoRestoreIfSQLDataNotExist=true;
     public boolean mUUIDMode=false;
-    public boolean mForceUseLockData=false;
+    public boolean mForceUseLockData=true;
 
     public ConfigManager(PlayerDataSQL pPlugin){
         super(pPlugin,"1.0");
