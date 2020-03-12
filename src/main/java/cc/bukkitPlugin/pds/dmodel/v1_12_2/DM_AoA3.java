@@ -10,8 +10,8 @@ import cc.commons.util.reflect.MethodUtil;
 
 public class DM_AoA3 extends ADM_CapabilityProvider {
 
-    private Object instance_GlobalEvents;
-    private Method method_GlobalEvents_onPlayerLogin;
+    private Object instance_EventListener;
+    private Method method_EventListener_onPlayerLogin;
 
     public DM_AoA3(PlayerDataSQL pPlugin) {
         super(pPlugin);
@@ -33,15 +33,18 @@ public class DM_AoA3 extends ADM_CapabilityProvider {
     @Override
     protected boolean initCapability() throws Exception {
         Class<?> tClazz = Class.forName("net.tslat.aoa3.event.GlobalEvents");
-        this.instance_GlobalEvents = ClassUtil.newInstance(tClazz);
-        this.method_GlobalEvents_onPlayerLogin = MethodUtil.getMethodIgnoreParam(tClazz, "onPlayerLogin", true).oneGet();
+        if (!MethodUtil.isMethodExist(tClazz, "onPlayerLogin", CapabilityHelper.clazz_PlayerLoggedInEvent, true)) {
+            tClazz = Class.forName("net.tslat.aoa3.event.PlayerEvents");
+        }
+        this.method_EventListener_onPlayerLogin = MethodUtil.getMethodIgnoreParam(tClazz, "onPlayerLogin", true).oneGet();
+        this.instance_EventListener = ClassUtil.newInstance(tClazz);
 
         return super.initCapability();
     }
 
     @Override
     public void updateAround(CPlayer pPlayer, Class<?> pProvider) {
-        MethodUtil.invokeMethod(method_GlobalEvents_onPlayerLogin, instance_GlobalEvents, CapabilityHelper.newLoginEvent(pPlayer));
+        MethodUtil.invokeMethod(method_EventListener_onPlayerLogin, instance_EventListener, CapabilityHelper.newLoginEvent(pPlayer));
 
         super.updateAround(pPlayer, pProvider);
     }
