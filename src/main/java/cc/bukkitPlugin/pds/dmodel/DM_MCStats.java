@@ -28,12 +28,24 @@ public class DM_MCStats extends ADataModel {
     private static final String MARK_STAT = "stat:";
     private static final String MARK_ADVANCE = "\nadvance:";
 
+    private static MCVersion mMCV = null;
+
     private Boolean mInit = null;
     private Method method_EntityPlayerMP_getStatisticMan;
-    /** Map loadStatistic(String) */
+    /**
+     * static Map loadStatistic(String) 1.12及以下<br>
+     * void parseLocal(DataFixer, String) 1.13及以上
+     */
     private Method method_StatisticsFile_loadStatistic;
-    /** String saveStatistic(Map) */
+    /**
+     * String saveStatistic(Map) 1.12及以下<br>
+     * String saveStatistic() 1.13及以上
+     */
     private Method method_StatisticsFile_saveStatistic;
+    /**
+     * Map 1.12及以下<br>
+     * Object2IntMaps 1.13及以上
+     */
     private Field field_StatFileWriter_stats;
     /** PlayerAdvancements EntityPlayerMP.getAdvancements() 1.12+ */
     private Method method_EntityPlayerMP_getAdvancementsMan = null;
@@ -45,6 +57,11 @@ public class DM_MCStats extends ADataModel {
     private Field field_AdvancementData_file = null;
     private Method method_AdvancementData_save = null;
     private Method method_AdvancementData_reload = null;
+
+    //1.13+
+    private Field field__ServerStatisticManager_server = null;
+    private Field field__MinecraftServer_dataFixer = null;
+    private Object mDataFixer = null;
 
     private File mDataDir;
 
@@ -75,25 +92,47 @@ public class DM_MCStats extends ADataModel {
                     if (FieldUtil.isDeclaredFieldExist(NMSUtil.clazz_EntityPlayerMP, FieldFilter.t(sMethod.getReturnType())))
                         this.method_EntityPlayerMP_getAdvancementsMan = sMethod;
                 }
-                if (this.method_EntityPlayerMP_getAdvancementsMan != null && this.method_EntityPlayerMP_getStatisticMan != null) break;
+                if (this.method_EntityPlayerMP_getAdvancementsMan != null
+                        && this.method_EntityPlayerMP_getStatisticMan != null) break;
             }
         }
 
         if (this.method_EntityPlayerMP_getStatisticMan == null)
             return (this.mInit = false);
 
-        Class<?> tClazz = this.method_EntityPlayerMP_getStatisticMan.getReturnType();
-        this.method_StatisticsFile_loadStatistic = MethodUtil.getDeclaredMethod(tClazz, MethodFilter.rpt(Map.class, String.class)).first();
-        this.method_StatisticsFile_saveStatistic = MethodUtil.getDeclaredMethod(tClazz, MethodFilter.rpt(String.class, Map.class)).first();
-        this.field_StatFileWriter_stats = FieldUtil.getDeclaredField(tClazz.getSuperclass(), FieldFilter.t(Map.class)).first();
-
+        Class<?> tClazz;
         if (this.method_EntityPlayerMP_getAdvancementsMan != null) {
+            mMCV = MCVersion.v1_12_2;
             tClazz = this.method_EntityPlayerMP_getAdvancementsMan.getReturnType();
             this.field_AdvancementData_file = FieldUtil.getDeclaredField(tClazz, FieldFilter.t(File.class)).oneGet();
             this.field_AdvancementData_progress = FieldUtil.getDeclaredField(tClazz, FieldFilter.t(Map.class)).oneGet();
+        } else {
+            mMCV = MCVersion.v1_7_10;
         }
-        //TODO 兼容1.13
 
+        tClazz = this.method_EntityPlayerMP_getStatisticMan.getReturnType();
+        if (MethodUtil.isMethodExist(tClazz, MethodFilter.rpt(Map.class, String.class))) {
+            //1.7.10,1.12.2
+            this.method_StatisticsFile_loadStatistic = MethodUtil.getDeclaredMethod(tClazz,
+                    MethodFilter.rpt(Map.class, String.class)).first();
+            this.method_StatisticsFile_saveStatistic = MethodUtil.getDeclaredMethod(tClazz,
+                    MethodFilter.rpt(String.class, Map.class)).first();
+        } else {
+            //1.13+
+            mMCV = MCVersion.v1_13_ABOVE;
+            this.field__ServerStatisticManager_server = FieldUtil.getDeclaredField(tClazz,
+                    (field) -> field.getType().getSimpleName().equals("MinecraftServer")).oneGet();
+            this.field__MinecraftServer_dataFixer = FieldUtil.getDeclaredField(this.field__ServerStatisticManager_server.getType(),
+                    (field) -> field.getType().getSimpleName().equals("DataFixer")).oneGet();
+
+            this.method_StatisticsFile_loadStatistic = MethodUtil.getDeclaredMethod(tClazz,
+                    MethodFilter.rpt(void.class, this.field__MinecraftServer_dataFixer.getType(), String.class)).first();
+            this.method_StatisticsFile_saveStatistic = MethodUtil.getDeclaredMethod(tClazz,
+                    MethodFilter.rpt(String.class)).first();
+        }
+
+        this.field_StatFileWriter_stats = FieldUtil.getDeclaredField(tClazz.getSuperclass(),
+                (field) -> Map.class.isAssignableFrom(field.getType())).first();
         return true;
     }
 
@@ -101,7 +140,13 @@ public class DM_MCStats extends ADataModel {
     public byte[] getData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws Exception {
         StringBuilder tSBuilder = new StringBuilder(MARK_STAT);
         Object tStatMan = this.getStatMan(pPlayer);
-        String tJson = (String)MethodUtil.invokeMethod(this.method_StatisticsFile_saveStatistic, tStatMan, this.getManStatValue(tStatMan));
+        String tJson;
+        if (mMCV.ordinal() <= MCVersion.v1_12_2.ordinal()) {
+            tJson = (String)MethodUtil.invokeMethod(this.method_StatisticsFile_saveStatistic,
+                    tStatMan, this.getManStatValue(tStatMan));
+        } else {
+            tJson = (String)MethodUtil.invokeMethod(this.method_StatisticsFile_saveStatistic, tStatMan);
+        }
         tSBuilder.append(tJson);
         tSBuilder.append(MARK_ADVANCE);
 
@@ -125,8 +170,6 @@ public class DM_MCStats extends ADataModel {
     @Override
     public void restore(CPlayer pPlayer, byte[] pData) throws Exception {
         Object tStatMan = this.getStatMan(pPlayer);
-        Map<Object, Object> tPlayerStatValue = this.getManStatValue(tStatMan);
-        tPlayerStatValue.clear();
         String tDataStr = new String(pData, UTF_8);
         String tStat, tAdvancement;
         if (tDataStr.startsWith(MARK_STAT)) {
@@ -138,7 +181,20 @@ public class DM_MCStats extends ADataModel {
             tStat = tDataStr;
             tAdvancement = "";
         }
-        tPlayerStatValue.putAll((Map<Object, Object>)MethodUtil.invokeMethod(this.method_StatisticsFile_loadStatistic, tStatMan, tStat));
+
+        if (mMCV.ordinal() <= MCVersion.v1_12_2.ordinal()) {
+            Map<Object, Object> tPlayerStatValue = this.getManStatValue(tStatMan);
+            tPlayerStatValue.clear();
+            tPlayerStatValue.putAll((Map<Object, Object>)MethodUtil.invokeMethod(this.method_StatisticsFile_loadStatistic,
+                    tStatMan, tStat));
+        } else {
+            if (this.mDataFixer == null) {
+                this.mDataFixer = FieldUtil.getFieldValue(field__MinecraftServer_dataFixer,
+                        FieldUtil.getFieldValue(field__ServerStatisticManager_server, tStatMan));
+            }
+
+            MethodUtil.invokeMethod(method_StatisticsFile_loadStatistic, tStatMan, this.mDataFixer, tStat);
+        }
 
         if (this.method_EntityPlayerMP_getAdvancementsMan != null) {
             Object tAdvance = MethodUtil.invokeMethod(method_EntityPlayerMP_getAdvancementsMan, pPlayer.getNMSPlayer());
@@ -176,13 +232,6 @@ public class DM_MCStats extends ADataModel {
             Map<Object, Object> tAdvcData = (Map<Object, Object>)FieldUtil.getFieldValue(field_AdvancementData_progress, tAdvance);
             tAdvcData.clear();
         }
-    }
-
-    protected void loadDataFromString(CPlayer pToPlayer, String pData) {
-        Object tStatMan = this.getStatMan(pToPlayer);
-        Map<Object, Object> tPlayerStatValue = this.getManStatValue(tStatMan);
-        tPlayerStatValue.clear();
-        tPlayerStatValue.putAll((Map<Object, Object>)MethodUtil.invokeMethod(this.method_StatisticsFile_loadStatistic, tStatMan, pData));
     }
 
     private Object getStatMan(CPlayer pPlayer) {
@@ -260,6 +309,12 @@ public class DM_MCStats extends ADataModel {
             this.mReadMark = true;
             return super.isFile();
         }
+    }
+
+    public static enum MCVersion {
+        v1_7_10,
+        v1_12_2,
+        v1_13_ABOVE;
     }
 
 }
