@@ -6,14 +6,12 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
-import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.bukkitPlugin.commons.plugin.ABukkitPlugin;
 import cc.bukkitPlugin.commons.plugin.manager.fileManager.IConfigModel;
 import cc.bukkitPlugin.commons.util.BukkitUtil;
@@ -29,7 +27,9 @@ import cc.bukkitPlugin.pds.storage.IStorage;
 import cc.bukkitPlugin.pds.storage.MySQL;
 import cc.bukkitPlugin.pds.user.UserManager;
 import cc.bukkitPlugin.pds.util.CPlayer;
+import cc.bukkitPlugin.pds.util.PDSNBTUtil;
 import cc.commons.util.reflect.ClassUtil;
+import lombok.Getter;
 
 public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
 
@@ -64,8 +64,8 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL>{
      */
     public void onEnable(){
         // 强制初始化工具类
-        NMSUtil.class.getName();
-        NBTUtil.class.getName();
+        String.valueOf(NMSUtil.mTestAPIVersion).length();
+        String.valueOf(PDSNBTUtil.NBT_Byte).length();
         // 注册管理器
         this.setLangManager(new LangManager(this));
         this.registerManager(this.getLangManager());
