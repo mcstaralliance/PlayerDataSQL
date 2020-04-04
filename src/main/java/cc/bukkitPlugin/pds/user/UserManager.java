@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -84,13 +85,11 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
      * @param pReciver
      *            消息接收者
      */
-    public void restoreUser(CPlayer pPlayer,User pUser,CommandSender pReciver){
-        if(Bukkit.isPrimaryThread()){
-            this.restoreUser0(pUser,pPlayer,pReciver);
-        }else{
-            Bukkit.getScheduler().runTask(this.mPlugin,()->restoreUser0(pUser,pPlayer,pReciver));
-        }
+    public void restoreUser(CPlayer pPlayer, User pUser, CommandSender pReciver) {
+        Bukkit.getScheduler().callSyncMethod(this.mPlugin,
+                Executors.callable(() -> restoreUser0(pUser, pPlayer, pReciver)));
     }
+
 
     /**
      * 为用户从数据库载入数据
