@@ -17,47 +17,47 @@ import cc.bukkitPlugin.pds.user.User;
 import cc.bukkitPlugin.pds.user.UserManager;
 import cc.bukkitPlugin.pds.util.CPlayer;
 
-public class PlayerListener extends AListener<PlayerDataSQL>{
+public class PlayerListener extends AListener<PlayerDataSQL> {
 
     private UserManager mUserMan;
 
-    public PlayerListener(PlayerDataSQL pPlugin,UserManager pUserMan){
+    public PlayerListener(PlayerDataSQL pPlugin, UserManager pUserMan) {
         super(pPlugin);
 
-        this.mUserMan=pUserMan;
+        this.mUserMan = pUserMan;
     }
 
     @EventHandler
-    public void onLogin(PlayerLoginEvent pEvent){
-        Player tPlayer=pEvent.getPlayer();
-        Log.debug("Lock user "+tPlayer.getName()+" done!");
+    public void onLogin(PlayerLoginEvent pEvent) {
+        Player tPlayer = pEvent.getPlayer();
+        Log.debug("Lock user " + tPlayer.getName() + " done!");
         this.mUserMan.lockUser(tPlayer.getName());
     }
 
     @EventHandler
-    public void onJoin(PlayerJoinEvent pEvent){
-        if(!this.mPlugin.getConfigManager().mNoRestoreIfSQLDataNotExist){
+    public void onJoin(PlayerJoinEvent pEvent) {
+        if (!this.mPlugin.getConfigManager().mNoRestoreIfSQLDataNotExist) {
             this.mUserMan.cleanPlayerData(pEvent.getPlayer());
         }
-        Bukkit.getScheduler().runTaskAsynchronously(this.mPlugin,new LoadUserTask(pEvent.getPlayer(),this.mUserMan));
+        Bukkit.getScheduler().runTaskAsynchronously(this.mPlugin, new LoadUserTask(pEvent.getPlayer(), this.mUserMan));
     }
 
-    @EventHandler(priority=MONITOR)
-    public void onQuit(PlayerQuitEvent pEvent){
-        String tPlayer=pEvent.getPlayer().getName();
+    @EventHandler(priority = MONITOR)
+    public void onQuit(PlayerQuitEvent pEvent) {
+        String tPlayer = pEvent.getPlayer().getName();
         Log.debug("Handle player quit");
-        if(this.mUserMan.isNotLocked(tPlayer)){
+        if (this.mUserMan.isNotLocked(tPlayer)) {
             this.mUserMan.cancelSaveTask(tPlayer);
-            User tUser=this.mUserMan.getUserData(new CPlayer(pEvent.getPlayer()),true);
-            Bukkit.getScheduler().runTaskAsynchronously(this.mPlugin,()->{
-                int i=3;
-                do{
-                    if(this.mUserMan.saveUser(tUser,false)) break;
-                }while(--i>0);
-                if(i<=0){
+            User tUser = this.mUserMan.getUserData(new CPlayer(pEvent.getPlayer()), true);
+            Bukkit.getScheduler().runTaskAsynchronously(this.mPlugin, () -> {
+                int i = 3;
+                do {
+                    if (this.mUserMan.saveUser(tUser, false)) break;
+                } while (--i > 0);
+                if (i <= 0) {
                     Log.debug("Fail to save player data,try times 3!");
                 }
-                this.mUserMan.unlockUser(tPlayer,true);
+                this.mUserMan.unlockUser(tPlayer, true);
             });
         } else this.mUserMan.unlockUser(tPlayer, false);
     }

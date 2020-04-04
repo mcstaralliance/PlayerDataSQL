@@ -8,7 +8,7 @@ import org.bukkit.plugin.Plugin;
 
 import cc.bukkitPlugin.pds.util.CPlayer;
 
-public interface IDataModel{
+public interface IDataModel {
 
     public Plugin getPlugin();
 
@@ -47,7 +47,7 @@ public interface IDataModel{
      * @throws Exception
      *             序列化数据时发生异常
      */
-    public byte[] getData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws Exception;
+    public byte[] getData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws Exception;
 
     /**
      * 使用序列化的数据还原玩家数据
@@ -59,7 +59,7 @@ public interface IDataModel{
      * @throws Exception
      *             反序列化与设置数据过程中发生异常
      */
-    public void restore(CPlayer pPlayer,byte[] pData) throws Exception;
+    public void restore(CPlayer pPlayer, byte[] pData) throws Exception;
 
     /**
      * 载入玩家的文件数据
@@ -72,7 +72,7 @@ public interface IDataModel{
      * @throws IOException
      *             读取文件时发生异常
      */
-    public byte[] loadFileData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException;
+    public byte[] loadFileData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws IOException;
 
     /**
      * 清理玩家此模块的数据
@@ -82,7 +82,7 @@ public interface IDataModel{
      * 
      * @param pPlayer
      *            要清理数据的玩家
-     * @throws Exception 
+     * @throws Exception
      */
     public void cleanData(CPlayer pPlayer) throws Exception;
 

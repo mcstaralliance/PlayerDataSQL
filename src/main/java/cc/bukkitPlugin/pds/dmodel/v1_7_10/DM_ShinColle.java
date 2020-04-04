@@ -6,29 +6,29 @@ import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.util.reflect.MethodUtil;
 
-public class DM_ShinColle extends ADM_InVanilla{
+public class DM_ShinColle extends ADM_InVanilla {
 
-    private Method method_ExtendPlayerProps_syncShips=null;
+    private Method method_ExtendPlayerProps_syncShips = null;
 
-    public DM_ShinColle(PlayerDataSQL pPlugin){
-        super(pPlugin,"com.lulan.shincolle.entity.ExtendPlayerProps","TeitokuExtProps");
+    public DM_ShinColle(PlayerDataSQL pPlugin) {
+        super(pPlugin, "com.lulan.shincolle.entity.ExtendPlayerProps", "TeitokuExtProps");
     }
 
     @Override
-    public String getModelId(){
+    public String getModelId() {
         return "ShinColle";
     }
 
     @Override
-    public String getDesc(){
+    public String getDesc() {
         return "舰队收藏";
     }
 
     @Override
-    protected boolean initOnce() throws Exception{
+    protected boolean initOnce() throws Exception {
         this.initExProp();
 
-        this.method_ExtendPlayerProps_syncShips=MethodUtil.getMethod(this.mExPropClazz,"syncShips",true);
+        this.method_ExtendPlayerProps_syncShips = MethodUtil.getMethod(this.mExPropClazz, "syncShips", true);
 
         // 舰娘的TAG
         this.mModelTags.add(this.mExPropName);
@@ -37,8 +37,8 @@ public class DM_ShinColle extends ADM_InVanilla{
     }
 
     @Override
-    protected void updateToAround(CPlayer pPlayer,Object pExProp){
-        MethodUtil.invokeMethod(this.method_ExtendPlayerProps_syncShips,pExProp);
+    protected void updateToAround(CPlayer pPlayer, Object pExProp) {
+        MethodUtil.invokeMethod(this.method_ExtendPlayerProps_syncShips, pExProp);
     }
 
 }

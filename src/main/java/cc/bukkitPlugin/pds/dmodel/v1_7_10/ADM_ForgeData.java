@@ -14,35 +14,35 @@ import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.bukkitPlugin.pds.util.PDSNBTUtil;
 import cc.commons.util.reflect.MethodUtil;
 
-public abstract class ADM_ForgeData extends ADataModel{
+public abstract class ADM_ForgeData extends ADataModel {
 
-    protected final HashSet<String> mModelTags=new HashSet<>();
+    protected final HashSet<String> mModelTags = new HashSet<>();
 
     private static Method method_Entity_getEntityData;
 
-    static{
-        try{
-            method_Entity_getEntityData=MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity,"getEntityData",true).get(0);
-        }catch(IllegalStateException ignore){
+    static {
+        try {
+            method_Entity_getEntityData = MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity, "getEntityData", true).get(0);
+        } catch (IllegalStateException ignore) {
         }
     }
 
-    public ADM_ForgeData(PlayerDataSQL pPlugin){
+    public ADM_ForgeData(PlayerDataSQL pPlugin) {
         super(pPlugin);
     }
 
-    public Object getEntityData(CPlayer pPlayer){
-        return MethodUtil.invokeMethod(method_Entity_getEntityData,pPlayer.getNMSPlayer());
+    public Object getEntityData(CPlayer pPlayer) {
+        return MethodUtil.invokeMethod(method_Entity_getEntityData, pPlayer.getNMSPlayer());
     }
 
     @Override
-    public byte[] getData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
-        Object tNBT=this.getEntityData(pPlayer);
-        Map<String,Object> tNBTValue=NBTUtil.getNBTTagCompoundValue(tNBT);
-        Map<String,Object> tRemoved=new HashMap<>();
-        for(String sKey : this.mModelTags){
-            Object tValue=tNBTValue.remove(sKey);
-            if(tValue!=null) tRemoved.put(sKey,tValue);
+    public byte[] getData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws Exception {
+        Object tNBT = this.getEntityData(pPlayer);
+        Map<String, Object> tNBTValue = NBTUtil.getNBTTagCompoundValue(tNBT);
+        Map<String, Object> tRemoved = new HashMap<>();
+        for (String sKey : this.mModelTags) {
+            Object tValue = tNBTValue.remove(sKey);
+            if (tValue != null) tRemoved.put(sKey, tValue);
         }
 
         tNBTValue.clear();
@@ -51,31 +51,31 @@ public abstract class ADM_ForgeData extends ADataModel{
     }
 
     @Override
-    public void restore(CPlayer pPlayer,byte[] pData) throws Exception{
+    public void restore(CPlayer pPlayer, byte[] pData) throws Exception {
         this.cleanData(pPlayer);
-        if(pData.length==0) return;
+        if (pData.length == 0) return;
 
-        Object tNBT=this.getEntityData(pPlayer);
-        Map<String,Object> tNBTValue=NBTUtil.getNBTTagCompoundValue(tNBT);
-        Map<String,Object> tRestoreNBTValue=NBTUtil.getNBTTagCompoundValue(this.correctNBTData(PDSNBTUtil.decompressNBT(pData)));
+        Object tNBT = this.getEntityData(pPlayer);
+        Map<String, Object> tNBTValue = NBTUtil.getNBTTagCompoundValue(tNBT);
+        Map<String, Object> tRestoreNBTValue = NBTUtil.getNBTTagCompoundValue(this.correctNBTData(PDSNBTUtil.decompressNBT(pData)));
 
         tNBTValue.putAll(tRestoreNBTValue);
         this.updateToAround(pPlayer);
     }
 
     @Override
-    public byte[] loadFileData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException{
+    public byte[] loadFileData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws IOException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void cleanData(CPlayer pPlayer){
-        Object tNBT=this.getEntityData(pPlayer);
-        Map<String,Object> tNBTValue=NBTUtil.getNBTTagCompoundValue(tNBT);
-        for(String sKey : this.mModelTags){
+    public void cleanData(CPlayer pPlayer) {
+        Object tNBT = this.getEntityData(pPlayer);
+        Map<String, Object> tNBTValue = NBTUtil.getNBTTagCompoundValue(tNBT);
+        for (String sKey : this.mModelTags) {
             tNBTValue.remove(sKey);
         }
-        
+
         this.correctNBTData(tNBT);
     }
 
@@ -86,7 +86,7 @@ public abstract class ADM_ForgeData extends ADataModel{
      *            要修正的NBT数据
      * @return 修正后的数据
      */
-    public Object correctNBTData(Object pNBTTag){
+    public Object correctNBTData(Object pNBTTag) {
         return pNBTTag;
     }
 

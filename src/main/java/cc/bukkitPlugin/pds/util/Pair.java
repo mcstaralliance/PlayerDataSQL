@@ -13,12 +13,12 @@ public class Pair<K, V> {
         this.key = pKey;
         this.value = pValue;
     }
-    
+
     @Override
     public String toString() {
-        return this.getKey()+" = "+this.getValue();
+        return this.getKey() + " = " + this.getValue();
     }
-    
+
     @Override
     public int hashCode() {
         return this.toString().hashCode();

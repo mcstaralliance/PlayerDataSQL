@@ -24,117 +24,117 @@ import cc.bukkitPlugin.commons.plugin.AListener;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.user.UserManager;
 
-public class PreventListener extends AListener<PlayerDataSQL>{
+public class PreventListener extends AListener<PlayerDataSQL> {
 
     private UserManager mUserMan;
 
-    public PreventListener(PlayerDataSQL pPlugin,UserManager pUserMan){
+    public PreventListener(PlayerDataSQL pPlugin, UserManager pUserMan) {
         super(pPlugin);
-        this.mUserMan=pUserMan;
+        this.mUserMan = pUserMan;
 
     }
 
-    @EventHandler(priority=LOWEST)
-    public void pre(AsyncPlayerChatEvent pEvent){
+    @EventHandler(priority = LOWEST)
+    public void pre(AsyncPlayerChatEvent pEvent) {
         this.post(pEvent);
     }
 
-    @EventHandler(ignoreCancelled=true,priority=HIGHEST)
-    public void post(AsyncPlayerChatEvent pEvent){
-        this.handle(pEvent.getPlayer(),pEvent);
+    @EventHandler(ignoreCancelled = true, priority = HIGHEST)
+    public void post(AsyncPlayerChatEvent pEvent) {
+        this.handle(pEvent.getPlayer(), pEvent);
     }
 
-    @EventHandler(priority=LOWEST)
-    public void pre(EntityDamageEvent pEvent){
+    @EventHandler(priority = LOWEST)
+    public void pre(EntityDamageEvent pEvent) {
         post(pEvent);
     }
 
-    @EventHandler(ignoreCancelled=true,priority=HIGHEST)
-    public void post(EntityDamageEvent pEvent){
-        if(pEvent.getEntity() instanceof Player){
-            this.handle((Player)pEvent.getEntity(),pEvent);
+    @EventHandler(ignoreCancelled = true, priority = HIGHEST)
+    public void post(EntityDamageEvent pEvent) {
+        if (pEvent.getEntity() instanceof Player) {
+            this.handle((Player)pEvent.getEntity(), pEvent);
         }
     }
 
-    @EventHandler(priority=LOWEST)
-    public void pre(InventoryClickEvent pEvent){
+    @EventHandler(priority = LOWEST)
+    public void pre(InventoryClickEvent pEvent) {
         post(pEvent);
     }
 
-    @EventHandler(ignoreCancelled=true,priority=HIGHEST)
-    public void post(InventoryClickEvent pEvent){
-        HumanEntity tWho=pEvent.getWhoClicked();
-        if(tWho instanceof Player&&this.mUserMan.isLocked(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID")?tWho.getUniqueId().toString():tWho.getName())){
+    @EventHandler(ignoreCancelled = true, priority = HIGHEST)
+    public void post(InventoryClickEvent pEvent) {
+        HumanEntity tWho = pEvent.getWhoClicked();
+        if (tWho instanceof Player && this.mUserMan.isLocked(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID") ? tWho.getUniqueId().toString() : tWho.getName())) {
             pEvent.setCancelled(true);
             tWho.closeInventory();
         }
     }
 
-    @EventHandler(priority=LOWEST)
-    public void pre(PlayerPickupItemEvent pEvent){
+    @EventHandler(priority = LOWEST)
+    public void pre(PlayerPickupItemEvent pEvent) {
         this.post(pEvent);
     }
 
-    @EventHandler(ignoreCancelled=true,priority=HIGHEST)
-    public void post(PlayerPickupItemEvent pEvent){
-        this.handle(pEvent.getPlayer(),pEvent);
+    @EventHandler(ignoreCancelled = true, priority = HIGHEST)
+    public void post(PlayerPickupItemEvent pEvent) {
+        this.handle(pEvent.getPlayer(), pEvent);
     }
 
-    @EventHandler(priority=LOWEST)
-    public void pre(PlayerDropItemEvent pEvent){
+    @EventHandler(priority = LOWEST)
+    public void pre(PlayerDropItemEvent pEvent) {
         this.post(pEvent);
     }
 
-    @EventHandler(ignoreCancelled=true,priority=HIGHEST)
-    public void post(PlayerDropItemEvent pEvent){
-        this.handle(pEvent.getPlayer(),pEvent);
+    @EventHandler(ignoreCancelled = true, priority = HIGHEST)
+    public void post(PlayerDropItemEvent pEvent) {
+        this.handle(pEvent.getPlayer(), pEvent);
     }
 
-    @EventHandler(priority=LOWEST)
-    public void pre(PlayerInteractEntityEvent pEvent){
+    @EventHandler(priority = LOWEST)
+    public void pre(PlayerInteractEntityEvent pEvent) {
         this.post(pEvent);
     }
 
-    @EventHandler(ignoreCancelled=true,priority=HIGHEST)
-    public void post(PlayerInteractEntityEvent pEvent){
-        this.handle(pEvent.getPlayer(),pEvent);
+    @EventHandler(ignoreCancelled = true, priority = HIGHEST)
+    public void post(PlayerInteractEntityEvent pEvent) {
+        this.handle(pEvent.getPlayer(), pEvent);
     }
 
-    @EventHandler(priority=LOWEST)
-    public void pre(PlayerInteractEvent pEvent){
+    @EventHandler(priority = LOWEST)
+    public void pre(PlayerInteractEvent pEvent) {
         this.post(pEvent);
     }
 
-    @EventHandler(priority=HIGHEST)
-    public void post(PlayerInteractEvent pEvent){
-        this.handle(pEvent.getPlayer(),pEvent);
+    @EventHandler(priority = HIGHEST)
+    public void post(PlayerInteractEvent pEvent) {
+        this.handle(pEvent.getPlayer(), pEvent);
     }
 
-    @EventHandler(priority=LOWEST)
-    public void pre(PlayerCommandPreprocessEvent pEvent){
+    @EventHandler(priority = LOWEST)
+    public void pre(PlayerCommandPreprocessEvent pEvent) {
         this.post(pEvent);
     }
 
-    @EventHandler(ignoreCancelled=true,priority=HIGHEST)
-    public void post(PlayerCommandPreprocessEvent pEvent){
-        this.handle(pEvent.getPlayer(),pEvent);
+    @EventHandler(ignoreCancelled = true, priority = HIGHEST)
+    public void post(PlayerCommandPreprocessEvent pEvent) {
+        this.handle(pEvent.getPlayer(), pEvent);
     }
 
-    @EventHandler(priority=LOWEST)
-    public void pre(PlayerToggleSneakEvent pEvent){
+    @EventHandler(priority = LOWEST)
+    public void pre(PlayerToggleSneakEvent pEvent) {
         this.post(pEvent);
     }
 
-    @EventHandler(ignoreCancelled=true,priority=HIGHEST)
-    public void post(PlayerToggleSneakEvent pEvent){
-        this.handle(pEvent.getPlayer(),pEvent);
+    @EventHandler(ignoreCancelled = true, priority = HIGHEST)
+    public void post(PlayerToggleSneakEvent pEvent) {
+        this.handle(pEvent.getPlayer(), pEvent);
     }
 
     @EventHandler
-    public void handle(PlayerMoveEvent pEvent){
-        if(this.mUserMan.isLocked(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID")?pEvent.getPlayer().getUniqueId().toString():pEvent.getPlayer().getName())){
-            Location tFromLoc=pEvent.getFrom();
-            Location tToLoc=pEvent.getTo();
+    public void handle(PlayerMoveEvent pEvent) {
+        if (this.mUserMan.isLocked(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID") ? pEvent.getPlayer().getUniqueId().toString() : pEvent.getPlayer().getName())) {
+            Location tFromLoc = pEvent.getFrom();
+            Location tToLoc = pEvent.getTo();
             tFromLoc.setYaw(tToLoc.getYaw());
             tFromLoc.setPitch(tToLoc.getPitch());
             pEvent.setTo(tFromLoc);
@@ -150,15 +150,15 @@ public class PreventListener extends AListener<PlayerDataSQL>{
      *            事件
      * @return 是否取消
      */
-    protected boolean handle(OfflinePlayer pPlayer,Cancellable pEvent){
-        if(this.mUserMan.isLocked(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID")?pPlayer.getUniqueId().toString():pPlayer.getName())){
+    protected boolean handle(OfflinePlayer pPlayer, Cancellable pEvent) {
+        if (this.mUserMan.isLocked(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID") ? pPlayer.getUniqueId().toString() : pPlayer.getName())) {
             pEvent.setCancelled(true);
             return true;
         }
         return false;
     }
 
-    public UserManager getManager(){
+    public UserManager getManager() {
         return this.mUserMan;
     }
 

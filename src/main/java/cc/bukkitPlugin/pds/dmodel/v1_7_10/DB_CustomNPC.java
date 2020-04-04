@@ -14,7 +14,7 @@ import cc.commons.util.reflect.FieldUtil;
 import cc.commons.util.reflect.MethodUtil;
 import cc.commons.util.reflect.filter.FieldFilter;
 
-public class DB_CustomNPC extends ADM_InVanilla{
+public class DB_CustomNPC extends ADM_InVanilla {
 
     private Object value_PlayerDataController_instance;
     private Method method_PlayerDataController_getPlayerData;
@@ -23,79 +23,79 @@ public class DB_CustomNPC extends ADM_InVanilla{
     /** public void readNBT(NBTTagCompound) */
     private Method method_PlayerData_readNBT;
 
-    public DB_CustomNPC(PlayerDataSQL pPlugin){
-        super(pPlugin,"noppes.npcs.controllers.PlayerData","CustomNpcsData");
+    public DB_CustomNPC(PlayerDataSQL pPlugin) {
+        super(pPlugin, "noppes.npcs.controllers.PlayerData", "CustomNpcsData");
     }
 
     @Override
-    public String getModelId(){
+    public String getModelId() {
         return "CustomNPC";
     }
 
     @Override
-    public String getDesc(){
+    public String getDesc() {
         return "自定义NPC";
     }
 
     @Override
-    protected boolean initOnce() throws Exception{
+    protected boolean initOnce() throws Exception {
         this.initExProp();
 
         this.mModelTags.add("CustomNpcsId");
         this.mModelTags.add("CustomNpcsData");
 
-        Class<?> tClazz=Class.forName("noppes.npcs.controllers.PlayerDataController");
-        this.method_PlayerDataController_getPlayerData=MethodUtil.getMethod(tClazz,"getPlayerData",NMSUtil.clazz_EntityPlayer,true);
-        Field tField=FieldUtil.getDeclaredField(tClazz,FieldFilter.t(tClazz)).first();
-        this.value_PlayerDataController_instance=FieldUtil.getStaticFieldValue(tField);
-        if(this.value_PlayerDataController_instance==null){
-            this.value_PlayerDataController_instance=ClassUtil.newInstance(tClazz);
+        Class<?> tClazz = Class.forName("noppes.npcs.controllers.PlayerDataController");
+        this.method_PlayerDataController_getPlayerData = MethodUtil.getMethod(tClazz, "getPlayerData", NMSUtil.clazz_EntityPlayer, true);
+        Field tField = FieldUtil.getDeclaredField(tClazz, FieldFilter.t(tClazz)).first();
+        this.value_PlayerDataController_instance = FieldUtil.getStaticFieldValue(tField);
+        if (this.value_PlayerDataController_instance == null) {
+            this.value_PlayerDataController_instance = ClassUtil.newInstance(tClazz);
             tField.setAccessible(true);
-            tField.set(null,this.value_PlayerDataController_instance);
+            tField.set(null, this.value_PlayerDataController_instance);
         }
 
-        this.method_PlayerData_getNBT=MethodUtil.getMethod(this.mExPropClazz,"getNBT",true);
+        this.method_PlayerData_getNBT = MethodUtil.getMethod(this.mExPropClazz, "getNBT", true);
 
-        if(MethodUtil.isMethodExist(this.mExPropClazz,"readNBT",NBTUtil.clazz_NBTTagCompound,true)){
-            this.method_PlayerData_readNBT=MethodUtil.getMethod(this.mExPropClazz,"readNBT",NBTUtil.clazz_NBTTagCompound,true);
-        }else{
-            this.method_PlayerData_readNBT=MethodUtil.getMethod(this.mExPropClazz,"setNBT",NBTUtil.clazz_NBTTagCompound,true);
+        if (MethodUtil.isMethodExist(this.mExPropClazz, "readNBT", NBTUtil.clazz_NBTTagCompound, true)) {
+            this.method_PlayerData_readNBT = MethodUtil.getMethod(this.mExPropClazz, "readNBT", NBTUtil.clazz_NBTTagCompound, true);
+        } else {
+            this.method_PlayerData_readNBT = MethodUtil.getMethod(this.mExPropClazz, "setNBT", NBTUtil.clazz_NBTTagCompound, true);
         }
 
         return true;
     }
 
     @Override
-    public byte[] getData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
-        Object tData=this.getExProp(pPlayer);
-        if(tData==null) return new byte[0];
+    public byte[] getData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws Exception {
+        Object tData = this.getExProp(pPlayer);
+        if (tData == null) return new byte[0];
 
-        return PDSNBTUtil.compressNBT(MethodUtil.invokeMethod(this.method_PlayerData_getNBT,tData));
+        return PDSNBTUtil.compressNBT(MethodUtil.invokeMethod(this.method_PlayerData_getNBT, tData));
     }
 
     @Override
-    public void restore(CPlayer pPlayer,byte[] pData) throws Exception{
+    public void restore(CPlayer pPlayer, byte[] pData) throws Exception {
         this.cleanData(pPlayer);
-        if(pData.length==0) return;
+        if (pData.length == 0) return;
 
-        Object tExProp=this.getExProp(pPlayer);
-        if(tExProp==null) return;
+        Object tExProp = this.getExProp(pPlayer);
+        if (tExProp == null) return;
 
-        MethodUtil.invokeMethod(this.method_PlayerData_readNBT,tExProp,PDSNBTUtil.decompressNBT(pData));
-        this.updateToAround(pPlayer,tExProp);
+        MethodUtil.invokeMethod(this.method_PlayerData_readNBT, tExProp, PDSNBTUtil.decompressNBT(pData));
+        this.updateToAround(pPlayer, tExProp);
     }
 
     @Override
-    protected Object getExProp(CPlayer pPlayer){
-        return MethodUtil.invokeMethod(this.method_PlayerDataController_getPlayerData,this.value_PlayerDataController_instance,pPlayer.getNMSPlayer());
+    protected Object getExProp(CPlayer pPlayer) {
+        return MethodUtil.invokeMethod(this.method_PlayerDataController_getPlayerData, this.value_PlayerDataController_instance, pPlayer.getNMSPlayer());
     }
 
     @Override
-    protected void registerExProp(CPlayer pPlayer){
+    protected void registerExProp(CPlayer pPlayer) {
         this.getExProp(pPlayer);
     }
 
     @Override
-    protected void updateToAround(CPlayer pPlayer,Object pExProp){}
+    protected void updateToAround(CPlayer pPlayer, Object pExProp) {}
 
 }

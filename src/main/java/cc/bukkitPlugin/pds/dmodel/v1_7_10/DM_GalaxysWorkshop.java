@@ -2,21 +2,21 @@ package cc.bukkitPlugin.pds.dmodel.v1_7_10;
 
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 
-public class DM_GalaxysWorkshop extends DM_ArmourersWorkshop{
+public class DM_GalaxysWorkshop extends DM_ArmourersWorkshop {
 
-    public static final String EXT_PROP_NAME="playerCustomEquipmentData";
+    public static final String EXT_PROP_NAME = "playerCustomEquipmentData";
 
-    public DM_GalaxysWorkshop(PlayerDataSQL pPlugin){
-        super(pPlugin,"wang.magick.galaxyworkshop.skin.ExPropsPlayerEquipmentData",EXT_PROP_NAME);
+    public DM_GalaxysWorkshop(PlayerDataSQL pPlugin) {
+        super(pPlugin, "wang.magick.galaxyworkshop.skin.ExPropsPlayerEquipmentData", EXT_PROP_NAME);
     }
 
     @Override
-    public String getModelId(){
+    public String getModelId() {
         return "GalaxysWorkshop";
     }
 
     @Override
-    public String getDesc(){
+    public String getDesc() {
         return "银河时装工坊";
     }
 

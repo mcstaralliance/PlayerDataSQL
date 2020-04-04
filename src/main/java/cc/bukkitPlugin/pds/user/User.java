@@ -16,91 +16,91 @@ import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.util.ByteUtil;
 import cc.commons.util.IOUtil;
 
-public class User{
+public class User {
 
-    public static final String COL_NAME="name";
-    public static final String COL_LOCK="locked";
-    public static final String COL_DATA="data";
+    public static final String COL_NAME = "name";
+    public static final String COL_LOCK = "locked";
+    public static final String COL_DATA = "data";
 
     /** 标识,玩家名字 */
     private CPlayer mPlayer;
     /** 数据是否被锁定 */
     public boolean mLocked;
     /** 数据,key请保证小写 */
-    private ConcurrentHashMap<String,byte[]> mData=new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, byte[]> mData = new ConcurrentHashMap<>();
     /** {@link #mData}的数据序列化缓存 */
-    private transient byte[] mDataCache=null;
+    private transient byte[] mDataCache = null;
 
-    public User(CPlayer pPlayer){
-        this.mPlayer=pPlayer;
+    public User(CPlayer pPlayer) {
+        this.mPlayer = pPlayer;
     }
 
-    public User(String pPlayer){
+    public User(String pPlayer) {
         this.setPlayer(pPlayer);
     }
 
-    public void setPlayer(String pPlayer){
-        this.mPlayer=new CPlayer(pPlayer);
+    public void setPlayer(String pPlayer) {
+        this.mPlayer = new CPlayer(pPlayer);
     }
-    
-    public CPlayer getOwner(){
+
+    public CPlayer getOwner() {
         return this.mPlayer;
     }
 
-    public byte[] getData(){
-        if(this.mDataCache==null){
-            ByteArrayOutputStream tBAOStream=new ByteArrayOutputStream();
-            DataOutputStream tDOStream=null;
-            try{
-                tDOStream=new DataOutputStream(new GZIPOutputStream(tBAOStream));
+    public byte[] getData() {
+        if (this.mDataCache == null) {
+            ByteArrayOutputStream tBAOStream = new ByteArrayOutputStream();
+            DataOutputStream tDOStream = null;
+            try {
+                tDOStream = new DataOutputStream(new GZIPOutputStream(tBAOStream));
                 tDOStream.writeInt(this.mData.size());
-                for(Map.Entry<String,byte[]> sEntry : this.mData.entrySet()){
+                for (Map.Entry<String, byte[]> sEntry : this.mData.entrySet()) {
                     tDOStream.writeUTF(sEntry.getKey().toLowerCase());
-                    byte[] tValue=sEntry.getValue();
+                    byte[] tValue = sEntry.getValue();
                     tDOStream.writeInt(tValue.length);
-                    if(tValue.length>0){
+                    if (tValue.length > 0) {
                         tDOStream.write(tValue);
                     }
                 }
-            }catch(IOException exp){
-                Log.severe("序列化数据到SQL时发生错误",exp);
-            }finally{
+            } catch (IOException exp) {
+                Log.severe("序列化数据到SQL时发生错误", exp);
+            } finally {
                 IOUtil.closeStream(tDOStream);
             }
-            this.mDataCache=tBAOStream.toByteArray();
+            this.mDataCache = tBAOStream.toByteArray();
         }
         return this.mDataCache;
     }
 
-    public void setData(byte[] pData){
-        if(pData==null){
+    public void setData(byte[] pData) {
+        if (pData == null) {
             // 0 zero length Gzip byte data
-            pData=ByteUtil.base64ToByte("H4sIAAAAAAAAAGNgYGAAABzfRCEEAAAA");
+            pData = ByteUtil.base64ToByte("H4sIAAAAAAAAAGNgYGAAABzfRCEEAAAA");
         }
 
-        this.mDataCache=pData;
+        this.mDataCache = pData;
         this.mData.clear();
-        ByteArrayInputStream tBAIStream=new ByteArrayInputStream(pData);
-        DataInputStream tDIStream=null;
-        try{
-            tDIStream=new DataInputStream(new GZIPInputStream(tBAIStream));
-            int tCount=tDIStream.readInt();
+        ByteArrayInputStream tBAIStream = new ByteArrayInputStream(pData);
+        DataInputStream tDIStream = null;
+        try {
+            tDIStream = new DataInputStream(new GZIPInputStream(tBAIStream));
+            int tCount = tDIStream.readInt();
 
-            for(int i=0;i<tCount;i++){
-                String tName=tDIStream.readUTF().toLowerCase();
-                int tSubDataSize=tDIStream.readInt();
-                byte[] tSubData=new byte[tSubDataSize];
-                if(tSubDataSize>0){
+            for (int i = 0; i < tCount; i++) {
+                String tName = tDIStream.readUTF().toLowerCase();
+                int tSubDataSize = tDIStream.readInt();
+                byte[] tSubData = new byte[tSubDataSize];
+                if (tSubDataSize > 0) {
                     tDIStream.readFully(tSubData);
                 }
-                this.mData.put(tName,tSubData);
+                this.mData.put(tName, tSubData);
             }
-        }catch(IOException exp){
-            Log.severe("从SQL反序列化数据时发生错误",exp);
-            if(PlayerDataSQL.getInstance().getConfigManager().mKickOnReadSQLError){
+        } catch (IOException exp) {
+            Log.severe("从SQL反序列化数据时发生错误", exp);
+            if (PlayerDataSQL.getInstance().getConfigManager().mKickOnReadSQLError) {
                 PlayerDataSQL.kickPlayerOnError(this.getOwner());
             }
-        }finally{
+        } finally {
             IOUtil.closeStream(tDIStream);
         }
     }
@@ -112,18 +112,18 @@ public class User{
      *            是否重置序列化到SQL数据的缓存
      * @return 模块序列化数据
      */
-    public Map<String,byte[]> getDataMap(boolean pResetCache){
-        if(pResetCache){
-            this.mDataCache=null;
+    public Map<String, byte[]> getDataMap(boolean pResetCache) {
+        if (pResetCache) {
+            this.mDataCache = null;
         }
         return this.mData;
     }
 
-    public boolean isLocked(){
+    public boolean isLocked() {
         return this.mLocked;
     }
-    
-    public String getOwnerName(){
+
+    public String getOwnerName() {
         return this.mPlayer.getName();
     }
 

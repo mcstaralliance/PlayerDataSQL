@@ -6,45 +6,45 @@ import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.util.reflect.MethodUtil;
 
-public class DM_ArmourersWorkshop extends ADM_InVanilla{
+public class DM_ArmourersWorkshop extends ADM_InVanilla {
 
-    public static final String EXT_PROP_NAME="playerCustomEquipmentData";
+    public static final String EXT_PROP_NAME = "playerCustomEquipmentData";
 
     protected Method method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround;
     protected Method method_ExPropsPlayerEquipmentData_sendSkinData;
 
-    private static String getExpClass(){
-        try{
+    private static String getExpClass() {
+        try {
             return Class.forName("riskyken.armourersWorkshop.common.skin.ExPropsPlayerEquipmentData").getName();
-        }catch(ClassNotFoundException e){
+        } catch (ClassNotFoundException e) {
             return "riskyken.armourersWorkshop.common.skin.ExPropsPlayerSkinData";
         }
     }
-    
-    public DM_ArmourersWorkshop(PlayerDataSQL pPlugin){
-        super(pPlugin,getExpClass(),EXT_PROP_NAME);
+
+    public DM_ArmourersWorkshop(PlayerDataSQL pPlugin) {
+        super(pPlugin, getExpClass(), EXT_PROP_NAME);
     }
 
-    public DM_ArmourersWorkshop(PlayerDataSQL pPlugin,String pExPropClass,String pExPropName){
-        super(pPlugin,pExPropClass,pExPropName);
+    public DM_ArmourersWorkshop(PlayerDataSQL pPlugin, String pExPropClass, String pExPropName) {
+        super(pPlugin, pExPropClass, pExPropName);
     }
 
     @Override
-    public String getModelId(){
+    public String getModelId() {
         return "ArmourersWorkshoh";
     }
 
     @Override
-    public String getDesc(){
+    public String getDesc() {
         return "时装工坊";
     }
 
     @Override
-    protected boolean initOnce() throws Exception{
+    protected boolean initOnce() throws Exception {
         this.initExProp();
 
-        this.method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround=MethodUtil.getMethod(this.mExPropClazz,"updateEquipmentDataToPlayersAround",true);
-        this.method_ExPropsPlayerEquipmentData_sendSkinData=MethodUtil.getMethod(this.mExPropClazz,"sendSkinData",true);
+        this.method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround = MethodUtil.getMethod(this.mExPropClazz, "updateEquipmentDataToPlayersAround", true);
+        this.method_ExPropsPlayerEquipmentData_sendSkinData = MethodUtil.getMethod(this.mExPropClazz, "sendSkinData", true);
 
         // 时装的TAG
         this.mModelTags.add("wardrobeContainer");
@@ -52,8 +52,8 @@ public class DM_ArmourersWorkshop extends ADM_InVanilla{
 
         this.mModelTags.add("skinColour");
         this.mModelTags.add("hairColour");
-        for(int i=0;i<4;i++){
-            this.mModelTags.add("armourOverride"+i);
+        for (int i = 0; i < 4; i++) {
+            this.mModelTags.add("armourOverride" + i);
         }
         this.mModelTags.add("headOverlay");
         this.mModelTags.add("limitLimbs");
@@ -65,9 +65,9 @@ public class DM_ArmourersWorkshop extends ADM_InVanilla{
     }
 
     @Override
-    protected void updateToAround(CPlayer pPlayer,Object pExProp){
-        MethodUtil.invokeMethod(method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround,pExProp);
-        MethodUtil.invokeMethod(method_ExPropsPlayerEquipmentData_sendSkinData,pExProp);
+    protected void updateToAround(CPlayer pPlayer, Object pExProp) {
+        MethodUtil.invokeMethod(method_ExPropsPlayerEquipmentData_updateEquipmentDataToPlayersAround, pExProp);
+        MethodUtil.invokeMethod(method_ExPropsPlayerEquipmentData_sendSkinData, pExProp);
     }
 
 }

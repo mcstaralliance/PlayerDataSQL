@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import cc.bukkitPlugin.pds.user.User;
 import cc.bukkitPlugin.pds.util.CPlayer;
 
-public interface IStorage{
+public interface IStorage {
 
     /**
      * 根据名字获取用户数据
@@ -18,6 +18,7 @@ public interface IStorage{
      *             读写数据库时发生异常
      */
     public User get(CPlayer pPlayer) throws SQLException;
+
     /**
      * 根据获取所有用户数据
      *
@@ -25,6 +26,7 @@ public interface IStorage{
      *             读写数据库时发生异常
      */
     public ArrayList<User> getall() throws SQLException;
+
     /**
      * 使用用户数据更新或插入到数据库中
      * 
@@ -34,7 +36,7 @@ public interface IStorage{
      * @throws SQLException
      *             读写数据库时发生异常
      */
-    public boolean update(CPlayer pPlayer,User pUser) throws SQLException;
+    public boolean update(CPlayer pPlayer, User pUser) throws SQLException;
 
     /**
      * 使用部分数据更新或插入到数据库中
@@ -53,6 +55,6 @@ public interface IStorage{
      * @throws SQLException
      *             读写数据库时发生异常
      */
-    public boolean update(CPlayer pPlayer,String[] pCols,Object...pValues) throws SQLException;
+    public boolean update(CPlayer pPlayer, String[] pCols, Object...pValues) throws SQLException;
 
 }

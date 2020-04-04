@@ -19,18 +19,18 @@ import cc.bukkitPlugin.pds.util.PDSNBTUtil;
 import cc.commons.util.reflect.FieldUtil;
 import cc.commons.util.reflect.MethodUtil;
 
-public abstract class ADM_InVanilla extends DM_Minecraft{
+public abstract class ADM_InVanilla extends DM_Minecraft {
 
     protected static Method method_Entity_getExtendedProperties;
     protected static Method method_Entity_registerExtendedProperties;
     public final static boolean INIT_SUCCESS;
 
-    static{
+    static {
         boolean tSuccess = true;
-        try{
-            method_Entity_registerExtendedProperties=MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity,"registerExtendedProperties",true).get(0);
-            method_Entity_getExtendedProperties=MethodUtil.getMethod(NMSUtil.clazz_NMSEntity,"getExtendedProperties",String.class,true);
-        }catch(IllegalStateException ignore){
+        try {
+            method_Entity_registerExtendedProperties = MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity, "registerExtendedProperties", true).get(0);
+            method_Entity_getExtendedProperties = MethodUtil.getMethod(NMSUtil.clazz_NMSEntity, "getExtendedProperties", String.class, true);
+        } catch (IllegalStateException ignore) {
             tSuccess = false;
         }
 
@@ -44,7 +44,7 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
      * 所使用的NBT根节点名字来从玩家的所有NBT数据中分离出Mod的数据
      * </p>
      */
-    protected final HashSet<String> mModelTags=new HashSet<>();
+    protected final HashSet<String> mModelTags = new HashSet<>();
     /** Mod Exp的类全名,在构造函数中初始化 */
     protected final String mExPropClass;
     /** Mod Exp的类全名,在构造函数中初始化 */
@@ -66,11 +66,11 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
 
     protected Field field_NMSEntity_extendedProperties;
 
-    public ADM_InVanilla(PlayerDataSQL pPlugin,String pExPropClass,String pExPropName){
+    public ADM_InVanilla(PlayerDataSQL pPlugin, String pExPropClass, String pExPropName) {
         super(pPlugin);
 
-        this.mExPropClass=pExPropClass;
-        this.mExPropName=pExPropName;
+        this.mExPropClass = pExPropClass;
+        this.mExPropName = pExPropName;
     }
 
     /**
@@ -83,59 +83,59 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
      * 
      * @throws Exception
      */
-    protected void initExProp() throws Exception{
-        if(!INIT_SUCCESS) throw new ClassNotFoundException("Minecraft version not match");
-        this.mExPropClazz=Class.forName(this.mExPropClass);
+    protected void initExProp() throws Exception {
+        if (!INIT_SUCCESS) throw new ClassNotFoundException("Minecraft version not match");
+        this.mExPropClazz = Class.forName(this.mExPropClass);
 
-        this.method_ExProp_loadNBTData=MethodUtil.getMethod(this.mExPropClazz,"loadNBTData",NBTUtil.clazz_NBTTagCompound,true);
-        this.method_ExProp_saveNBTData=MethodUtil.getMethod(this.mExPropClazz,"saveNBTData",NBTUtil.clazz_NBTTagCompound,true);
-        this.method_ExProp_init=MethodUtil.getMethodIgnoreParam(this.mExPropClazz,"init",true).get(0);
+        this.method_ExProp_loadNBTData = MethodUtil.getMethod(this.mExPropClazz, "loadNBTData", NBTUtil.clazz_NBTTagCompound, true);
+        this.method_ExProp_saveNBTData = MethodUtil.getMethod(this.mExPropClazz, "saveNBTData", NBTUtil.clazz_NBTTagCompound, true);
+        this.method_ExProp_init = MethodUtil.getMethodIgnoreParam(this.mExPropClazz, "init", true).get(0);
 
-        try{
-            this.method_ExProp_get=this.mExPropClazz.getDeclaredMethod("get",NMSUtil.clazz_EntityPlayer);
-            this.method_ExProp_register=this.mExPropClazz.getDeclaredMethod("register",NMSUtil.clazz_EntityPlayer);
-        }catch(NoSuchMethodException ignore){
+        try {
+            this.method_ExProp_get = this.mExPropClazz.getDeclaredMethod("get", NMSUtil.clazz_EntityPlayer);
+            this.method_ExProp_register = this.mExPropClazz.getDeclaredMethod("register", NMSUtil.clazz_EntityPlayer);
+        } catch (NoSuchMethodException ignore) {
         }
 
-        try{
-            this.field_NMSEntity_extendedProperties=NMSUtil.clazz_NMSEntity.getDeclaredField("extendedProperties");
-        }catch(NoSuchFieldException ignore){
+        try {
+            this.field_NMSEntity_extendedProperties = NMSUtil.clazz_NMSEntity.getDeclaredField("extendedProperties");
+        } catch (NoSuchFieldException ignore) {
         }
     }
 
     @Override
-    public byte[] getData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
-        Object tData=this.getOrCreateExProp(pPlayer);
-        if(tData==null) return new byte[0];
+    public byte[] getData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws Exception {
+        Object tData = this.getOrCreateExProp(pPlayer);
+        if (tData == null) return new byte[0];
 
-        Object tNBTTag=NBTUtil.newNBTTagCompound();
-        MethodUtil.invokeMethod(this.method_ExProp_saveNBTData,tData,tNBTTag);
+        Object tNBTTag = NBTUtil.newNBTTagCompound();
+        MethodUtil.invokeMethod(this.method_ExProp_saveNBTData, tData, tNBTTag);
         return PDSNBTUtil.compressNBT(tNBTTag);
     }
 
     @Override
-    public void restore(CPlayer pPlayer,byte[] pData) throws Exception{
+    public void restore(CPlayer pPlayer, byte[] pData) throws Exception {
         this.cleanData(pPlayer);
-        if(pData.length==0) return;
+        if (pData.length == 0) return;
 
-        Object tExProp=this.getOrCreateExProp(pPlayer);
-        if(tExProp==null) return;
+        Object tExProp = this.getOrCreateExProp(pPlayer);
+        if (tExProp == null) return;
 
-        MethodUtil.invokeMethod(method_ExProp_loadNBTData,tExProp,PDSNBTUtil.decompressNBT(pData));
-        this.updateToAround(pPlayer,tExProp);
+        MethodUtil.invokeMethod(method_ExProp_loadNBTData, tExProp, PDSNBTUtil.decompressNBT(pData));
+        this.updateToAround(pPlayer, tExProp);
     }
 
     @Override
-    public byte[] loadFileData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException{
-        byte[] tData=pLoadedData.get(DM_Minecraft.ID.toLowerCase());
-        if(tData==null) tData=super.loadFileData(pPlayer,pLoadedData);
+    public byte[] loadFileData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws IOException {
+        byte[] tData = pLoadedData.get(DM_Minecraft.ID.toLowerCase());
+        if (tData == null) tData = super.loadFileData(pPlayer, pLoadedData);
 
-        Object tNBT=this.correctNBTData(PDSNBTUtil.decompressNBT(tData));
-        Map<String,Object> tNBTValue=NBTUtil.getNBTTagCompoundValue(tNBT);
-        Map<String,Object> tRemoved=new HashMap<>();
-        for(String sKey : this.mModelTags){
-            Object tValue=tNBTValue.remove(sKey);
-            if(tValue!=null) tRemoved.put(sKey,tValue);
+        Object tNBT = this.correctNBTData(PDSNBTUtil.decompressNBT(tData));
+        Map<String, Object> tNBTValue = NBTUtil.getNBTTagCompoundValue(tNBT);
+        Map<String, Object> tRemoved = new HashMap<>();
+        for (String sKey : this.mModelTags) {
+            Object tValue = tNBTValue.remove(sKey);
+            if (tValue != null) tRemoved.put(sKey, tValue);
         }
 
         tNBTValue.clear();
@@ -150,7 +150,7 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
      *            要修正的NBT数据
      * @return 修正后的数据
      */
-    public Object correctNBTData(Object pNBTTag){
+    public Object correctNBTData(Object pNBTTag) {
         return pNBTTag;
     }
 
@@ -161,11 +161,11 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
      *            NMS玩家,类型为EntityPlayer
      * @return MOD数据或null
      */
-    public Object getOrCreateExProp(CPlayer pPlayer){
-        Object tExProp=this.getExProp(pPlayer);
-        if(tExProp==null){
+    public Object getOrCreateExProp(CPlayer pPlayer) {
+        Object tExProp = this.getExProp(pPlayer);
+        if (tExProp == null) {
             this.registerExProp(pPlayer);
-            tExProp=this.getExProp(pPlayer);
+            tExProp = this.getExProp(pPlayer);
         }
         return tExProp;
     }
@@ -177,11 +177,11 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
      *            NMS玩家,数据类型为EntityPlayer
      * @return Mod数据或null
      */
-    protected Object getExProp(CPlayer pPlayer){
-        if(this.method_ExProp_get==null){
+    protected Object getExProp(CPlayer pPlayer) {
+        if (this.method_ExProp_get == null) {
             return this.getExPropNMS(pPlayer);
-        }else{
-            return MethodUtil.invokeStaticMethod(this.method_ExProp_get,pPlayer.getNMSPlayer());
+        } else {
+            return MethodUtil.invokeStaticMethod(this.method_ExProp_get, pPlayer.getNMSPlayer());
         }
     }
 
@@ -192,8 +192,8 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
      *            NMS玩家,数据类型为EntityPlayer
      * @return Mod数据或null
      */
-    public final Object getExPropNMS(CPlayer pPlayer){
-        return MethodUtil.invokeMethod(method_Entity_getExtendedProperties,pPlayer.getNMSPlayer(),this.mExPropName);
+    public final Object getExPropNMS(CPlayer pPlayer) {
+        return MethodUtil.invokeMethod(method_Entity_getExtendedProperties, pPlayer.getNMSPlayer(), this.mExPropName);
     }
 
     /**
@@ -202,14 +202,14 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
      * @param pNMSPlayer
      *            NMS玩家,数据类型为EntityPlayer
      */
-    protected void registerExProp(CPlayer pPlayer){
-        if(this.method_ExProp_register==null){
+    protected void registerExProp(CPlayer pPlayer) {
+        if (this.method_ExProp_register == null) {
             this.registerExPropNMS(pPlayer);
-        }else{
-            Object tNMSPlayer=pPlayer.getNMSPlayer();
-            if(tNMSPlayer!=null){
-                MethodUtil.invokeStaticMethod(this.method_ExProp_register,tNMSPlayer);
-                this.initExProp(pPlayer,NMSUtil.getNMSWorld(pPlayer.getWorld()));
+        } else {
+            Object tNMSPlayer = pPlayer.getNMSPlayer();
+            if (tNMSPlayer != null) {
+                MethodUtil.invokeStaticMethod(this.method_ExProp_register, tNMSPlayer);
+                this.initExProp(pPlayer, NMSUtil.getNMSWorld(pPlayer.getWorld()));
             }
         }
     }
@@ -220,11 +220,11 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
      * @param pNMSPlayer
      *            NMS玩家,数据类型为EntityPlayer
      */
-    protected void registerExPropNMS(CPlayer pPlayer){
-        Object tNMSWorld=NMSUtil.getNMSWorld(pPlayer.getWorld());
-        if(tNMSWorld!=null){
-            MethodUtil.invokeMethod(method_Entity_registerExtendedProperties,pPlayer.getNMSPlayer(),this.mExPropName,this.newExProp(pPlayer,tNMSWorld));
-            this.initExProp(pPlayer,tNMSWorld);
+    protected void registerExPropNMS(CPlayer pPlayer) {
+        Object tNMSWorld = NMSUtil.getNMSWorld(pPlayer.getWorld());
+        if (tNMSWorld != null) {
+            MethodUtil.invokeMethod(method_Entity_registerExtendedProperties, pPlayer.getNMSPlayer(), this.mExPropName, this.newExProp(pPlayer, tNMSWorld));
+            this.initExProp(pPlayer, tNMSWorld);
         }
     }
 
@@ -241,29 +241,29 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
      *            NMS的世界
      * @return 新的mod附属数据实例
      */
-    public Object newExProp(CPlayer pPlayer,Object pNMSWorld){
-        try{
-            Constructor<?> tConstructor=this.mExPropClazz.getDeclaredConstructor(NMSUtil.clazz_EntityPlayer);
+    public Object newExProp(CPlayer pPlayer, Object pNMSWorld) {
+        try {
+            Constructor<?> tConstructor = this.mExPropClazz.getDeclaredConstructor(NMSUtil.clazz_EntityPlayer);
             tConstructor.setAccessible(true);
             return tConstructor.newInstance(pPlayer.getNMSPlayer());
-        }catch(Throwable ignore){
+        } catch (Throwable ignore) {
         }
 
-        try{
-            Constructor<?> tConstructor=this.mExPropClazz.getDeclaredConstructor(String.class);
+        try {
+            Constructor<?> tConstructor = this.mExPropClazz.getDeclaredConstructor(String.class);
             tConstructor.setAccessible(true);
             return tConstructor.newInstance(pPlayer.getName());
-        }catch(Throwable ignore){
+        } catch (Throwable ignore) {
         }
 
-        try{
-            Constructor<?> tConstructor=this.mExPropClazz.getDeclaredConstructor();
+        try {
+            Constructor<?> tConstructor = this.mExPropClazz.getDeclaredConstructor();
             tConstructor.setAccessible(true);
             return tConstructor.newInstance();
-        }catch(Throwable ignore){
+        } catch (Throwable ignore) {
         }
 
-        throw new IllegalStateException("Cannot instance ExProp for model "+this.getModelId());
+        throw new IllegalStateException("Cannot instance ExProp for model " + this.getModelId());
     }
 
     /**
@@ -274,36 +274,36 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
      * @param pNMSWorld
      *            NMS世界
      */
-    public void initExProp(CPlayer pPlayer,Object pNMSWorld){
-        MethodUtil.invokeMethod(method_ExProp_init,this.getExProp(pPlayer),pPlayer.getNMSPlayer(),pNMSWorld);
+    public void initExProp(CPlayer pPlayer, Object pNMSWorld) {
+        MethodUtil.invokeMethod(method_ExProp_init, this.getExProp(pPlayer), pPlayer.getNMSPlayer(), pNMSWorld);
     }
 
     @Override
-    public void cleanData(CPlayer pPlayer){
-        Object pNMSPlayer=pPlayer.getNMSPlayer();
-        if(pNMSPlayer==null) return;
+    public void cleanData(CPlayer pPlayer) {
+        Object pNMSPlayer = pPlayer.getNMSPlayer();
+        if (pNMSPlayer == null) return;
 
-        Object tExProp=this.getExProp(pPlayer);
-        if(tExProp==null){
+        Object tExProp = this.getExProp(pPlayer);
+        if (tExProp == null) {
             this.registerExProp(pPlayer);
             return;
         }
 
-        Map<?,?> tExProps=null;
-        if(this.field_NMSEntity_extendedProperties==null){
-            for(Field sField : NMSUtil.clazz_NMSEntity.getDeclaredFields()){
-                if(!Map.class.isAssignableFrom(sField.getType()))
+        Map<?, ?> tExProps = null;
+        if (this.field_NMSEntity_extendedProperties == null) {
+            for (Field sField : NMSUtil.clazz_NMSEntity.getDeclaredFields()) {
+                if (!Map.class.isAssignableFrom(sField.getType()))
                     continue;
 
-                tExProps=(Map<?,?>)FieldUtil.getFieldValue(sField,pNMSPlayer);
-                if(tExProps.get(this.mExPropName)==tExProp){
-                    this.field_NMSEntity_extendedProperties=sField;
+                tExProps = (Map<?, ?>)FieldUtil.getFieldValue(sField, pNMSPlayer);
+                if (tExProps.get(this.mExPropName) == tExProp) {
+                    this.field_NMSEntity_extendedProperties = sField;
                     break;
                 }
             }
         }
-        if(this.field_NMSEntity_extendedProperties==null) return; // not found
-        if(tExProps==null) tExProps=(Map<?,?>)FieldUtil.getFieldValue(this.field_NMSEntity_extendedProperties,pNMSPlayer);
+        if (this.field_NMSEntity_extendedProperties == null) return; // not found
+        if (tExProps == null) tExProps = (Map<?, ?>)FieldUtil.getFieldValue(this.field_NMSEntity_extendedProperties, pNMSPlayer);
 
         tExProps.remove(this.mExPropName);
         this.registerExProp(pPlayer);
@@ -318,6 +318,6 @@ public abstract class ADM_InVanilla extends DM_Minecraft{
     @Override
     protected abstract boolean initOnce() throws Exception;
 
-    protected abstract void updateToAround(CPlayer pPlayer,Object pExProp);
+    protected abstract void updateToAround(CPlayer pPlayer, Object pExProp);
 
 }

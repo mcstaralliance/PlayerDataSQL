@@ -2,24 +2,24 @@ package cc.bukkitPlugin.pds.dmodel.v1_7_10.am2;
 
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 
-public class DM_ArsMagica2 extends ADM_AM2{
+public class DM_ArsMagica2 extends ADM_AM2 {
 
-    public DM_ArsMagica2(PlayerDataSQL pPlugin){
-        super(pPlugin,"am2.playerextensions.ExtendedProperties","ArsMagicaExProps");
+    public DM_ArsMagica2(PlayerDataSQL pPlugin) {
+        super(pPlugin, "am2.playerextensions.ExtendedProperties", "ArsMagicaExProps");
     }
 
     @Override
-    public String getModelId(){
+    public String getModelId() {
         return "ArsMagica2";
     }
 
     @Override
-    public String getDesc(){
+    public String getDesc() {
         return "魔法艺术2";
     }
 
     @Override
-    protected boolean initOnce() throws Exception{
+    protected boolean initOnce() throws Exception {
         this.initExProp();
         super.initOnce();
 

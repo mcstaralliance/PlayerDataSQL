@@ -13,66 +13,66 @@ import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.user.UserManager;
 import cc.bukkitPlugin.pds.util.CPlayer;
 
-public class CommandCopy extends TACommandBase<PlayerDataSQL,CommandExc>{
+public class CommandCopy extends TACommandBase<PlayerDataSQL, CommandExc> {
 
-    public CommandCopy(CommandExc pExector){
-        super(pExector,"copy",2);
+    public CommandCopy(CommandExc pExector) {
+        super(pExector, "copy", 2);
     }
 
     @Override
-    public boolean execute(CommandSender pSender,String pLabel,String[] pArgs){
-        if(!hasCmdPermission(pSender))
-            return noPermission(pSender,this.mLastConstructPermisson);
+    public boolean execute(CommandSender pSender, String pLabel, String[] pArgs) {
+        if (!hasCmdPermission(pSender))
+            return noPermission(pSender, this.mLastConstructPermisson);
 
-        if(pArgs.length==0) return help(pSender,pLabel);
-        if(pArgs.length>2) return errorArgsNumber(pSender,pArgs.length);
+        if (pArgs.length == 0) return help(pSender, pLabel);
+        if (pArgs.length > 2) return errorArgsNumber(pSender, pArgs.length);
 
-        Player tCopyFor,tCopyFrom;
+        Player tCopyFor, tCopyFrom;
         int tCopyFromIndex;
-        if(pArgs.length==1){
-            tCopyFromIndex=0;
-            if(!(pSender instanceof Player))
-                return send(pSender,C("MsgCannotCopyDataForConsole"));
+        if (pArgs.length == 1) {
+            tCopyFromIndex = 0;
+            if (!(pSender instanceof Player))
+                return send(pSender, C("MsgCannotCopyDataForConsole"));
 
-            tCopyFor=(Player)pSender;
-        }else{
-            tCopyFromIndex=1;
-            tCopyFor=Bukkit.getPlayerExact(pArgs[0]);
-            if(tCopyFor==null)
-                return send(pSender,C("MsgPlayerNotOnline","%player%",pArgs[0]));
+            tCopyFor = (Player)pSender;
+        } else {
+            tCopyFromIndex = 1;
+            tCopyFor = Bukkit.getPlayerExact(pArgs[0]);
+            if (tCopyFor == null)
+                return send(pSender, C("MsgPlayerNotOnline", "%player%", pArgs[0]));
         }
-        tCopyFrom=Bukkit.getPlayerExact(pArgs[tCopyFromIndex]);
-        if(tCopyFrom==null)
-            return send(pSender,C("MsgPlayerNotExist","%player%",pArgs[0]));
+        tCopyFrom = Bukkit.getPlayerExact(pArgs[tCopyFromIndex]);
+        if (tCopyFrom == null)
+            return send(pSender, C("MsgPlayerNotExist", "%player%", pArgs[0]));
 
-        GameMode tMode=tCopyFor.getGameMode();
-        UserManager tUserMan=this.mPlugin.getUserManager();
-        tUserMan.restoreUser(new CPlayer(tCopyFor.getName()),tUserMan.getUserData(new CPlayer(tCopyFrom),false,pSender),pSender);
+        GameMode tMode = tCopyFor.getGameMode();
+        UserManager tUserMan = this.mPlugin.getUserManager();
+        tUserMan.restoreUser(new CPlayer(tCopyFor.getName()), tUserMan.getUserData(new CPlayer(tCopyFrom), false, pSender), pSender);
         tCopyFor.setGameMode(tMode);
 
-        return send(pSender,C("MsgCopyDataForPlayer",
-                new String[]{"%from%","%for%"},
-                new Object[]{tCopyFrom==pSender?C("WordYou"):tCopyFrom.getName(),tCopyFor==pSender?C("WordYou"):tCopyFor.getName()}));
+        return send(pSender, C("MsgCopyDataForPlayer",
+                new String[]{"%from%", "%for%"},
+                new Object[]{tCopyFrom == pSender ? C("WordYou") : tCopyFrom.getName(), tCopyFor == pSender ? C("WordYou") : tCopyFor.getName()}));
     }
 
     @Override
-    public ArrayList<String> getHelp(CommandSender pSender,String pLabel){
-        ArrayList<String> tHelps=new ArrayList<>();
-        if(hasCmdPermission(pSender)){
+    public ArrayList<String> getHelp(CommandSender pSender, String pLabel) {
+        ArrayList<String> tHelps = new ArrayList<>();
+        if (hasCmdPermission(pSender)) {
             tHelps.add(constructCmdUsage(C("WordFrom")));
-            tHelps.add(this.mExector.getCmdUsagePrefix()+C("HelpCmdCopy"));
-            tHelps.add(constructCmdUsage(C("WordFor"),C("WordFrom")));
-            tHelps.add(this.mExector.getCmdUsagePrefix()+C("HelpCmdCopyForPlayer"));
+            tHelps.add(this.mExector.getCmdUsagePrefix() + C("HelpCmdCopy"));
+            tHelps.add(constructCmdUsage(C("WordFor"), C("WordFrom")));
+            tHelps.add(this.mExector.getCmdUsagePrefix() + C("HelpCmdCopyForPlayer"));
         }
         return tHelps;
     }
 
     @Override
-    public ArrayList<String> getTabSubCmd(CommandSender pSender,String pLabel,String[] pArgs){
-        ArrayList<String> tTabs=null;
-        if(hasCmdPermission(pSender)){
-            tTabs=new ArrayList<>();
-            if(pArgs.length<=2){
+    public ArrayList<String> getTabSubCmd(CommandSender pSender, String pLabel, String[] pArgs) {
+        ArrayList<String> tTabs = null;
+        if (hasCmdPermission(pSender)) {
+            tTabs = new ArrayList<>();
+            if (pArgs.length <= 2) {
                 tTabs.addAll(BukkitUtil.getOnlinePlayersName());
             }
         }

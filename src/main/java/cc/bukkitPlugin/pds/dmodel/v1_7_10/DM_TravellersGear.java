@@ -20,7 +20,7 @@ import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import travellersgear.api.TGSaveData;
 import travellersgear.api.TravellersGearAPI;
 
-public class DM_TravellersGear extends ADataModel{
+public class DM_TravellersGear extends ADataModel {
 
     /** static NBTTagCompound getPlayerData(EntityPlayer) */
     private Method method_TravellersGearAPI_getTravellersNBTData;
@@ -28,90 +28,90 @@ public class DM_TravellersGear extends ADataModel{
     private Method method_TGSaveData_setPlayerData;
 
     private TGSaveData mTGSDInstance;
-    private HashMap<UUID,Object> mTGSDMap=new HashMap<>();
+    private HashMap<UUID, Object> mTGSDMap = new HashMap<>();
 
-    private Boolean mInit=null;
+    private Boolean mInit = null;
     /** 用于发送同步包 */
     private SimpleNetworkWrapper mPacketHandler;
     /** void sendTo(IMessage;EntityPlayerMP) */
     private Method method_SimpleNetworkWrapper_sendTo;
     private Class<?> class_MessageNBTSync;
 
-    public DM_TravellersGear(PlayerDataSQL pPlugin){
+    public DM_TravellersGear(PlayerDataSQL pPlugin) {
         super(pPlugin);
     }
 
     @Override
-    public String getModelId(){
+    public String getModelId() {
         return "TravellersGear";
     }
 
     @Override
-    public String getDesc(){
+    public String getDesc() {
         return "旅行者背包";
     }
 
     @Override
-    protected boolean initOnce() throws Exception{
-        Class tClazz=Class.forName("travellersgear.TravellersGear");
-        this.mPacketHandler=(SimpleNetworkWrapper)FieldUtil.getFieldValue(tClazz,"packetHandler",true,null);
-        this.method_SimpleNetworkWrapper_sendTo=MethodUtil.getMethodIgnoreParam(SimpleNetworkWrapper.class,"sendTo",true).get(0);
+    protected boolean initOnce() throws Exception {
+        Class tClazz = Class.forName("travellersgear.TravellersGear");
+        this.mPacketHandler = (SimpleNetworkWrapper)FieldUtil.getFieldValue(tClazz, "packetHandler", true, null);
+        this.method_SimpleNetworkWrapper_sendTo = MethodUtil.getMethodIgnoreParam(SimpleNetworkWrapper.class, "sendTo", true).get(0);
 
-        this.class_MessageNBTSync=Class.forName("travellersgear.common.network.MessageNBTSync");
+        this.class_MessageNBTSync = Class.forName("travellersgear.common.network.MessageNBTSync");
 
         Class.forName("travellersgear.api.TravellersGearAPI");
-        this.method_TravellersGearAPI_getTravellersNBTData=MethodUtil.getMethod(TravellersGearAPI.class,
+        this.method_TravellersGearAPI_getTravellersNBTData = MethodUtil.getMethod(TravellersGearAPI.class,
                 "getTravellersNBTData",
                 NMSUtil.clazz_EntityPlayer,
                 true);
 
         Class.forName("travellersgear.api.TGSaveData");
-        this.method_TGSaveData_setPlayerData=MethodUtil.getMethod(TGSaveData.class,
+        this.method_TGSaveData_setPlayerData = MethodUtil.getMethod(TGSaveData.class,
                 "setPlayerData",
-                new Class<?>[]{NMSUtil.clazz_EntityPlayer,NBTUtil.clazz_NBTTagCompound},
+                new Class<?>[]{NMSUtil.clazz_EntityPlayer, NBTUtil.clazz_NBTTagCompound},
                 true);
 
-        this.mTGSDInstance=(TGSaveData)FieldUtil.getStaticFieldValue(FieldUtil.getDeclaredField(TGSaveData.class,FieldFilter.t(TGSaveData.class)).oneGet());
-        this.mTGSDMap=(HashMap<UUID,Object>)FieldUtil.getFieldValue(TGSaveData.class,"playerData",true,this.mTGSDInstance);
+        this.mTGSDInstance = (TGSaveData)FieldUtil.getStaticFieldValue(FieldUtil.getDeclaredField(TGSaveData.class, FieldFilter.t(TGSaveData.class)).oneGet());
+        this.mTGSDMap = (HashMap<UUID, Object>)FieldUtil.getFieldValue(TGSaveData.class, "playerData", true, this.mTGSDInstance);
 
         return true;
     }
 
     @Override
-    public byte[] getData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
+    public byte[] getData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws Exception {
         return this.getData0(pPlayer);
     }
 
     @Override
-    public void restore(CPlayer pPlayer,byte[] pData) throws Exception{
-        Object tNBT=PDSNBTUtil.decompressNBT(pData);
-        this.mTGSDMap.put(pPlayer.getUniqueId(),tNBT);
+    public void restore(CPlayer pPlayer, byte[] pData) throws Exception {
+        Object tNBT = PDSNBTUtil.decompressNBT(pData);
+        this.mTGSDMap.put(pPlayer.getUniqueId(), tNBT);
         TGSaveData.setDirty();
         this.syncToClient(pPlayer);
     }
 
     @Override
-    public byte[] loadFileData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException{
+    public byte[] loadFileData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws IOException {
         return this.getData0(pPlayer);
     }
 
-    private byte[] getData0(CPlayer pPlayer){
-        Object tNBT=this.mTGSDMap.get(pPlayer.getUniqueId());
-        if(tNBT==null) tNBT=NBTUtil.newNBTTagCompound();
+    private byte[] getData0(CPlayer pPlayer) {
+        Object tNBT = this.mTGSDMap.get(pPlayer.getUniqueId());
+        if (tNBT == null) tNBT = NBTUtil.newNBTTagCompound();
         return PDSNBTUtil.compressNBT(tNBT);
     }
 
     @Override
-    public void cleanData(CPlayer pPlayer){
-        Object tRemoved=this.mTGSDMap.remove(pPlayer.getUniqueId());
-        if(tRemoved!=null) TGSaveData.setDirty();
+    public void cleanData(CPlayer pPlayer) {
+        Object tRemoved = this.mTGSDMap.remove(pPlayer.getUniqueId());
+        if (tRemoved != null) TGSaveData.setDirty();
     }
 
-    public void syncToClient(CPlayer pPlayer){
-        Object tNMSPlayer=pPlayer.getNMSPlayer();
-        if(tNMSPlayer!=null){
-            Object tNBTSyncMsg=ClassUtil.newInstance(this.class_MessageNBTSync,NMSUtil.clazz_EntityPlayer,tNMSPlayer);
-            MethodUtil.invokeMethod(method_SimpleNetworkWrapper_sendTo,this.mPacketHandler,tNBTSyncMsg,tNMSPlayer);
+    public void syncToClient(CPlayer pPlayer) {
+        Object tNMSPlayer = pPlayer.getNMSPlayer();
+        if (tNMSPlayer != null) {
+            Object tNBTSyncMsg = ClassUtil.newInstance(this.class_MessageNBTSync, NMSUtil.clazz_EntityPlayer, tNMSPlayer);
+            MethodUtil.invokeMethod(method_SimpleNetworkWrapper_sendTo, this.mPacketHandler, tNBTSyncMsg, tNMSPlayer);
         }
     }
 

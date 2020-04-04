@@ -20,52 +20,52 @@ import cc.commons.util.FileUtil;
 //import cc.commons.util.reflect.FieldUtil;
 //import cc.commons.util.reflect.MethodUtil;
 
-public class DM_Minecraft extends ADataModel{
+public class DM_Minecraft extends ADataModel {
 
-    public static final String ID="Minecraft";
+    public static final String ID = "Minecraft";
 
-    private Method method_EntityLivingBase_getAttributeMap=null;
-    private HashSet<Field> mMapFields=new HashSet<>();
+    private Method method_EntityLivingBase_getAttributeMap = null;
+    private HashSet<Field> mMapFields = new HashSet<>();
 
-    public DM_Minecraft(PlayerDataSQL pPlugin){
+    public DM_Minecraft(PlayerDataSQL pPlugin) {
         super(pPlugin);
     }
 
     @Override
-    public String getModelId(){
+    public String getModelId() {
         return DM_Minecraft.ID;
     }
 
     @Override
-    public String getDesc(){
+    public String getDesc() {
         return "Minecraft原版数据";
     }
 
     @Override
-    protected boolean initOnce() throws Exception{
+    protected boolean initOnce() throws Exception {
         return true;
     }
 
     @Override
-    public byte[] getData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
+    public byte[] getData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws Exception {
         return PDSNBTUtil.compressNBT(PDSNBTUtil.getPlayerNBT(pPlayer.getPlayer()));
     }
 
     @Override
-    public void restore(CPlayer pPlayer,byte[] pData) throws Exception{
+    public void restore(CPlayer pPlayer, byte[] pData) throws Exception {
         this.cleanData(pPlayer);
 
-        Player tPlayer=pPlayer.getPlayer();
-        GameMode tMode=tPlayer.getGameMode();
-        PDSNBTUtil.setPlayerNBT(tPlayer,PDSNBTUtil.decompressNBT(pData));
+        Player tPlayer = pPlayer.getPlayer();
+        GameMode tMode = tPlayer.getGameMode();
+        PDSNBTUtil.setPlayerNBT(tPlayer, PDSNBTUtil.decompressNBT(pData));
         tPlayer.setGameMode(tMode);
     }
 
     @Override
-    public void cleanData(CPlayer pPlayer){
+    public void cleanData(CPlayer pPlayer) {
         // clear buff
-        Player tPlayer=pPlayer.getPlayer();
-        for(PotionEffect sEffect : tPlayer.getActivePotionEffects()){
+        Player tPlayer = pPlayer.getPlayer();
+        for (PotionEffect sEffect : tPlayer.getActivePotionEffects()) {
             tPlayer.removePotionEffect(sEffect.getType());
         }
         //        // clear Attribute
@@ -103,9 +103,9 @@ public class DM_Minecraft extends ADataModel{
     }
 
     @Override
-    public byte[] loadFileData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws IOException{
-        File tDataFile=this.getUUIDOrNameFile(pPlayer,this.mPlayerDataDir,"%name%.dat");
-        if(!tDataFile.isFile()) return new byte[0];
+    public byte[] loadFileData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws IOException {
+        File tDataFile = this.getUUIDOrNameFile(pPlayer, this.mPlayerDataDir, "%name%.dat");
+        if (!tDataFile.isFile()) return new byte[0];
 
         return FileUtil.readData(tDataFile);
     }

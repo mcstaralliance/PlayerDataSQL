@@ -8,7 +8,7 @@ import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.util.reflect.MethodUtil;
 
-public class DM_ThirstMod extends ADM_ForgeData{
+public class DM_ThirstMod extends ADM_ForgeData {
 
     protected Class<?> clazz_PlayerContainer;
 
@@ -20,33 +20,33 @@ public class DM_ThirstMod extends ADM_ForgeData{
     protected Method method_ThirstLogic_readData;
     protected Method method_ThirstLogic_writeData;
 
-    public DM_ThirstMod(PlayerDataSQL pPlugin){
+    public DM_ThirstMod(PlayerDataSQL pPlugin) {
         super(pPlugin);
     }
 
     @Override
-    public String getModelId(){
+    public String getModelId() {
         return "ThirstMod";
     }
 
     @Override
-    public String getDesc(){
+    public String getDesc() {
         return "饮水";
     }
 
     @Override
-    protected boolean initOnce() throws Exception{
+    protected boolean initOnce() throws Exception {
         Class.forName("com.thetorine.thirstmod.core.main.ThirstMod");
 
-        clazz_PlayerContainer=Class.forName("com.thetorine.thirstmod.core.player.PlayerContainer");
-        method_PlayerContainer_addPlayer=MethodUtil.getMethod(clazz_PlayerContainer,"addPlayer",NMSUtil.clazz_EntityPlayer,true);
-        method_PlayerContainer_getPlayer=MethodUtil.getMethod(clazz_PlayerContainer,"getPlayer",NMSUtil.clazz_EntityPlayer,true);
-        method_PlayerContainer_respawnPlayer=MethodUtil.getMethod(clazz_PlayerContainer,"respawnPlayer",true);
-        method_PlayerContainer_getStats=MethodUtil.getMethod(clazz_PlayerContainer,"getStats",true);
+        clazz_PlayerContainer = Class.forName("com.thetorine.thirstmod.core.player.PlayerContainer");
+        method_PlayerContainer_addPlayer = MethodUtil.getMethod(clazz_PlayerContainer, "addPlayer", NMSUtil.clazz_EntityPlayer, true);
+        method_PlayerContainer_getPlayer = MethodUtil.getMethod(clazz_PlayerContainer, "getPlayer", NMSUtil.clazz_EntityPlayer, true);
+        method_PlayerContainer_respawnPlayer = MethodUtil.getMethod(clazz_PlayerContainer, "respawnPlayer", true);
+        method_PlayerContainer_getStats = MethodUtil.getMethod(clazz_PlayerContainer, "getStats", true);
 
-        Class<?> tClazz=method_PlayerContainer_getStats.getReturnType();
-        method_ThirstLogic_readData=MethodUtil.getMethodIgnoreParam(tClazz,"readData",true).get(0);
-        method_ThirstLogic_writeData=MethodUtil.getMethodIgnoreParam(tClazz,"writeData",true).get(0);
+        Class<?> tClazz = method_PlayerContainer_getStats.getReturnType();
+        method_ThirstLogic_readData = MethodUtil.getMethodIgnoreParam(tClazz, "readData", true).get(0);
+        method_ThirstLogic_writeData = MethodUtil.getMethodIgnoreParam(tClazz, "writeData", true).get(0);
 
         this.mModelTags.add("ThirstMod");
 
@@ -54,37 +54,37 @@ public class DM_ThirstMod extends ADM_ForgeData{
     }
 
     @Override
-    public byte[] getData(CPlayer pPlayer,Map<String,byte[]> pLoadedData) throws Exception{
-        MethodUtil.invokeMethod(method_ThirstLogic_writeData,this.getThirstLogic(pPlayer));
-        return super.getData(pPlayer,pLoadedData);
+    public byte[] getData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws Exception {
+        MethodUtil.invokeMethod(method_ThirstLogic_writeData, this.getThirstLogic(pPlayer));
+        return super.getData(pPlayer, pLoadedData);
     }
 
     @Override
-    public void restore(CPlayer pPlayer,byte[] pData) throws Exception{
-        super.restore(pPlayer,pData);
-        MethodUtil.invokeMethod(method_ThirstLogic_readData,this.getThirstLogic(pPlayer));
+    public void restore(CPlayer pPlayer, byte[] pData) throws Exception {
+        super.restore(pPlayer, pData);
+        MethodUtil.invokeMethod(method_ThirstLogic_readData, this.getThirstLogic(pPlayer));
     }
 
     @Override
-    public void cleanData(CPlayer pPlayer){
-        MethodUtil.invokeMethod(method_PlayerContainer_respawnPlayer,this.getOrCreatePlayerContainer(pPlayer));
+    public void cleanData(CPlayer pPlayer) {
+        MethodUtil.invokeMethod(method_PlayerContainer_respawnPlayer, this.getOrCreatePlayerContainer(pPlayer));
     }
 
-    public Object getThirstLogic(CPlayer pPlayer){
-        return MethodUtil.invokeMethod(method_PlayerContainer_getStats,this.getOrCreatePlayerContainer(pPlayer));
+    public Object getThirstLogic(CPlayer pPlayer) {
+        return MethodUtil.invokeMethod(method_PlayerContainer_getStats, this.getOrCreatePlayerContainer(pPlayer));
     }
 
-    public Object getOrCreatePlayerContainer(CPlayer pPlayer){
-        while(true){
-            Object tPlayerContainer=MethodUtil.invokeStaticMethod(method_PlayerContainer_getPlayer,pPlayer.getNMSPlayer());
-            if(tPlayerContainer!=null) return tPlayerContainer;
+    public Object getOrCreatePlayerContainer(CPlayer pPlayer) {
+        while (true) {
+            Object tPlayerContainer = MethodUtil.invokeStaticMethod(method_PlayerContainer_getPlayer, pPlayer.getNMSPlayer());
+            if (tPlayerContainer != null) return tPlayerContainer;
 
-            MethodUtil.invokeStaticMethod(method_PlayerContainer_addPlayer,pPlayer.getNMSPlayer());
+            MethodUtil.invokeStaticMethod(method_PlayerContainer_addPlayer, pPlayer.getNMSPlayer());
         }
     }
 
     @Override
-    protected void updateToAround(CPlayer pPlayer){
+    protected void updateToAround(CPlayer pPlayer) {
         // 自动每Tick发送一次数据
     }
 
