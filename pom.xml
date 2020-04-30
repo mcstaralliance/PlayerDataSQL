@@ -5,6 +5,16 @@
     <version>1.1.7</version>
     <name>PlayerDataSQL</name>
     <description>数据同步</description>
+    <repositories>
+        <repository>
+            <id>uraniummc</id>
+            <url>https://repo.uraniummc.cc/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>yum</id>
+            <url>https://repo.yumc.pw/repository/maven-public/</url>
+        </repository>
+    </repositories>
     <build>
         <finalName>${project.name}_v${project.version}</finalName>
         <resources>
