@@ -1,5 +1,7 @@
 package cc.bukkitPlugin.pds.task;
 
+import cc.bukkitPlugin.pds.events.PlayerDataLoadCompleteEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import cc.bukkitPlugin.commons.Log;
@@ -79,6 +81,7 @@ public class LoadUserTask implements Runnable {
                         Log.warn("Use locked data to restore user " + this.mName);
                     }
                     this.restoreUser(tUser, false);
+                    Bukkit.getPluginManager().callEvent(new PlayerDataLoadCompleteEvent(this.mPlayer.getPlayer()));
                     break;
                 }
             } catch (Throwable exp) {
