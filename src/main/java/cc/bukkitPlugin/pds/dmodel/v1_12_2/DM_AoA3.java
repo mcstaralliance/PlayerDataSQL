@@ -44,7 +44,10 @@ public class DM_AoA3 extends ADM_CapabilityProvider {
 
     @Override
     public void updateAround(CPlayer pPlayer, Class<?> pProvider) {
-        MethodUtil.invokeMethod(method_EventListener_onPlayerLogin, instance_EventListener, CapabilityHelper.newLoginEvent(pPlayer));
+        Object tEvent = CapabilityHelper.newLoginEvent(pPlayer);
+        if (tEvent != null) {
+            MethodUtil.invokeMethod(method_EventListener_onPlayerLogin, instance_EventListener, tEvent);
+        }
 
         super.updateAround(pPlayer, pProvider);
     }

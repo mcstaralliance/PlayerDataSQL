@@ -153,7 +153,10 @@ public class DM_BetterQuesting extends ADM_CapabilityProvider implements IConfig
             MethodUtil.invokeStaticMethod(method_NetBulkSync_sendReset, tNMSPlayer, true, false);
             MethodUtil.invokeStaticMethod(method_NetBulkSync_sendSync, tNMSPlayer);
         } else if (method_EventHandler_onPlayerJoin != null) {
-            MethodUtil.invokeMethod(method_EventHandler_onPlayerJoin, instance_EventHandler, CapabilityHelper.newLoginEvent(pPlayer));
+            Object tEvent = CapabilityHelper.newLoginEvent(pPlayer);
+            if (tEvent != null) {
+                MethodUtil.invokeMethod(method_EventHandler_onPlayerJoin, instance_EventHandler, tEvent);
+            }
         }
     }
 

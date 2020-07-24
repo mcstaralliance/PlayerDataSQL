@@ -2,9 +2,11 @@ package cc.bukkitPlugin.pds.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.function.BiFunction;
 
 import javax.annotation.Nullable;
 
+import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
 import cc.bukkitPlugin.commons.nmsutil.nbt.NBTUtil;
 import cc.commons.util.reflect.ClassUtil;
@@ -21,6 +23,10 @@ public class CapabilityHelper {
     private static Field field_CapabilityDispatcher_caps;
     /** INBTSerializable<NBTBase>[] writers; */
     private static Field field_CapabilityDispatcher_writers;
+    /** FastCapability CatServer */
+    private static Field field_CapabilityDispatcher_fastCapabilities;
+    private static BiFunction<Object, Class<?>, Object> cap_getter;
+    private static BiFunction<Object, Class<?>, Object> writer_getter;
 
     /** T serializeNBT(); */
     private static Method method_INBTSerializable_serializeNBT;
@@ -33,23 +39,80 @@ public class CapabilityHelper {
     private static Method method_Capability_writeNBT;
     /** void readNBT(T instance, EnumFacing side, NBTBase nbt); */
     private static Method method_Capability_readNBT;
-
+    @Nullable
     public final static Class<?> clazz_PlayerLoggedInEvent;
 
     static {
+        String tStatus = "field_NMSEntity_capabilities";
         try {
             field_NMSEntity_capabilities = FieldUtil.getDeclaredField(NMSUtil.clazz_NMSEntity, "capabilities");
         } catch (IllegalStateException exp) {
             mInitSuccess = false;
         }
 
+        if (mInitSuccess) tStatus = "caps getter, writers getter";
         try {
-            field_CapabilityDispatcher_caps = FieldUtil.getDeclaredField(field_NMSEntity_capabilities.getType(), "caps");
-            field_CapabilityDispatcher_writers = FieldUtil.getDeclaredField(field_NMSEntity_capabilities.getType(), "writers");
+            Class<?> tClazz = field_NMSEntity_capabilities.getType();
+            if (FieldUtil.isDeclaredFieldExist(tClazz, "caps")) {
+                field_CapabilityDispatcher_caps = FieldUtil.getDeclaredField(tClazz, "caps");
+                cap_getter = (Object pNMSEntity, Class<?> pProvider) -> {
+                    // capabilities
+                    Object tObj = FieldUtil.getFieldValue(field_NMSEntity_capabilities, pNMSEntity);
+                    // providers
+                    tObj = FieldUtil.getFieldValue(field_CapabilityDispatcher_caps, tObj);
+                    for (Object sObj : (Object[])tObj) {
+                        if (pProvider.isInstance(sObj)) return sObj;
+                    }
+
+                    return null;
+                };
+                field_CapabilityDispatcher_writers = FieldUtil.getDeclaredField(tClazz, "writers");
+                writer_getter = (Object pNMSEntity, Class<?> pProvider) -> {
+                    // capabilities
+                    Object tObj = FieldUtil.getFieldValue(field_NMSEntity_capabilities, pNMSEntity);
+                    // writers
+                    tObj = FieldUtil.getFieldValue(field_CapabilityDispatcher_writers, tObj);
+                    for (Object sObj : (Object[])tObj) {
+                        if (pProvider.isInstance(sObj)) return sObj;
+                    }
+
+                    return null;
+                };
+            } else { // Catserver FastCapability
+                field_CapabilityDispatcher_fastCapabilities = FieldUtil.getDeclaredField(tClazz, "fastCapabilities");
+                tClazz = field_CapabilityDispatcher_fastCapabilities.getType().getComponentType();
+                field_CapabilityDispatcher_caps = FieldUtil.getDeclaredField(tClazz, "cap");
+                cap_getter = (Object pNMSEntity, Class<?> pProvider) -> {
+                    // capabilities
+                    Object tObj = FieldUtil.getFieldValue(field_NMSEntity_capabilities, pNMSEntity);
+                    // FastCapability
+                    tObj = FieldUtil.getFieldValue(field_CapabilityDispatcher_fastCapabilities, tObj);
+                    for (Object sObj : (Object[])tObj) {
+                        Object tCap = FieldUtil.getFieldValue(field_CapabilityDispatcher_caps, sObj);
+                        if (pProvider.isInstance(tCap)) return tCap;
+                    }
+
+                    return null;
+                };
+                field_CapabilityDispatcher_writers = FieldUtil.getDeclaredField(tClazz, "writer");
+                writer_getter = (Object pNMSEntity, Class<?> pProvider) -> {
+                    // capabilities
+                    Object tObj = FieldUtil.getFieldValue(field_NMSEntity_capabilities, pNMSEntity);
+                    // FastCapability
+                    tObj = FieldUtil.getFieldValue(field_CapabilityDispatcher_fastCapabilities, tObj);
+                    for (Object sObj : (Object[])tObj) {
+                        Object tWriter = FieldUtil.getFieldValue(field_CapabilityDispatcher_writers, sObj);
+                        if (pProvider.isInstance(sObj)) return sObj;
+                    }
+
+                    return null;
+                };
+            }
         } catch (IllegalStateException | NullPointerException exp) {
             mInitSuccess = false;
         }
 
+        if (mInitSuccess) tStatus = "INBTSerializable serializeNBT/deserializeNBT";
         try {
             Class<?> tClazz = ClassUtil.getClass("net.minecraftforge.common.util.INBTSerializable");
             method_INBTSerializable_serializeNBT = MethodUtil.getMethodIgnoreParam(tClazz, "serializeNBT", true).oneGet();
@@ -58,12 +121,14 @@ public class CapabilityHelper {
             mInitSuccess = false;
         }
 
+        if (mInitSuccess) tStatus = "getCapability";
         try {
             method_NMSEntity_getCapability = MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity, "getCapability", true).oneGet();
         } catch (IllegalStateException exp) {
             mInitSuccess = false;
         }
 
+        if (mInitSuccess) tStatus = "Capability writeNBT/readNBT";
         try {
             Class<?> tClazz = ClassUtil.getClass("net.minecraftforge.common.capabilities.Capability");
             method_Capability_writeNBT = MethodUtil.getMethodIgnoreParam(tClazz, "writeNBT", true).oneGet();
@@ -77,9 +142,15 @@ public class CapabilityHelper {
             tClazz = ClassUtil.getClass("net.minecraftforge.fml.common.gameevent.PlayerEvent$PlayerLoggedInEvent");
         } catch (IllegalStateException | NullPointerException exp) {
             tClazz = null;
-            mInitSuccess = false;
         }
         clazz_PlayerLoggedInEvent = tClazz;
+
+        if (!mInitSuccess) {
+            Log.severe("CapabilityHelper 在\"" + tStatus + "\"过程时初始化失败,部分模块可能无法启用");
+        }
+        if (clazz_PlayerLoggedInEvent == null) {
+            Log.warn("未能找到玩家登陆事件类,部分模块数据可能会存在服务器与客户端不同的情况");
+        }
     }
 
     public static boolean isInisSuccess() {
@@ -88,28 +159,14 @@ public class CapabilityHelper {
 
     public static Object getCapabilityProvider(Object pNMSEntity, Class<?> pProvider) {
         if (!isInisSuccess()) return null;
-        // capabilities
-        Object tObj = FieldUtil.getFieldValue(field_NMSEntity_capabilities, pNMSEntity);
-        // providers
-        tObj = FieldUtil.getFieldValue(field_CapabilityDispatcher_caps, tObj);
-        for (Object sObj : (Object[])tObj) {
-            if (pProvider.isInstance(sObj)) return sObj;
-        }
 
-        return null;
+        return cap_getter.apply(pNMSEntity, pProvider);
     }
 
     public static Object getCapabilityStorage(Object pNMSEntity, Class<?> pProvider) {
         if (!isInisSuccess()) return null;
-        // capabilities
-        Object tObj = FieldUtil.getFieldValue(field_NMSEntity_capabilities, pNMSEntity);
-        // writers
-        tObj = FieldUtil.getFieldValue(field_CapabilityDispatcher_writers, tObj);
-        for (Object sObj : (Object[])tObj) {
-            if (pProvider.isInstance(sObj)) return sObj;
-        }
 
-        return null;
+        return writer_getter.apply(pNMSEntity, pProvider);
     }
 
     public static Object serializeCapability(Object pNMSEntity, Class<?> pProvider) {
@@ -185,8 +242,10 @@ public class CapabilityHelper {
         return MethodUtil.invokeMethod(method_Capability_writeNBT, pCapabilityEntry, tCap, pFacing);
     }
 
+    @Nullable
     public static Object newLoginEvent(CPlayer pPlayer) {
-        return ClassUtil.newInstance(clazz_PlayerLoggedInEvent, NMSUtil.clazz_EntityPlayer, pPlayer.getNMSPlayer());
+        return clazz_PlayerLoggedInEvent == null ? null
+                : ClassUtil.newInstance(clazz_PlayerLoggedInEvent, NMSUtil.clazz_EntityPlayer, pPlayer.getNMSPlayer());
     }
 
 }
