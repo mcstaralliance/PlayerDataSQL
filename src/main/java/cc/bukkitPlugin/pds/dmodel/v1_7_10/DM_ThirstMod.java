@@ -5,6 +5,7 @@ import java.util.Map;
 
 import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
+import cc.bukkitPlugin.pds.dmodel.ADM_ForgeData;
 import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.util.reflect.MethodUtil;
 
@@ -84,8 +85,6 @@ public class DM_ThirstMod extends ADM_ForgeData {
     }
 
     @Override
-    protected void updateToAround(CPlayer pPlayer) {
-        // 自动每Tick发送一次数据
-    }
+    public void updateToClient(CPlayer pPlayer) {}
 
 }
