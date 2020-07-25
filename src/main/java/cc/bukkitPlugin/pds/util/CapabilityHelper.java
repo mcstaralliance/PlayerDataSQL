@@ -102,7 +102,7 @@ public class CapabilityHelper {
                     tObj = FieldUtil.getFieldValue(field_CapabilityDispatcher_fastCapabilities, tObj);
                     for (Object sObj : (Object[])tObj) {
                         Object tWriter = FieldUtil.getFieldValue(field_CapabilityDispatcher_writers, sObj);
-                        if (pProvider.isInstance(sObj)) return sObj;
+                        if (pProvider.isInstance(tWriter)) return tWriter;
                     }
 
                     return null;
