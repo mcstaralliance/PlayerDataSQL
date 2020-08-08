@@ -59,6 +59,7 @@ public class DM_Minecraft extends ADataModel {
         GameMode tMode = tPlayer.getGameMode();
         PDSNBTUtil.setPlayerNBT(tPlayer, PDSNBTUtil.decompressNBT(pData));
         tPlayer.setGameMode(tMode);
+        tPlayer.getInventory().setHeldItemSlot(0);
     }
 
     @Override
