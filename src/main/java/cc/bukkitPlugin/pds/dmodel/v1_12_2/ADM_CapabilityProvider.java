@@ -23,7 +23,7 @@ public abstract class ADM_CapabilityProvider extends ADataModel {
     /** Provider的类全名 */
     protected HashSet<String> mCapabilityPs_name = new HashSet<>();
     /** 根据Provider的类全名获的Provider类 */
-    private HashMap<String, Class<?>> mCapabilityPs = new HashMap<>();
+    protected HashMap<String, Class<?>> mCapabilityPs = new HashMap<>();
     /** 判断mod是否加载的类全名 */
     protected HashSet<String> mModClass = new HashSet<String>();
 
