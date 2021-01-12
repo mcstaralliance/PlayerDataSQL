@@ -45,7 +45,7 @@ public class CapabilityHelper {
     static {
         String tStatus = "field_NMSEntity_capabilities";
         try {
-            field_NMSEntity_capabilities = FieldUtil.getDeclaredField(NMSUtil.clazz_NMSEntity, "capabilities");
+            field_NMSEntity_capabilities = FieldUtil.getField(NMSUtil.clazz_NMSEntity, "capabilities");
         } catch (IllegalStateException exp) {
             mInitSuccess = false;
         }
@@ -123,7 +123,7 @@ public class CapabilityHelper {
 
         if (mInitSuccess) tStatus = "getCapability";
         try {
-            method_NMSEntity_getCapability = MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity, "getCapability", true).oneGet();
+            method_NMSEntity_getCapability = MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity, "getCapability", false).oneGet();
         } catch (IllegalStateException exp) {
             mInitSuccess = false;
         }
@@ -139,7 +139,13 @@ public class CapabilityHelper {
 
         Class<?> tClazz = null;
         try {
-            tClazz = ClassUtil.getClass("net.minecraftforge.fml.common.gameevent.PlayerEvent$PlayerLoggedInEvent");
+            String tStr = "net.minecraftforge.fml.common.gameevent.PlayerEvent$PlayerLoggedInEvent";//1.12.x
+            if (ClassUtil.isClassLoaded(tStr)) {
+                tClazz = ClassUtil.getClass(tStr);
+            } else {
+                tStr = "net.minecraftforge.event.entity.player.PlayerEvent$PlayerLoggedInEvent";//1.15.x
+                tClazz = ClassUtil.getClass(tStr);
+            }
         } catch (IllegalStateException | NullPointerException exp) {
             tClazz = null;
         }
