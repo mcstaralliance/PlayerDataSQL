@@ -60,13 +60,12 @@ public abstract class ADataModel implements IDataModel {
         try {
             return this.mInitSuccess = this.initOnce();
         } catch (Exception exp) {
-            if (exp instanceof ClassNotFoundException) {
-            } else {
-                Throwable tSource = exp;
-                if (exp instanceof IllegalStateException && exp.getCause() != null) {
-                    tSource = exp.getCause();
-                }
+            Throwable tSource = exp;
+            if (exp instanceof IllegalStateException && exp.getCause() != null) {
+                tSource = tSource.getCause();
+            }
 
+            if (!(tSource instanceof ClassNotFoundException)) {
                 String tName = this.getDesc() + "(" + this.getModelId() + ")";
                 if (tSource instanceof NoSuchMethodException || tSource instanceof NoSuchFieldException) {
                     Log.severe("模块 " + tName + " 可能不支持你当前MOD版本");
@@ -76,6 +75,7 @@ public abstract class ADataModel implements IDataModel {
                     if (Log.isDebug()) Log.severe(exp);
                 }
             }
+
             return (this.mInitSuccess = false);
         }
     }
