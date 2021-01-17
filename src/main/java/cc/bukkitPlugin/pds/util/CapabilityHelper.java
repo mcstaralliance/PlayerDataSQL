@@ -43,6 +43,9 @@ public class CapabilityHelper {
     public final static Class<?> clazz_PlayerLoggedInEvent;
 
     static {
+        boolean tIsForge = ClassUtil.isClassLoaded("net.minecraftforge.common.MinecraftForge");
+        mInitSuccess = tIsForge;
+
         String tStatus = "field_NMSEntity_capabilities";
         try {
             field_NMSEntity_capabilities = FieldUtil.getField(NMSUtil.clazz_NMSEntity, "capabilities");
@@ -50,112 +53,127 @@ public class CapabilityHelper {
             mInitSuccess = false;
         }
 
-        if (mInitSuccess) tStatus = "caps getter, writers getter";
-        try {
-            Class<?> tClazz = field_NMSEntity_capabilities.getType();
-            if (FieldUtil.isDeclaredFieldExist(tClazz, "caps")) {
-                field_CapabilityDispatcher_caps = FieldUtil.getDeclaredField(tClazz, "caps");
-                cap_getter = (Object pNMSEntity, Class<?> pProvider) -> {
-                    // capabilities
-                    Object tObj = FieldUtil.getFieldValue(field_NMSEntity_capabilities, pNMSEntity);
-                    // providers
-                    tObj = FieldUtil.getFieldValue(field_CapabilityDispatcher_caps, tObj);
-                    for (Object sObj : (Object[])tObj) {
-                        if (pProvider.isInstance(sObj)) return sObj;
-                    }
+        if (mInitSuccess) {
+            tStatus = "caps getter, writers getter";
 
-                    return null;
-                };
-                field_CapabilityDispatcher_writers = FieldUtil.getDeclaredField(tClazz, "writers");
-                writer_getter = (Object pNMSEntity, Class<?> pProvider) -> {
-                    // capabilities
-                    Object tObj = FieldUtil.getFieldValue(field_NMSEntity_capabilities, pNMSEntity);
-                    // writers
-                    tObj = FieldUtil.getFieldValue(field_CapabilityDispatcher_writers, tObj);
-                    for (Object sObj : (Object[])tObj) {
-                        if (pProvider.isInstance(sObj)) return sObj;
-                    }
+            try {
+                Class<?> tClazz = field_NMSEntity_capabilities.getType();
+                if (FieldUtil.isDeclaredFieldExist(tClazz, "caps")) {
+                    field_CapabilityDispatcher_caps = FieldUtil.getDeclaredField(tClazz, "caps");
+                    cap_getter = (Object pNMSEntity, Class<?> pProvider) -> {
+                        // capabilities
+                        Object tObj = FieldUtil.getFieldValue(field_NMSEntity_capabilities, pNMSEntity);
+                        // providers
+                        tObj = FieldUtil.getFieldValue(field_CapabilityDispatcher_caps, tObj);
+                        for (Object sObj : (Object[])tObj) {
+                            if (pProvider.isInstance(sObj)) return sObj;
+                        }
 
-                    return null;
-                };
-            } else { // Catserver FastCapability
-                field_CapabilityDispatcher_fastCapabilities = FieldUtil.getDeclaredField(tClazz, "fastCapabilities");
-                tClazz = field_CapabilityDispatcher_fastCapabilities.getType().getComponentType();
-                field_CapabilityDispatcher_caps = FieldUtil.getDeclaredField(tClazz, "cap");
-                cap_getter = (Object pNMSEntity, Class<?> pProvider) -> {
-                    // capabilities
-                    Object tObj = FieldUtil.getFieldValue(field_NMSEntity_capabilities, pNMSEntity);
-                    // FastCapability
-                    tObj = FieldUtil.getFieldValue(field_CapabilityDispatcher_fastCapabilities, tObj);
-                    for (Object sObj : (Object[])tObj) {
-                        Object tCap = FieldUtil.getFieldValue(field_CapabilityDispatcher_caps, sObj);
-                        if (pProvider.isInstance(tCap)) return tCap;
-                    }
+                        return null;
+                    };
+                    field_CapabilityDispatcher_writers = FieldUtil.getDeclaredField(tClazz, "writers");
+                    writer_getter = (Object pNMSEntity, Class<?> pProvider) -> {
+                        // capabilities
+                        Object tObj = FieldUtil.getFieldValue(field_NMSEntity_capabilities, pNMSEntity);
+                        // writers
+                        tObj = FieldUtil.getFieldValue(field_CapabilityDispatcher_writers, tObj);
+                        for (Object sObj : (Object[])tObj) {
+                            if (pProvider.isInstance(sObj)) return sObj;
+                        }
 
-                    return null;
-                };
-                field_CapabilityDispatcher_writers = FieldUtil.getDeclaredField(tClazz, "writer");
-                writer_getter = (Object pNMSEntity, Class<?> pProvider) -> {
-                    // capabilities
-                    Object tObj = FieldUtil.getFieldValue(field_NMSEntity_capabilities, pNMSEntity);
-                    // FastCapability
-                    tObj = FieldUtil.getFieldValue(field_CapabilityDispatcher_fastCapabilities, tObj);
-                    for (Object sObj : (Object[])tObj) {
-                        Object tWriter = FieldUtil.getFieldValue(field_CapabilityDispatcher_writers, sObj);
-                        if (pProvider.isInstance(tWriter)) return tWriter;
-                    }
+                        return null;
+                    };
+                } else { // Catserver FastCapability
+                    field_CapabilityDispatcher_fastCapabilities = FieldUtil.getDeclaredField(tClazz, "fastCapabilities");
+                    tClazz = field_CapabilityDispatcher_fastCapabilities.getType().getComponentType();
+                    field_CapabilityDispatcher_caps = FieldUtil.getDeclaredField(tClazz, "cap");
+                    cap_getter = (Object pNMSEntity, Class<?> pProvider) -> {
+                        // capabilities
+                        Object tObj = FieldUtil.getFieldValue(field_NMSEntity_capabilities, pNMSEntity);
+                        // FastCapability
+                        tObj = FieldUtil.getFieldValue(field_CapabilityDispatcher_fastCapabilities, tObj);
+                        for (Object sObj : (Object[])tObj) {
+                            Object tCap = FieldUtil.getFieldValue(field_CapabilityDispatcher_caps, sObj);
+                            if (pProvider.isInstance(tCap)) return tCap;
+                        }
 
-                    return null;
-                };
+                        return null;
+                    };
+                    field_CapabilityDispatcher_writers = FieldUtil.getDeclaredField(tClazz, "writer");
+                    writer_getter = (Object pNMSEntity, Class<?> pProvider) -> {
+                        // capabilities
+                        Object tObj = FieldUtil.getFieldValue(field_NMSEntity_capabilities, pNMSEntity);
+                        // FastCapability
+                        tObj = FieldUtil.getFieldValue(field_CapabilityDispatcher_fastCapabilities, tObj);
+                        for (Object sObj : (Object[])tObj) {
+                            Object tWriter = FieldUtil.getFieldValue(field_CapabilityDispatcher_writers, sObj);
+                            if (pProvider.isInstance(tWriter)) return tWriter;
+                        }
+
+                        return null;
+                    };
+                }
+            } catch (IllegalStateException | NullPointerException exp) {
+                mInitSuccess = false;
             }
-        } catch (IllegalStateException | NullPointerException exp) {
-            mInitSuccess = false;
         }
 
-        if (mInitSuccess) tStatus = "INBTSerializable serializeNBT/deserializeNBT";
-        try {
-            Class<?> tClazz = ClassUtil.getClass("net.minecraftforge.common.util.INBTSerializable");
-            method_INBTSerializable_serializeNBT = MethodUtil.getMethodIgnoreParam(tClazz, "serializeNBT", true).oneGet();
-            method_INBTSerializable_deserializeNBT = MethodUtil.getMethodIgnoreParam(tClazz, "deserializeNBT", true).oneGet();
-        } catch (IllegalStateException | NullPointerException exp) {
-            mInitSuccess = false;
+        if (mInitSuccess) {
+            tStatus = "INBTSerializable serializeNBT/deserializeNBT";
+
+            try {
+                Class<?> tClazz = ClassUtil.getClass("net.minecraftforge.common.util.INBTSerializable");
+                method_INBTSerializable_serializeNBT = MethodUtil.getMethodIgnoreParam(tClazz, "serializeNBT", true).oneGet();
+                method_INBTSerializable_deserializeNBT = MethodUtil.getMethodIgnoreParam(tClazz, "deserializeNBT", true).oneGet();
+            } catch (IllegalStateException | NullPointerException exp) {
+                mInitSuccess = false;
+            }
         }
 
-        if (mInitSuccess) tStatus = "getCapability";
-        try {
-            method_NMSEntity_getCapability = MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity, "getCapability", false).oneGet();
-        } catch (IllegalStateException exp) {
-            mInitSuccess = false;
+        if (mInitSuccess) {
+            tStatus = "getCapability";
+
+            try {
+                method_NMSEntity_getCapability = MethodUtil.getMethodIgnoreParam(NMSUtil.clazz_NMSEntity, "getCapability", false).oneGet();
+            } catch (IllegalStateException exp) {
+                mInitSuccess = false;
+            }
         }
 
-        if (mInitSuccess) tStatus = "Capability writeNBT/readNBT";
-        try {
-            Class<?> tClazz = ClassUtil.getClass("net.minecraftforge.common.capabilities.Capability");
-            method_Capability_writeNBT = MethodUtil.getMethodIgnoreParam(tClazz, "writeNBT", true).oneGet();
-            method_Capability_readNBT = MethodUtil.getMethodIgnoreParam(tClazz, "readNBT", true).oneGet();
-        } catch (IllegalStateException | NullPointerException exp) {
-            mInitSuccess = false;
+        if (mInitSuccess) {
+            tStatus = "Capability writeNBT/readNBT";
+
+            try {
+                Class<?> tClazz = ClassUtil.getClass("net.minecraftforge.common.capabilities.Capability");
+                method_Capability_writeNBT = MethodUtil.getMethodIgnoreParam(tClazz, "writeNBT", true).oneGet();
+                method_Capability_readNBT = MethodUtil.getMethodIgnoreParam(tClazz, "readNBT", true).oneGet();
+            } catch (IllegalStateException | NullPointerException exp) {
+                mInitSuccess = false;
+            }
         }
 
         Class<?> tClazz = null;
-        try {
-            String tStr = "net.minecraftforge.fml.common.gameevent.PlayerEvent$PlayerLoggedInEvent";//1.12.x
-            if (ClassUtil.isClassLoaded(tStr)) {
-                tClazz = ClassUtil.getClass(tStr);
-            } else {
-                tStr = "net.minecraftforge.event.entity.player.PlayerEvent$PlayerLoggedInEvent";//1.15.x
-                tClazz = ClassUtil.getClass(tStr);
+        if (mInitSuccess) {
+            try {
+                String tStr = "net.minecraftforge.fml.common.gameevent.PlayerEvent$PlayerLoggedInEvent";//1.12.x
+                if (ClassUtil.isClassLoaded(tStr)) {
+                    tClazz = ClassUtil.getClass(tStr);
+                } else {
+                    tStr = "net.minecraftforge.event.entity.player.PlayerEvent$PlayerLoggedInEvent";//1.15.x
+                    tClazz = ClassUtil.getClass(tStr);
+                }
+            } catch (IllegalStateException | NullPointerException exp) {
+                tClazz = null;
             }
-        } catch (IllegalStateException | NullPointerException exp) {
-            tClazz = null;
+
+            if (tClazz == null) {
+                Log.warn("未能找到玩家登陆事件类,部分模块数据可能会存在服务器与客户端不同的情况");
+            }
         }
         clazz_PlayerLoggedInEvent = tClazz;
 
-        if (!mInitSuccess) {
+        if (!mInitSuccess && tIsForge) {
             Log.severe("CapabilityHelper 在\"" + tStatus + "\"过程时初始化失败,部分模块可能无法启用");
-        }
-        if (clazz_PlayerLoggedInEvent == null) {
-            Log.warn("未能找到玩家登陆事件类,部分模块数据可能会存在服务器与客户端不同的情况");
         }
     }
 
