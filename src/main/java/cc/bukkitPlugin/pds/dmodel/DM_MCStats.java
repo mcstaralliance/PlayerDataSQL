@@ -8,6 +8,11 @@ import java.lang.reflect.Modifier;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Server;
 
 import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
@@ -21,6 +26,7 @@ import cc.commons.util.reflect.FieldUtil;
 import cc.commons.util.reflect.MethodUtil;
 import cc.commons.util.reflect.filter.FieldFilter;
 import cc.commons.util.reflect.filter.MethodFilter;
+import cc.commons.util.tools.CacheGettor;
 
 public class DM_MCStats extends ADataModel {
 
@@ -28,20 +34,8 @@ public class DM_MCStats extends ADataModel {
     private static final String MARK_STAT = "stat:";
     private static final String MARK_ADVANCE = "\nadvance:";
 
-    private static MCVersion mMCV = null;
-
     private Boolean mInit = null;
     private Method method_EntityPlayerMP_getStatisticMan;
-    /**
-     * static Map loadStatistic(String) 1.12及以下<br>
-     * void parseLocal(DataFixer, String) 1.13及以上
-     */
-    private Method method_StatisticsFile_loadStatistic;
-    /**
-     * String saveStatistic(Map) 1.12及以下<br>
-     * String saveStatistic() 1.13及以上
-     */
-    private Method method_StatisticsFile_saveStatistic;
     /**
      * Map 1.12及以下<br>
      * Object2IntMaps 1.13及以上
@@ -52,16 +46,20 @@ public class DM_MCStats extends ADataModel {
     // map
     private Field field_AdvancementData_progress = null;
     private boolean mAdvancementAlreadyDetected = false;
-    // set
-    //private Field field_AdvancementData_dirty = null;
-    private Field field_AdvancementData_file = null;
-    private Method method_AdvancementData_save = null;
-    private Method method_AdvancementData_reload = null;
 
-    //1.13+
-    private Field field__ServerStatisticManager_server = null;
-    private Field field__MinecraftServer_dataFixer = null;
-    private Object mDataFixer = null;
+    private Field field_AdvancementData_file = null;
+
+    private Function<CPlayer, String> mStatSave = null;
+    private BiConsumer<CPlayer, String> mStatLoad = null;
+
+    //1.12+
+    private Function<CPlayer, String> mAdvanceSave = null;
+    private BiConsumer<CPlayer, String> mAdvanceRestore = null;
+
+    private CacheGettor<Object> mNMSServer = CacheGettor.create(() -> {
+        Server tCraftServer = Bukkit.getServer();
+        return MethodUtil.invokeDeclaredMethod(tCraftServer.getClass(), "getServer", tCraftServer);
+    });
 
     private File mDataDir;
 
@@ -102,33 +100,44 @@ public class DM_MCStats extends ADataModel {
 
         Class<?> tClazz;
         if (this.method_EntityPlayerMP_getAdvancementsMan != null) {
-            mMCV = MCVersion.v1_12_2;
             tClazz = this.method_EntityPlayerMP_getAdvancementsMan.getReturnType();
             this.field_AdvancementData_file = FieldUtil.getDeclaredField(tClazz, FieldFilter.t(File.class)).oneGet();
             this.field_AdvancementData_progress = FieldUtil.getDeclaredField(tClazz, FieldFilter.t(Map.class)).oneGet();
-        } else {
-            mMCV = MCVersion.v1_7_10;
         }
 
         tClazz = this.method_EntityPlayerMP_getStatisticMan.getReturnType();
         if (MethodUtil.isMethodExist(tClazz, MethodFilter.rpt(Map.class, String.class))) {
             //1.7.10,1.12.2
-            this.method_StatisticsFile_loadStatistic = MethodUtil.getDeclaredMethod(tClazz,
-                    MethodFilter.rpt(Map.class, String.class)).first();
-            this.method_StatisticsFile_saveStatistic = MethodUtil.getDeclaredMethod(tClazz,
+            Method tMethod1 = MethodUtil.getDeclaredMethod(tClazz,
                     MethodFilter.rpt(String.class, Map.class)).first();
+            this.mStatSave = (CPlayer pPlayer) -> {
+                Object tStatMan = getStatMan(pPlayer);
+                return (String)MethodUtil.invokeMethod(tMethod1,
+                        tStatMan, getManStatValue(tStatMan));
+
+            };
+            Method tMethod2 = MethodUtil.getDeclaredMethod(tClazz,
+                    MethodFilter.rpt(Map.class, String.class)).first();
+            this.mStatLoad = (CPlayer pPlayer, String pStat) -> {
+                Object tStatMan = getStatMan(pPlayer);
+                Map<Object, Object> tPlayerStatValue = getManStatValue(tStatMan);
+                tPlayerStatValue.clear();
+                tPlayerStatValue.putAll((Map<Object, Object>)MethodUtil.invokeMethod(tMethod2,
+                        tStatMan, pStat));
+            };
         } else {
             //1.13+
-            mMCV = MCVersion.v1_13_ABOVE;
-            this.field__ServerStatisticManager_server = FieldUtil.getDeclaredField(tClazz,
-                    (field) -> field.getType().getSimpleName().equals("MinecraftServer")).oneGet();
-            this.field__MinecraftServer_dataFixer = FieldUtil.getDeclaredField(this.field__ServerStatisticManager_server.getType(),
-                    (field) -> field.getType().getSimpleName().equals("DataFixer")).oneGet();
-
-            this.method_StatisticsFile_loadStatistic = MethodUtil.getDeclaredMethod(tClazz,
-                    MethodFilter.rpt(void.class, this.field__MinecraftServer_dataFixer.getType(), String.class)).first();
-            this.method_StatisticsFile_saveStatistic = MethodUtil.getDeclaredMethod(tClazz,
+            Method tMethod1 = MethodUtil.getDeclaredMethod(tClazz,
                     MethodFilter.rpt(String.class)).first();
+            this.mStatSave = (pPlayer) -> (String)MethodUtil.invokeMethod(tMethod1, getStatMan(pPlayer));
+
+            Field field_MinecraftServer_dataFixer = FieldUtil.getField(mNMSServer.get().getClass(),
+                    (field) -> field.getType().getSimpleName().equals("DataFixer")).oneGet();
+            Method tMethod2 = MethodUtil.getDeclaredMethod(tClazz,
+                    MethodFilter.rpt(void.class, field_MinecraftServer_dataFixer.getType(), String.class)).first();
+            Object tDataFixer = FieldUtil.getFieldValue(mNMSServer.get().getClass(),
+                    (field) -> field.getType().getSimpleName().equals("DataFixer"), false, mNMSServer.get());
+            this.mStatLoad = (CPlayer pPlayer, String pStat) -> MethodUtil.invokeMethod(tMethod2, getStatMan(pPlayer), tDataFixer, pStat);
         }
 
         this.field_StatFileWriter_stats = FieldUtil.getDeclaredField(tClazz.getSuperclass(),
@@ -138,31 +147,11 @@ public class DM_MCStats extends ADataModel {
 
     @Override
     public byte[] getData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws Exception {
-        StringBuilder tSBuilder = new StringBuilder(MARK_STAT);
-        Object tStatMan = this.getStatMan(pPlayer);
-        String tJson;
-        if (mMCV.ordinal() <= MCVersion.v1_12_2.ordinal()) {
-            tJson = (String)MethodUtil.invokeMethod(this.method_StatisticsFile_saveStatistic,
-                    tStatMan, this.getManStatValue(tStatMan));
-        } else {
-            tJson = (String)MethodUtil.invokeMethod(this.method_StatisticsFile_saveStatistic, tStatMan);
-        }
-        tSBuilder.append(tJson);
-        tSBuilder.append(MARK_ADVANCE);
+        StringBuilder tSBuilder = new StringBuilder(MARK_STAT).append(this.mStatSave.apply(pPlayer)).append(MARK_ADVANCE);
 
         if (this.method_EntityPlayerMP_getAdvancementsMan != null) {
-            Object tAdvance = MethodUtil.invokeMethod(method_EntityPlayerMP_getAdvancementsMan, pPlayer.getNMSPlayer());
-            if (!this.mAdvancementAlreadyDetected) this.detectAdvancementDataMethod(tAdvance);
-
-            if (this.method_AdvancementData_save != null) {
-                try {
-                    MethodUtil.invokeMethod(method_AdvancementData_save, tAdvance);
-                    File tAdvFile = (File)FieldUtil.getFieldValue(field_AdvancementData_file, tAdvance);
-                    tSBuilder.append(FileUtil.readContent(tAdvFile, UTF_8.name()));
-                } catch (IOException exp) {
-                    Log.severe("未能保存成就的部分数据: " + exp.getLocalizedMessage());
-                }
-            }
+            if (!this.mAdvancementAlreadyDetected) this.detectAdvancementDataMethod(getPlayerAdvanceMan(pPlayer));
+            if (this.mAdvanceSave != null) tSBuilder.append(this.mAdvanceSave.apply(pPlayer));
         }
         return tSBuilder.toString().getBytes(UTF_8);
     }
@@ -182,34 +171,11 @@ public class DM_MCStats extends ADataModel {
             tAdvancement = "";
         }
 
-        if (mMCV.ordinal() <= MCVersion.v1_12_2.ordinal()) {
-            Map<Object, Object> tPlayerStatValue = this.getManStatValue(tStatMan);
-            tPlayerStatValue.clear();
-            tPlayerStatValue.putAll((Map<Object, Object>)MethodUtil.invokeMethod(this.method_StatisticsFile_loadStatistic,
-                    tStatMan, tStat));
-        } else {
-            if (this.mDataFixer == null) {
-                this.mDataFixer = FieldUtil.getFieldValue(field__MinecraftServer_dataFixer,
-                        FieldUtil.getFieldValue(field__ServerStatisticManager_server, tStatMan));
-            }
-
-            MethodUtil.invokeMethod(method_StatisticsFile_loadStatistic, tStatMan, this.mDataFixer, tStat);
-        }
+        this.mStatLoad.accept(pPlayer, tStat);
 
         if (this.method_EntityPlayerMP_getAdvancementsMan != null) {
-            Object tAdvance = MethodUtil.invokeMethod(method_EntityPlayerMP_getAdvancementsMan, pPlayer.getNMSPlayer());
-            if (!this.mAdvancementAlreadyDetected) this.detectAdvancementDataMethod(tAdvance);
-
-            if (this.method_AdvancementData_reload != null) {
-                if (StringUtil.isBlank(tAdvancement)) tAdvancement = "{}";
-                try {
-                    File tAdvFile = (File)FieldUtil.getFieldValue(field_AdvancementData_file, tAdvance);
-                    FileUtil.writeData(tAdvFile, tAdvancement.getBytes(UTF_8));
-                    MethodUtil.invokeMethod(method_AdvancementData_reload, tAdvance);
-                } catch (IOException exp) {
-                    Log.severe("未能还原成就的部分数据: " + exp.getLocalizedMessage());
-                }
-            }
+            if (!this.mAdvancementAlreadyDetected) this.detectAdvancementDataMethod(getPlayerAdvanceMan(pPlayer));
+            if (this.mAdvanceRestore != null) this.mAdvanceRestore.accept(pPlayer, tAdvancement);
         }
     }
 
@@ -242,6 +208,10 @@ public class DM_MCStats extends ADataModel {
         return (Map<Object, Object>)FieldUtil.getFieldValue(this.field_StatFileWriter_stats, pStatMan);
     }
 
+    private Object getPlayerAdvanceMan(CPlayer pPlayer) {
+        return MethodUtil.invokeMethod(method_EntityPlayerMP_getAdvancementsMan, pPlayer.getNMSPlayer());
+    }
+
     /**
      * @param pObj
      *            AdvancementData实例
@@ -257,6 +227,8 @@ public class DM_MCStats extends ADataModel {
         CFile tTestFile = new CFile(tOriginFile.getParentFile(), "pds_test.dat");
         FieldUtil.setFieldValue(field_AdvancementData_file, pObj, tTestFile);
         int tStep = 0;
+        boolean tError = false;
+        Throwable tExp = null;
         try {
             String tTestContent = "\n\n{\n\n}\n\n";
             FileUtil.createNewFile(tTestFile, true);
@@ -271,29 +243,119 @@ public class DM_MCStats extends ADataModel {
                 tTestFile.mReadMark = false;
                 try {
                     MethodUtil.invokeMethod(sMethod, pObj);
-                } catch (NullPointerException ignore) {
+                } catch (Throwable ignore) {
                 }
                 boolean tReadMark = tTestFile.mReadMark;
 
-                if (this.method_AdvancementData_save == null && !FileUtil.readContent(tTestFile, "UTF-8").equals(tTestContent)) {
-                    this.method_AdvancementData_save = sMethod;
+                if (this.mAdvanceSave == null && !FileUtil.readContent(tTestFile, "UTF-8").equals(tTestContent)) {
+                    Method tSave = sMethod;
+                    this.mAdvanceSave = new AdvanceSave() {
+
+                        @Override
+                        protected String save(CPlayer pPlayer) throws IOException {
+                            MethodUtil.invokeMethod(tSave, getPlayerAdvanceMan(pPlayer));
+                            return super.save(pPlayer);
+                        }
+                    };
+
                     tStep |= 1;
                     continue;
                 }
-                if (this.method_AdvancementData_reload == null && tReadMark) {
-                    this.method_AdvancementData_reload = sMethod;
+                if (this.mAdvanceRestore == null && tReadMark) {
+                    Method tReload = sMethod;
                     tStep |= 2;
+                    this.mAdvanceRestore = new AdvanceRestore() {
+
+                        @Override
+                        protected void restore(CPlayer pPlayer, String pData) throws IOException {
+                            super.restore(pPlayer, pData);
+                            MethodUtil.invokeMethod(tReload, getPlayerAdvanceMan(pPlayer));
+                        }
+                    };
                     continue;
                 }
             }
         } catch (IOException e) {
-            Log.warn("§c成就模块部分初始化失败,成就数据无法同步: " + e.getLocalizedMessage());
+            tError = true;
+            tExp = e;
         } finally {
             FieldUtil.setFieldValue(field_AdvancementData_progress, pObj, tOriginAdvc);
             FieldUtil.setFieldValue(field_AdvancementData_file, pObj, tOriginFile);
         }
 
-        if (tStep != 3) Log.warn("§c成就模块部分初始化失败,成就数据无法同步");
+        if (!tError && this.mAdvanceRestore == null) {
+            // 1.6.4
+            Server tCraftServer = Bukkit.getServer();
+            try {
+                Object tNMSServer = MethodUtil.invokeDeclaredMethod(tCraftServer.getClass(), "getServer", tCraftServer);
+                Method tGetAdvMan = MethodUtil.getMethod(tNMSServer.getClass(), MethodFilter.c().addPossModifer(Modifier.PUBLIC).noParam()
+                        .addFilter((method) -> method.getReturnType().getSimpleName().toLowerCase().startsWith("advancement"))).oneGet();
+                Object tAdvMan = MethodUtil.invokeMethod(tGetAdvMan, tNMSServer);
+                Method tReload = MethodUtil.getMethod(pObj.getClass(),
+                        MethodFilter.rpt(void.class, tGetAdvMan.getReturnType()).addPossModifer(Modifier.PUBLIC)).oneGet();
+
+                this.mAdvanceRestore = new AdvanceRestore() {
+
+                    @Override
+                    protected void restore(CPlayer pPlayer, String pData) throws IOException {
+                        super.restore(pPlayer, pData);
+                        MethodUtil.invokeMethod(tReload, getPlayerAdvanceMan(pPlayer), tAdvMan);
+                    }
+                };
+                tStep |= 2;
+            } catch (Throwable exp) {
+                tError = true;
+                tExp = exp;
+            }
+        }
+
+        if (tStep != 3) {
+            String tErrorMsg = "§c成就模块部分初始化失败,成就数据无法同步";
+            if (tExp != null) tErrorMsg += ": " + tExp.getLocalizedMessage();
+            Log.warn("§c成就模块部分初始化失败,成就数据无法同步");
+            if (tExp != null && Log.isDebug()) Log.severe(tExp);
+        }
+    }
+
+    public class AdvanceSave implements Function<CPlayer, String> {
+
+        @Override
+        public final String apply(CPlayer pPlayer) {
+            try {
+                return this.save(pPlayer);
+            } catch (IOException exp) {
+                Log.severe("未能保存成就的部分数据: " + exp.getLocalizedMessage());
+                if (Log.isDebug()) Log.severe(exp);
+                return "";
+            }
+        }
+
+        protected String save(CPlayer pPlayer) throws IOException {
+            File tAdvFile = (File)FieldUtil.getFieldValue(field_AdvancementData_file, getPlayerAdvanceMan(pPlayer));
+            return FileUtil.readContent(tAdvFile, UTF_8.name());
+        }
+
+    }
+
+    public class AdvanceRestore implements BiConsumer<CPlayer, String> {
+
+        @Override
+        public final void accept(CPlayer pPlayer, String pData) {
+            if (StringUtil.isBlank(pData)) pData = "{}";
+            try {
+                this.restore(pPlayer, pData);
+                return;
+            } catch (IOException exp) {
+                Log.severe("未能还原成就的部分数据: " + exp.getLocalizedMessage());
+                if (Log.isDebug()) Log.severe(exp);
+            }
+        }
+
+        protected void restore(CPlayer pPlayer, String pData) throws IOException {
+            File tAdvFile = (File)FieldUtil.getFieldValue(field_AdvancementData_file, getPlayerAdvanceMan(pPlayer));
+            FileUtil.writeData(tAdvFile, pData.getBytes(UTF_8));
+        }
+
     }
 
     public static class CFile extends File {
@@ -309,12 +371,6 @@ public class DM_MCStats extends ADataModel {
             this.mReadMark = true;
             return super.isFile();
         }
-    }
-
-    public static enum MCVersion {
-        v1_7_10,
-        v1_12_2,
-        v1_13_ABOVE;
     }
 
 }
