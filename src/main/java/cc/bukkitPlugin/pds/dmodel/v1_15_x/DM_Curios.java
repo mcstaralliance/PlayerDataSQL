@@ -8,6 +8,7 @@ public class DM_Curios extends ADM_CapabilityProvider {
     public DM_Curios(PlayerDataSQL pPlugin) {
         super(pPlugin);
 
+        this.addModCheckClass("top.theillusivec4.curios.Curios");
         this.addCapabilityP("top.theillusivec4.curios.common.capability.CapCurioInventory$Provider");
     }
 
