@@ -16,7 +16,7 @@ import cc.commons.util.reflect.MethodUtil;
 public abstract class ADM_ForgeData extends ADataModel {
 
     protected final HashSet<String> mModelTags = new HashSet<>();
-    protected final HashSet<String> mChechClass = new HashSet<>();
+    protected final HashSet<String> mCheckClass = new HashSet<>();
 
     protected Method method_Entity_getEntityData;
 
@@ -83,7 +83,7 @@ public abstract class ADM_ForgeData extends ADataModel {
 
     @Override
     protected boolean initOnce() throws Exception {
-        for (String sClass : this.mChechClass)
+        for (String sClass : this.mCheckClass)
             Class.forName(sClass);
 
         method_Entity_getEntityData = MethodUtil.getDeclaredMethod(NMSUtil.clazz_NMSEntity, "getEntityData");
