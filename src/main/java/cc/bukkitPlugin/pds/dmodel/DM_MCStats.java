@@ -136,7 +136,7 @@ public class DM_MCStats extends ADataModel {
             Method tMethod2 = MethodUtil.getDeclaredMethod(tClazz,
                     MethodFilter.rpt(void.class, field_MinecraftServer_dataFixer.getType(), String.class)).first();
             Object tDataFixer = FieldUtil.getFieldValue(mNMSServer.get().getClass(),
-                    (field) -> field.getType().getSimpleName().equals("DataFixer"), false, mNMSServer.get());
+                    (field) -> field.getType().getSimpleName().equals("DataFixer"), false, mNMSServer.get()).oneGet();
             this.mStatLoad = (CPlayer pPlayer, String pStat) -> MethodUtil.invokeMethod(tMethod2, getStatMan(pPlayer), tDataFixer, pStat);
         }
 
