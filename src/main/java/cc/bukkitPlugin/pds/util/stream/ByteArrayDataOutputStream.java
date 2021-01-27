@@ -13,7 +13,7 @@ public class ByteArrayDataOutputStream extends DataOutputStream {
         this.mBAOStream = (ByteArrayOutputStream)this.out;
     }
 
-    public synchronized byte toByteArray()[] {
+    public synchronized byte[] toByteArray() {
         return this.mBAOStream.toByteArray();
     }
 
