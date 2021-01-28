@@ -22,6 +22,7 @@ import cc.bukkitPlugin.commons.util.BukkitUtil;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.api.IDataModel;
 import cc.bukkitPlugin.pds.api.PDSAPI;
+import cc.bukkitPlugin.pds.listener.PlayerListener;
 import cc.bukkitPlugin.pds.task.DailySaveTask;
 import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.commentedyaml.CommentedYamlConfig;
@@ -258,7 +259,10 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
                 tView.setCursor(new ItemStack(Material.AIR));
                 BukkitUtil.giveItem(tBPlayer, tCursor);
             }
-            tBPlayer.closeInventory();
+
+            if (tView != null && !PlayerListener.ClosedInvs.contains(tView.getTopInventory())) {
+                tBPlayer.closeInventory();
+            }
         }
 
         User tUser = new User(pPlayer);
