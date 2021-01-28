@@ -33,7 +33,7 @@ public abstract class ADM_Plugin extends ADataModel {
 
     @Override
     protected boolean initOnce() throws Exception {
-        return Bukkit.getPluginManager().isPluginEnabled("DeluxeTags");
+        return Bukkit.getPluginManager().isPluginEnabled(this.getDependentPluginN());
     }
 
 }
