@@ -102,7 +102,8 @@ public class DM_MCStats extends ADataModel {
         if (this.method_EntityPlayerMP_getAdvancementsMan != null) {
             tClazz = this.method_EntityPlayerMP_getAdvancementsMan.getReturnType();
             this.field_AdvancementData_file = FieldUtil.getDeclaredField(tClazz, FieldFilter.t(File.class)).oneGet();
-            this.field_AdvancementData_progress = FieldUtil.getDeclaredField(tClazz, FieldFilter.t(Map.class)).oneGet();
+            this.field_AdvancementData_progress = FieldUtil.getDeclaredField(tClazz, FieldFilter.t(Map.class).addFilter(
+                    pField->!pField.getName().equals("criterionData"))).oneGet();
         }
 
         tClazz = this.method_EntityPlayerMP_getStatisticMan.getReturnType();
@@ -292,7 +293,7 @@ public class DM_MCStats extends ADataModel {
                         .addFilter((method) -> method.getReturnType().getSimpleName().toLowerCase().startsWith("advancement"))).oneGet();
                 Object tAdvMan = MethodUtil.invokeMethod(tGetAdvMan, tNMSServer);
                 Method tReload = MethodUtil.getMethod(pObj.getClass(),
-                        MethodFilter.rpt(void.class, tGetAdvMan.getReturnType()).addPossModifer(Modifier.PUBLIC)).oneGet();
+                        MethodFilter.rpt(void.class, tGetAdvMan.getReturnType()).addPossModifer(Modifier.PUBLIC)).first();
 
                 this.mAdvanceRestore = new AdvanceRestore() {
 
