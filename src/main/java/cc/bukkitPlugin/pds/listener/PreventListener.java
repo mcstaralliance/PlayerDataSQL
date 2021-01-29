@@ -4,7 +4,6 @@ import static org.bukkit.event.EventPriority.HIGHEST;
 import static org.bukkit.event.EventPriority.LOWEST;
 
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -64,7 +63,7 @@ public class PreventListener extends AListener<PlayerDataSQL> {
     @EventHandler(ignoreCancelled = true, priority = HIGHEST)
     public void post(InventoryClickEvent pEvent) {
         HumanEntity tWho = pEvent.getWhoClicked();
-        if (tWho instanceof Player && this.mUserMan.isLocked(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID") ? tWho.getUniqueId().toString() : tWho.getName())) {
+        if (tWho instanceof Player && this.mUserMan.isLocked((Player)tWho)) {
             pEvent.setCancelled(true);
             tWho.closeInventory();
         }
@@ -132,7 +131,7 @@ public class PreventListener extends AListener<PlayerDataSQL> {
 
     @EventHandler
     public void handle(PlayerMoveEvent pEvent) {
-        if (this.mUserMan.isLocked(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID") ? pEvent.getPlayer().getUniqueId().toString() : pEvent.getPlayer().getName())) {
+        if (this.mUserMan.isLocked(pEvent.getPlayer())) {
             Location tFromLoc = pEvent.getFrom();
             Location tToLoc = pEvent.getTo();
             tFromLoc.setYaw(tToLoc.getYaw());
@@ -150,8 +149,8 @@ public class PreventListener extends AListener<PlayerDataSQL> {
      *            事件
      * @return 是否取消
      */
-    protected boolean handle(OfflinePlayer pPlayer, Cancellable pEvent) {
-        if (this.mUserMan.isLocked(mPlugin.getConfigManager().getConfig().getBoolean("Plugin.UseUUID") ? pPlayer.getUniqueId().toString() : pPlayer.getName())) {
+    protected boolean handle(Player pPlayer, Cancellable pEvent) {
+        if (this.mUserMan.isLocked(pPlayer)) {
             pEvent.setCancelled(true);
             return true;
         }

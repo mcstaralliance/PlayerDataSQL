@@ -39,7 +39,7 @@ public class PlayerListener extends AListener<PlayerDataSQL> {
     public void onLogin(PlayerLoginEvent pEvent) {
         Player tPlayer = pEvent.getPlayer();
         Log.debug("Lock user " + tPlayer.getName() + " done!");
-        this.mUserMan.lockUser(tPlayer.getName());
+        this.mUserMan.lockUser(tPlayer);
     }
 
     @EventHandler
@@ -52,7 +52,7 @@ public class PlayerListener extends AListener<PlayerDataSQL> {
 
     @EventHandler(priority = MONITOR)
     public void onQuit(PlayerQuitEvent pEvent) {
-        String tPlayer = pEvent.getPlayer().getName();
+        Player tPlayer = pEvent.getPlayer();
         Log.debug("Handle player quit");
         if (this.mUserMan.isNotLocked(tPlayer)) {
             this.mUserMan.cancelSaveTask(tPlayer);

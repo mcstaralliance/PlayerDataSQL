@@ -306,27 +306,27 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
                 }
             }
 
-            if (this.isLocked(pPlayer.getName())) {
-                this.unlockUser(pPlayer.getName(), false);
+            if (this.isLocked(pPlayer.getPlayer())) {
+                this.unlockUser(pPlayer.getPlayer(), false);
             }
         } else {
             Log.debug("User " + pPlayer.getName() + " not online! cancel restore");
         }
     }
 
-    public boolean isLocked(String pPlayer) {
-        return this.mLocked.contains(pPlayer.toLowerCase());
+    public boolean isLocked(Player pPlayer) {
+        return this.mLocked.contains(PlayerDataSQL.getPlayerID(pPlayer));
     }
 
-    public boolean isNotLocked(String pPlayer) {
-        return !this.isLocked(pPlayer);
+    public boolean isNotLocked(Player pPlayer) {
+        return !isLocked(pPlayer);
     }
 
-    public void lockUser(String pPlayer) {
-        this.mLocked.add(pPlayer.toLowerCase());
+    public void lockUser(Player pPlayer) {
+        this.mLocked.add(PlayerDataSQL.getPlayerID(pPlayer));
     }
 
-    public void unlockUser(String pPlayer, boolean pScheduled) {
+    public void unlockUser(Player pPlayer, boolean pScheduled) {
         if (pScheduled) {
             Bukkit.getScheduler().runTask(this.mPlugin, () -> unlockUser(pPlayer));
         } else {
@@ -334,14 +334,14 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
         }
     }
 
-    private void unlockUser(String pPlayer) {
+    private void unlockUser(Player pPlayer) {
         while (this.isLocked(pPlayer)) {
-            this.mLocked.remove(pPlayer.toLowerCase());
+            this.mLocked.remove(PlayerDataSQL.getPlayerID(pPlayer));
         }
     }
 
-    public void cancelSaveTask(String pPlayer) {
-        BukkitTask tTask = this.mTaskMap.remove(pPlayer.toLowerCase());
+    public void cancelSaveTask(Player pPlayer) {
+        BukkitTask tTask = this.mTaskMap.remove(PlayerDataSQL.getPlayerID(pPlayer));
         if (tTask != null) {
             tTask.cancel();
             Log.debug("Save task canceled for " + pPlayer + '!');
