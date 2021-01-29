@@ -129,7 +129,6 @@ public class LoadUserTask implements Runnable {
         }
 
         if (this.mUserMan.isLocked(this.mName)) { //skip fo player quit
-            this.mUserMan.unlockUser(this.mName, false);
             this.mUserMan.createSaveTask(this.mPlayer);
         }
     }

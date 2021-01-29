@@ -305,6 +305,10 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
                     Log.severe(pReciver, this.mPlugin.C("MsgModelErrorOndeserializeData", new String[]{"%model%", "%player%"}, sModel.getDesc(), pUser.getOwnerName()), exp);
                 }
             }
+
+            if (this.isLocked(pPlayer.getName())) {
+                this.unlockUser(pPlayer.getName(), false);
+            }
         } else {
             Log.debug("User " + pPlayer.getName() + " not online! cancel restore");
         }
