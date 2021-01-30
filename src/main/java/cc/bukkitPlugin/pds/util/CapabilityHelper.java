@@ -172,7 +172,8 @@ public class CapabilityHelper {
         }
         clazz_PlayerLoggedInEvent = tClazz;
 
-        if (!mInitSuccess && tIsForge) {
+        boolean tHasCap = ClassUtil.isClassLoaded("net.minecraftforge.common.capabilities.Capability");
+        if (!mInitSuccess && tIsForge && tHasCap) {
             Log.severe("CapabilityHelper 在\"" + tStatus + "\"过程时初始化失败,部分模块可能无法启用");
         }
     }
