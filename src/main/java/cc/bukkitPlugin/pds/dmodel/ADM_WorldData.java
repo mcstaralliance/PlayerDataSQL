@@ -105,9 +105,10 @@ public abstract class ADM_WorldData extends ADataModel {
     public byte[] getData(CPlayer pPlayer, Map<String, byte[]> pLoadedData) throws Exception {
         Object tData = NBTUtil.newNBTTagCompound();
         Map<String, Object> tValue = NBTUtil.getNBTTagCompoundValue(tData);
-        tValue.put(MULTI_DATA_MRAK, MULTI_DATA_MRAK);
+        tValue.put(MULTI_DATA_MRAK, NBTUtil.newNBTTagString(MULTI_DATA_MRAK));
         for (Class<?> sClazz : this.mWSDClass) {
-            Object tNBT = MethodUtil.invokeMethod(method_WorldSaeData_writeToNBT, this.loadWorldData(pPlayer, sClazz), NBTUtil.newNBTTagCompound());
+            Object tNBT = NBTUtil.newNBTTagCompound();
+            MethodUtil.invokeMethod(method_WorldSaeData_writeToNBT, this.loadWorldData(pPlayer, sClazz), tNBT);
             tValue.put(sClazz.getName(), tNBT);
         }
 
@@ -157,7 +158,7 @@ public abstract class ADM_WorldData extends ADataModel {
      * @return 数据
      */
     public Object loadWorldData(CPlayer pPlayer, Class<?> pWSDClazz) {
-        Object tData = MethodUtil.invokeMethod(method_World_loadItemData, this.mMainNMSWorld, this.mWSDClass, this.getDataKey(pPlayer, pWSDClazz));
+        Object tData = MethodUtil.invokeMethod(method_World_loadItemData, this.mMainNMSWorld, pWSDClazz, this.getDataKey(pPlayer, pWSDClazz));
         if (tData == null) {
             tData = this.newWorldData(pPlayer, pWSDClazz);
             this.saveWorldData(pPlayer, tData);
