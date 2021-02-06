@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -61,7 +62,11 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
      *            用户数据
      */
     public void restoreUser(User pUser) {
-        this.restoreUser(pUser.getOwner(), pUser, (CommandSender)null);
+        this.restoreUser(pUser.getOwner(), pUser, (CommandSender)null, (Consumer<Boolean>)null);
+    }
+
+    public void restoreUser(User pUser, Consumer<Boolean> pCall) {
+        this.restoreUser(pUser.getOwner(), pUser, (CommandSender)null, pCall);
     }
 
     /**
@@ -76,6 +81,10 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
         this.restoreUser(pPlayer, pUser, (CommandSender)null);
     }
 
+    public void restoreUser(CPlayer pPlayer, User pUser, Consumer<Boolean> pCall) {
+        this.restoreUser(pPlayer, pUser, (CommandSender)null, pCall);
+    }
+
     /**
      * 使用数据还原用户
      * 
@@ -87,8 +96,12 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
      *            消息接收者
      */
     public void restoreUser(CPlayer pPlayer, User pUser, CommandSender pReciver) {
+        restoreUser(pPlayer, pUser, pReciver, (Consumer<Boolean>)null);
+    }
+
+    public void restoreUser(CPlayer pPlayer, User pUser, CommandSender pReciver, Consumer<Boolean> pCall) {
         Bukkit.getScheduler().callSyncMethod(this.mPlugin,
-                Executors.callable(() -> restoreUser0(pUser, pPlayer, pReciver)));
+                Executors.callable(() -> restoreUser0(pUser, pPlayer, pReciver, pCall)));
     }
 
     /**
@@ -287,7 +300,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
      * @param pUser
      *            用户,包含序列化的数据
      */
-    protected void restoreUser0(User pUser, CPlayer pPlayer, CommandSender pReciver) {
+    protected void restoreUser0(User pUser, CPlayer pPlayer, CommandSender pReciver, Consumer<Boolean> pCall) {
         Player tPlayer = pPlayer.getPlayer();
         if (tPlayer != null && tPlayer.isOnline()) {
             Log.debug("Start restore data for user " + pPlayer.getName());
@@ -302,15 +315,15 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
                 try {
                     sModel.restore(pPlayer, tData);
                 } catch (Throwable exp) {
-                    Log.severe(pReciver, this.mPlugin.C("MsgModelErrorOndeserializeData", new String[]{"%model%", "%player%"}, sModel.getDesc(), pUser.getOwnerName()), exp);
+                    Log.severe(pReciver, this.mPlugin.C("MsgModelErrorOndeserializeData",
+                            new String[]{"%model%", "%player%"}, sModel.getDesc(), pUser.getOwnerName()), exp);
                 }
             }
 
-            if (this.isLocked(pPlayer.getPlayer())) {
-                this.unlockUser(pPlayer.getPlayer(), false);
-            }
+            pCall.accept(true);
         } else {
             Log.debug("User " + pPlayer.getName() + " not online! cancel restore");
+            pCall.accept(false);
         }
     }
 
@@ -365,7 +378,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
         DailySaveTask tSaveTask = new DailySaveTask(pPlayer, this);
         BukkitTask tTask = Bukkit.getScheduler().runTaskTimer(this.mPlugin, tSaveTask, this.mSaveInterval, this.mSaveInterval);
         tSaveTask.setTaskId(tTask.getTaskId());
-        tTask = this.mTaskMap.put(pPlayer.getName().toLowerCase(), tTask);
+        tTask = this.mTaskMap.put(PlayerDataSQL.getPlayerID(pPlayer), tTask);
         if (tTask != null) {
             tTask.cancel();
             Log.debug("Old save task canceled for " + pPlayer + '!');
@@ -384,7 +397,8 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
             try {
                 sModel.cleanData(tPlayer);
             } catch (Throwable exp) {
-                Log.severe(this.mPlugin.C("MsgModelErrorOnClearData", new String[]{"%model%", "%player%"}, sModel.getDesc(), pPlayer.getName()), exp);
+                Log.severe(this.mPlugin.C("MsgModelErrorOnClearData",
+                        new String[]{"%model%", "%player%"}, sModel.getDesc(), pPlayer.getName()), exp);
             }
         }
     }

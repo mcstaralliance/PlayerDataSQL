@@ -3,6 +3,7 @@ package cc.bukkitPlugin.pds.task;
 import cc.bukkitPlugin.pds.events.PlayerDataLoadCompleteEvent;
 
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -84,8 +85,7 @@ public class LoadUserTask implements Runnable {
                         Log.warn("Use locked data to restore user " + this.mName);
                     }
                     this.restoreUser(tUser, false);
-                    Bukkit.getScheduler().callSyncMethod(this.mPlugin, Executors.callable(()->
-                            Bukkit.getPluginManager().callEvent(new PlayerDataLoadCompleteEvent(this.mPlayer.getPlayer()))));
+                    Bukkit.getScheduler().callSyncMethod(this.mPlugin, Executors.callable(() -> Bukkit.getPluginManager().callEvent(new PlayerDataLoadCompleteEvent(this.mPlayer.getPlayer()))));
                     break;
                 }
             } catch (Throwable exp) {
@@ -121,16 +121,20 @@ public class LoadUserTask implements Runnable {
             Log.debug("Use blank data restore for player " + this.mName);
             pUser = new User(this.mPlayer);
         }
+        Consumer<Boolean> tCall = pSuccess -> {
+            if (pSuccess && this.mUserMan.isLocked(this.mPlayer.getPlayer())) {
+                this.mUserMan.createSaveTask(this.mPlayer);
+            }
 
+            this.mUserMan.unlockUser(this.mPlayer.getPlayer(), false);
+        };
         if (pUser != null) {
-            this.mUserMan.restoreUser(this.mPlayer, pUser);
+            this.mUserMan.restoreUser(this.mPlayer, pUser, tCall);
         } else {
             Log.debug("duce setting NoRestoreIfSQLDataNotExist=true,plugin skip load user data");
+            tCall.accept(false);
         }
 
-        if (this.mUserMan.isLocked(this.mPlayer.getPlayer())) { //skip fo player quit
-            this.mUserMan.createSaveTask(this.mPlayer);
-        }
     }
 
 }
