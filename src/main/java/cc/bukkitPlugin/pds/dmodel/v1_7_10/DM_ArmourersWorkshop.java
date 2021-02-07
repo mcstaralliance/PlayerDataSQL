@@ -1,9 +1,12 @@
 package cc.bukkitPlugin.pds.dmodel.v1_7_10;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.util.CPlayer;
+import cc.commons.util.reflect.ClassUtil;
 import cc.commons.util.reflect.MethodUtil;
 
 public class DM_ArmourersWorkshop extends ADM_InVanilla {
@@ -14,11 +17,13 @@ public class DM_ArmourersWorkshop extends ADM_InVanilla {
     protected Method method_ExPropsPlayerEquipmentData_sendSkinData;
 
     private static String getExpClass() {
-        try {
-            return Class.forName("riskyken.armourersWorkshop.common.skin.ExPropsPlayerEquipmentData").getName();
-        } catch (ClassNotFoundException e) {
-            return "riskyken.armourersWorkshop.common.skin.ExPropsPlayerSkinData";
+        List<String> tExpClazz = Arrays.asList("riskyken.armourersWorkshop.common.skin.ExPropsPlayerEquipmentData", "riskyken.armourersWorkshop.common.skin.ExPropsPlayerSkinData", "riskyken.armourersWorkshop.common.wardrobe.ExPropsPlayerSkinData");
+
+        for (String sStr : tExpClazz) {
+            if (ClassUtil.isClassLoaded(sStr)) return sStr;
         }
+
+        return null;
     }
 
     public DM_ArmourersWorkshop(PlayerDataSQL pPlugin) {
