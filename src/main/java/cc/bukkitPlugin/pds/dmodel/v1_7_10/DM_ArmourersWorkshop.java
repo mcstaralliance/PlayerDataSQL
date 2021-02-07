@@ -23,7 +23,7 @@ public class DM_ArmourersWorkshop extends ADM_InVanilla {
             if (ClassUtil.isClassLoaded(sStr)) return sStr;
         }
 
-        return null;
+        return tExpClazz.iterator().next();
     }
 
     public DM_ArmourersWorkshop(PlayerDataSQL pPlugin) {
