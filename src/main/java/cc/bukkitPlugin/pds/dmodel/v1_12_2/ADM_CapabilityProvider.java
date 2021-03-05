@@ -99,7 +99,8 @@ public abstract class ADM_CapabilityProvider extends ADataModel {
         for (Map.Entry<String, Class<?>> sEntry : this.mCapabilityPs.entrySet()) {
             tDOStream.writeUTF(sEntry.getKey());
 
-            byte[] tData = PDSNBTUtil.compressNBT(CapabilityHelper.serializeCapability(pPlayer.getNMSPlayer(), sEntry.getValue()));
+            byte[] tData = PDSNBTUtil.compressNBT(CapabilityHelper.wrapNBT(
+                    CapabilityHelper.serializeCapability(pPlayer.getNMSPlayer(), sEntry.getValue())));
             tDOStream.writeInt(tData.length);
             tDOStream.write(tData);
         }
@@ -126,7 +127,7 @@ public abstract class ADM_CapabilityProvider extends ADataModel {
                 tDIStream.read(tData);
                 Class<?> tProvider = this.mCapabilityPs.get(tProviderName);
                 if (tProvider != null) {
-                    Object tNBT = this.correctNBTData(tProviderName, PDSNBTUtil.decompressNBT(tData));
+                    Object tNBT = this.correctNBTData(tProviderName, CapabilityHelper.unwrapNBT(PDSNBTUtil.decompressNBT(tData)));
                     CapabilityHelper.deserializeCapability(pPlayer.getNMSPlayer(), tProvider, tNBT);
                     this.updateAround(pPlayer, tProvider);
                 }

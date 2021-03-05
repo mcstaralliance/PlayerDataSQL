@@ -273,4 +273,19 @@ public class CapabilityHelper {
                 : ClassUtil.newInstance(clazz_PlayerLoggedInEvent, NMSUtil.clazz_EntityPlayer, pPlayer.getNMSPlayer());
     }
 
+    public static String WRAP_CONTENT = "§WRAP_CONTENT§";
+
+    public static Object wrapNBT(Object pNBT) {
+        if (NBTUtil.isNBTTagCompound(pNBT)) return pNBT;
+
+        Object tNBTCmp = NBTUtil.newNBTTagCompound();
+        NBTUtil.invokeNBTTagCompound_set(tNBTCmp, WRAP_CONTENT, pNBT);
+        return tNBTCmp;
+    }
+
+    public static Object unwrapNBT(Object pNBT) {
+        Object tContent = NBTUtil.invokeNBTTagCompound_get(pNBT, WRAP_CONTENT);
+        return tContent == null ? pNBT : tContent;
+    }
+
 }
