@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 
 //import cc.bukkitPlugin.commons.nmsutil.NMSUtil;
@@ -26,6 +27,8 @@ public class DM_Minecraft extends ADataModel {
 
     private Method method_EntityLivingBase_getAttributeMap = null;
     private HashSet<Field> mMapFields = new HashSet<>();
+
+    private PlayerInventory Inventory;
 
     public DM_Minecraft(PlayerDataSQL pPlugin) {
         super(pPlugin);
@@ -59,7 +62,11 @@ public class DM_Minecraft extends ADataModel {
         GameMode tMode = tPlayer.getGameMode();
         PDSNBTUtil.setPlayerNBT(tPlayer, PDSNBTUtil.decompressNBT(pData));
         tPlayer.setGameMode(tMode);
-        tPlayer.getInventory().setHeldItemSlot(0);
+        
+        PlayerInventory tInv = tPlayer.getInventory();
+        int tSlot = tInv.getHeldItemSlot();
+        tInv.setHeldItemSlot(0);
+        tInv.setHeldItemSlot(tSlot);
     }
 
     @Override
