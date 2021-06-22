@@ -127,7 +127,9 @@ public abstract class ADM_WorldData extends ADataModel {
         for (Class<?> sClazz : this.mWSDClass) {
             Object tWorldData = this.loadWorldData(pPlayer, sClazz);
             if (tWorldData == null) continue;
-            MethodUtil.invokeMethod(method_WorldSaeData_readFromNBT, tWorldData, tNBTData);
+            Object tSQLData=tValue.get(sClazz.getName());
+            if (tSQLData == null) continue;
+            MethodUtil.invokeMethod(method_WorldSaeData_readFromNBT, tWorldData, tSQLData);
             MethodUtil.invokeMethod(method_WorldSaeData_setDirty, tWorldData, true);
             this.syncToClient(pPlayer, tWorldData);
         }
