@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
@@ -125,6 +126,14 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL> {
         for (Player sPlayer : BukkitUtil.getOnlinePlayers()) {
             this.mUserMan.saveUser(new CPlayer(sPlayer), false);
         }
+
+        Iterator<Runnable> tIt = PlayerListener.QUIT_SAVE_TASK.iterator();
+        while (tIt.hasNext()) {
+            Runnable tTask = tIt.next();
+            tIt.remove();
+            tTask.run();
+        }
+
         super.onDisable();
     }
 
