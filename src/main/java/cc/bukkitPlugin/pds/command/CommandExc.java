@@ -26,6 +26,7 @@ public class CommandExc extends TCommandExc<PlayerDataSQL> implements CommandExe
         this.register(new CommandCopy(this));
         this.register(new CommandSave(this));
         this.register(new CommandRunscript(this));
+        this.register(new CommandUnlock(this));
     }
 
 }

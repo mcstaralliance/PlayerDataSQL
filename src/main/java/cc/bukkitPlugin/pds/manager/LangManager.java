@@ -35,6 +35,7 @@ public class LangManager extends TLangManager<PlayerDataSQL> {
         this.mConfig.addDefault("HelpCmdSave", "保存你的数据到指定玩家");
         this.mConfig.addDefault("HelpCmdSaveToPlayer", "保存前者玩家数据到指定玩家");
         this.mConfig.addDefault("HelpCmdRunScript", "执行脚本操作玩家数据");
+        this.mConfig.addDefault("HelpCmdUnlock", "执行一个或全部玩家的数据解锁操作");
         this.mConfig.addDefault("MsgDataExpection", "数据库背包数据异常,请稍候再试");
         this.mConfig.addDefault("MsgCannotLoadDataForConsole", "§c不能为控制台载入数据");
         this.mConfig.addDefault("MsgErrorOnLoadingDataWait", "§c载入数据等待期间发生错误");
@@ -50,6 +51,7 @@ public class LangManager extends TLangManager<PlayerDataSQL> {
         this.mConfig.addDefault("MsgErrorNotFoundScript", "§c§4§l%script_name% §c这个脚本不存在");
         this.mConfig.addDefault("MsgErrorOnLoadSQLData", "§c从数据库载入 §4§l%player% §c的数据时发生了错误");
         this.mConfig.addDefault("MsgErrorOnUpdateSQLData", "§c对数据库更新玩家 §4§l%player% §c的数据时发生了错误");
+        this.mConfig.addDefault("MsgErrorOnUnlockPlayer", "§c解锁玩家数据时发生了错误");
         this.mConfig.addDefault("MsgModelErrorOnClearData", "§c模块 %model% 在清理 %player% 的数据时发生了错误");
         this.mConfig.addDefault("MsgModelErrorOnSerializeData", "§c模块 %model% 在序列化 %player% 的数据时发生了错误");
         this.mConfig.addDefault("MsgModelErrorOndeserializeData", "§c模块 %model% 在反序列化 %player% 的数据时发生了错误");
@@ -59,6 +61,9 @@ public class LangManager extends TLangManager<PlayerDataSQL> {
         this.mConfig.addDefault("MsgModifyDataForPlayer", "已经修改 %from% 的数据到  %to%");
         this.mConfig.addDefault("MsgSuccessConnectToDB", "成功连接到数据库");
         this.mConfig.addDefault("MsgUnableConnectToDB", "§c无法连接到数据库");
+        this.mConfig.addDefault("MsgOnlinePlayerNoUnlock", "§c在线用户无法解锁");
+        this.mConfig.addDefault("MsgUnlockNoChange", "§c未解锁任何数据");
+        this.mConfig.addDefault("MsgUnlockedPlayer", "共解锁了 %amount% 条玩家数据");
         this.mConfig.addDefault("WordFor", "为谁");
         this.mConfig.addDefault("WordFrom", "来源");
         this.mConfig.addDefault("WordPlayer", "玩家");
