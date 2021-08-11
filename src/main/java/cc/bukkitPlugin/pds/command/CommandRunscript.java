@@ -121,7 +121,7 @@ public class CommandRunscript extends TACommandBase<PlayerDataSQL, CommandExc> {
         ArrayList<String> tHelps = new ArrayList<>();
         if (hasCmdPermission(pSender)) {
             tHelps.add(constructCmdUsage(C("WordScriptName"), C("WordPlayer")));
-            tHelps.add(this.mExector.getCmdUsagePrefix() + C("HelpCmdRunScript"));
+            tHelps.add(this.mExector.getCmdDescPrefix() + C("HelpCmdRunScript"));
         }
         return tHelps;
     }

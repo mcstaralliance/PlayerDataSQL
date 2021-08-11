@@ -78,9 +78,9 @@ public class CommandLoad extends TACommandBase<PlayerDataSQL, CommandExc> {
         ArrayList<String> tHelps = new ArrayList<>();
         if (hasCmdPermission(pSender)) {
             tHelps.add(constructCmdUsage(C("WordFrom")));
-            tHelps.add(this.mExector.getCmdUsagePrefix() + C("HelpCmdLoad"));
+            tHelps.add(this.mExector.getCmdDescPrefix() + C("HelpCmdLoad"));
             tHelps.add(constructCmdUsage(C("WordFor"), C("WordFrom")));
-            tHelps.add(this.mExector.getCmdUsagePrefix() + C("HelpCmdLoadForPlayer"));
+            tHelps.add(this.mExector.getCmdDescPrefix() + C("HelpCmdLoadForPlayer"));
         }
         return tHelps;
     }

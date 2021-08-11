@@ -60,9 +60,9 @@ public class CommandCopy extends TACommandBase<PlayerDataSQL, CommandExc> {
         ArrayList<String> tHelps = new ArrayList<>();
         if (hasCmdPermission(pSender)) {
             tHelps.add(constructCmdUsage(C("WordFrom")));
-            tHelps.add(this.mExector.getCmdUsagePrefix() + C("HelpCmdCopy"));
+            tHelps.add(this.mExector.getCmdDescPrefix() + C("HelpCmdCopy"));
             tHelps.add(constructCmdUsage(C("WordFor"), C("WordFrom")));
-            tHelps.add(this.mExector.getCmdUsagePrefix() + C("HelpCmdCopyForPlayer"));
+            tHelps.add(this.mExector.getCmdDescPrefix() + C("HelpCmdCopyForPlayer"));
         }
         return tHelps;
     }

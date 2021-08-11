@@ -80,9 +80,9 @@ public class CommandSave extends TACommandBase<PlayerDataSQL, CommandExc> {
         ArrayList<String> tHelps = new ArrayList<>();
         if (hasCmdPermission(pSender)) {
             tHelps.add(constructCmdUsage(C("WordPlayer")));
-            tHelps.add(this.mExector.getCmdUsagePrefix() + C("HelpCmdSave"));
+            tHelps.add(this.mExector.getCmdDescPrefix() + C("HelpCmdSave"));
             tHelps.add(constructCmdUsage(C("WordPlayer"), C("WordPlayer")));
-            tHelps.add(this.mExector.getCmdUsagePrefix() + C("HelpCmdSaveToPlayer"));
+            tHelps.add(this.mExector.getCmdDescPrefix() + C("HelpCmdSaveToPlayer"));
         }
         return tHelps;
     }
