@@ -8,11 +8,11 @@ import cc.bukkitPlugin.pds.PlayerDataSQL;
 
 public class ConfigManager extends TConfigManager<PlayerDataSQL> {
 
-    public int mSyncDelay = 20;
+    public int mSyncDelay = 40;
     public boolean mKickOnReadSQLError = true;
     public boolean mNoRestoreIfSQLDataNotExist = true;
     public boolean mUUIDMode = false;
-    public boolean mForceUseLockData = true;
+    public boolean mForceUseLockData = false;
 
     public ConfigManager(PlayerDataSQL pPlugin) {
         super(pPlugin, "1.0");
