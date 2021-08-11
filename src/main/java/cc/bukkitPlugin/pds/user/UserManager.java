@@ -183,6 +183,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
         boolean tSuccess;
         try {
             tSuccess = this.mPlugin.getStorage().update(pPlayer, pUser);
+            if(tSuccess) UserLockMark.autoLockState(pPlayer, pLock);
         } catch (SQLException exp) {
             Log.severe(this.mPlugin.C("MsgErrorOnUpdateSQLData", "%player%", pUser.getOwnerName()), exp);
             return false;
@@ -210,6 +211,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
 
         try {
             tResult = this.mPlugin.getStorage().update(pPlayer, new String[]{User.COL_LOCK}, new Object[]{true});
+            UserLockMark.addLockedUser(pPlayer);
         } catch (SQLException exp) {
             Log.severe(this.mPlugin.C("MsgErrorOnUpdateSQLData", "%player%", pPlayer), exp);
         }
@@ -364,11 +366,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
     public void createSaveTask(CPlayer pPlayer) {
         if (this.mSaveInterval <= 0) return;
 
-        if (Bukkit.isPrimaryThread()) {
-            this.createSaveTask0(pPlayer);
-        } else {
-            Bukkit.getScheduler().runTask(this.mPlugin, () -> this.createSaveTask0(pPlayer));
-        }
+        Bukkit.getScheduler().scheduleSyncDelayedTask(this.mPlugin, () -> this.createSaveTask0(pPlayer));
     }
 
     protected void createSaveTask0(CPlayer pPlayer) {

@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import cc.bukkitPlugin.commons.Log;
 import cc.bukkitPlugin.pds.PlayerDataSQL;
 import cc.bukkitPlugin.pds.user.User;
+import cc.bukkitPlugin.pds.user.UserLockMark;
 import cc.bukkitPlugin.pds.user.UserManager;
 import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.commons.util.ToolKit;
@@ -124,6 +125,7 @@ public class LoadUserTask implements Runnable {
         Consumer<Boolean> tCall = pSuccess -> {
             if (pSuccess && this.mUserMan.isLocked(this.mPlayer.getPlayer())) {
                 this.mUserMan.createSaveTask(this.mPlayer);
+                Bukkit.getScheduler().runTaskLater(this.mPlugin, ()->UserLockMark.save(), 2);
             }
 
             this.mUserMan.unlockUser(this.mPlayer.getPlayer(), false);

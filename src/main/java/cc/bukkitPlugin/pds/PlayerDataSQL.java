@@ -27,6 +27,7 @@ import cc.bukkitPlugin.pds.manager.ConfigManager;
 import cc.bukkitPlugin.pds.manager.LangManager;
 import cc.bukkitPlugin.pds.storage.IStorage;
 import cc.bukkitPlugin.pds.storage.MySQL;
+import cc.bukkitPlugin.pds.user.UserLockMark;
 import cc.bukkitPlugin.pds.user.UserManager;
 import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.bukkitPlugin.pds.util.PDSNBTUtil;
@@ -96,9 +97,12 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL> {
 
         PDSAPI.checkModels(true); // 先加载配置,再决定启用哪些配置
 
+        UserLockMark.unlockLoggedUser(this); //先解锁缓存锁定的玩家再添加保存任务
         for (Player sPlayer : BukkitUtil.getOnlinePlayers()) {
             this.mUserMan.createSaveTask(new CPlayer(sPlayer));
         }
+        // 等待锁定/保存任务预先执行一次后再保存锁定玩家列表
+        Bukkit.getScheduler().runTaskLater(this, ()->UserLockMark.save(), 2);
     }
 
     @Override
@@ -133,6 +137,7 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL> {
             tIt.remove();
             tTask.run();
         }
+        UserLockMark.save();
 
         super.onDisable();
     }
