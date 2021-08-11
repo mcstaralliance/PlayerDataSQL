@@ -57,4 +57,15 @@ public interface IStorage {
      */
     public boolean update(CPlayer pPlayer, String[] pCols, Object...pValues) throws SQLException;
 
+    /**
+     * 直接执行一条SQL语句
+     * 
+     * @param pSQL
+     *            SQL语句
+     * @return 影响行数
+     * @throws SQLException
+     *             读写数据库时发生异常
+     */
+    public int update(String pSQL) throws SQLException;
+
 }
