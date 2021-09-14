@@ -202,7 +202,7 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel, INee
     protected PreparedStatement getOrCreate(Connection pConn, String pSQL) throws SQLException {
         PreparedStatement tStatement = this.mStatementCache.get(pSQL);
         if (tStatement == null || tStatement.isClosed()) {
-            tStatement = pConn.prepareStatement(pSQL);
+            tStatement = pConn.prepareStatement(pSQL, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             tStatement.setQueryTimeout(5);
             this.mStatementCache.put(pSQL, tStatement);
         }
