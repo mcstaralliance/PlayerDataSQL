@@ -7,6 +7,8 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -43,11 +45,16 @@ public class PDSNBTUtil extends NBTUtil {
                 MethodFilter.rpt(void.class, clazz_NBTTagCompound, OutputStream.class)).first();
 
         // Entity readFromNBT>>InvBack
+        
         Class<?> clazz_EntityZombie = null;
-        if (ClassUtil.isClassLoaded(packetPath + "EntityZombie")) {
-            clazz_EntityZombie = ClassUtil.getClass(packetPath + "EntityZombie");
-        } else {
-            clazz_EntityZombie = ClassUtil.getClass("net.minecraft.entity.monster.EntityZombie");
+        {
+            List<String> tNames = Arrays.asList(packetPath+".EntityZombie","net.minecraft.entity.monster.EntityZombie"
+                    ,"net.minecraft.world.entity.monster.EntityZombie");
+            for(String sName : tNames){
+                if(ClassUtil.isClassLoaded(sName)) clazz_EntityZombie=ClassUtil.getClass(sName);
+            }
+            
+            if(clazz_EntityZombie==null) throw new IllegalStateException(new NoClassDefFoundError("EntityZombie"));
         }
         // 获取世界实例
         World tWorld = Bukkit.getWorlds().get(0);
