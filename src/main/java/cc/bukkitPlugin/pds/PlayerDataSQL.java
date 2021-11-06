@@ -71,7 +71,7 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL> {
     public void onEnable() {
         // 强制初始化工具类
         String.valueOf(NMSUtil.mTestAPIVersion).length();
-        String.valueOf(PDSNBTUtil.NBT_Byte).length();
+        String.valueOf(PDSNBTUtil.method_NBTCompressedStreamTools_readCompressed).length();
         // 注册管理器
         this.setLangManager(new LangManager(this));
         this.registerManager(this.getLangManager());
