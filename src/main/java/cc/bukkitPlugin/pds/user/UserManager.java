@@ -275,7 +275,7 @@ public class UserManager extends AManager<PlayerDataSQL> implements IConfigModel
                 BukkitUtil.giveItem(tBPlayer, tCursor);
             }
 
-            if (tView != null && !PlayerListener.ClosedInvs.contains(tView.getTopInventory())) {
+            if (tView != null && PlayerListener.ClosedInvs.add(tView.getTopInventory())) {
                 tBPlayer.closeInventory();
             }
         }
