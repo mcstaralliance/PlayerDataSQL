@@ -311,7 +311,7 @@ public class DM_MCStats extends ADataModel {
         }
 
         if (tStep != 3) {
-            String tErrorMsg = "§c成就模块部分初始化失败,成就数据无法同步";
+            String tErrorMsg = "§c成就模块部分初始化失败,成就数据无法同步("+tStep+")";
             if (tExp != null) tErrorMsg += ": " + tExp.getLocalizedMessage();
             Log.warn(tErrorMsg);
             if (tExp != null && Log.isDebug()) Log.severe(tExp);
