@@ -38,6 +38,8 @@ public abstract class ADM_FTBLib extends ADataModel {
     protected static Method method_EventBase_post = null;
     /** public ForgePlayerLoggedInEvent(ForgePlayer) */
     protected static Constructor<?> construct_ForgePlayerLoggedInEvent = null;
+    /** public ForgeTeamCreatedEvent(ForgeTeam) */
+    protected static Constructor<?> construct_ForgeTeamCreatedEvent = null;
 
     protected static Class<?> clazz_NBTDataStorage_Data = null;
     /** NBTTagCompound serializeNBT() */
@@ -59,7 +61,7 @@ public abstract class ADM_FTBLib extends ADataModel {
         return DataHelper.writeMapData(this.mDataModelsClazz.entrySet(), (pDOStream, pEntry) -> {
             DataHelper.writeStr(pDOStream, pEntry.getKey());
             DataHelper.writeBytes(pDOStream,
-                    this.getDataModelData(this.getDataModel(pPlayer, pEntry.getValue())));
+                    this.getDataModelData(pPlayer, this.getDataModel(pPlayer, pEntry.getValue())));
         });
     }
 
@@ -70,14 +72,14 @@ public abstract class ADM_FTBLib extends ADataModel {
             byte[] tModelData = DataHelper.readBytes(pDIStream);
             Class<?> tModelClazz = this.mDataModelsClazz.get(pModelClazzStr);
             if (tModelClazz != null) {
-                this.restoreDataModelData(this.getDataModel(pPlayer, tModelClazz), tModelData);
+                this.restoreDataModelData(pPlayer, this.getDataModel(pPlayer, tModelClazz), tModelData);
             }
         });
     }
 
     @Override
     public void cleanData(CPlayer pPlayer) throws Exception {
-        this.mDataModelsClazz.values().forEach(clazz -> this.clearDataModelData(getDataModel(pPlayer, clazz)));
+        this.mDataModelsClazz.values().forEach(clazz -> this.clearDataModelData(pPlayer, getDataModel(pPlayer, clazz)));
     }
 
     @Override
@@ -94,6 +96,9 @@ public abstract class ADM_FTBLib extends ADataModel {
 
         Class<?> tClazz = Class.forName("com.feed_the_beast.ftblib.events.player.ForgePlayerLoggedInEvent");
         construct_ForgePlayerLoggedInEvent = ClassUtil.getConstrouctor(tClazz, method_Universe_getPlayer.getReturnType());
+
+        tClazz = Class.forName("com.feed_the_beast.ftblib.events.team.ForgeTeamCreatedEvent");
+        construct_ForgeTeamCreatedEvent = ClassUtil.getConstrouctor(tClazz, field_ForgePlayer_team.getType());
 
         clazz_EventBase = Class.forName("com.feed_the_beast.ftblib.lib.EventBase");
         method_EventBase_post = MethodUtil.getDeclaredMethod(clazz_EventBase, "post");
@@ -139,6 +144,14 @@ public abstract class ADM_FTBLib extends ADataModel {
                 ClassUtil.newInstance(construct_ForgePlayerLoggedInEvent, tForgePlayer));
     }
 
+    public void postForgeTeamCreatedEvent(CPlayer pPlayer) {
+        Object tForgeTeam = getForgeTeam(pPlayer);
+        if (tForgeTeam == null) return;
+
+        MethodUtil.invokeMethod(method_EventBase_post,
+                ClassUtil.newInstance(construct_ForgeTeamCreatedEvent, tForgeTeam));
+    }
+
     /**
      * 根据FTB数据模型类获取FTB数据模型实例
      * 
@@ -158,7 +171,7 @@ public abstract class ADM_FTBLib extends ADataModel {
      *            数据模块实例
      * @return
      */
-    public abstract byte[] getDataModelData(Object pDataModel);
+    public abstract byte[] getDataModelData(CPlayer pPlayer, Object pDataModel);
 
     /**
      * 用于还原各个模块数据时使用
@@ -168,7 +181,7 @@ public abstract class ADM_FTBLib extends ADataModel {
      * @param pData
      *            数据
      */
-    public abstract void restoreDataModelData(Object pDataModel, byte[] pData);
+    public abstract void restoreDataModelData(CPlayer pPlayer, Object pDataModel, byte[] pData);
 
     /**
      * 用于清除各个模块数据时使用
@@ -176,8 +189,8 @@ public abstract class ADM_FTBLib extends ADataModel {
      * @param pDataModel
      *            数据模块实例
      */
-    public void clearDataModelData(Object pDataModel) {
-        this.restoreDataModelData(pDataModel, new byte[0]);
+    public void clearDataModelData(CPlayer pPlayer, Object pDataModel) {
+        this.restoreDataModelData(pPlayer, pDataModel, new byte[0]);
     }
 
 }

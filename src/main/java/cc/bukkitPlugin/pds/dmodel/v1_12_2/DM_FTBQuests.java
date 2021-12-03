@@ -75,17 +75,20 @@ public class DM_FTBQuests extends ADM_FTBLib {
     }
 
     @Override
-    public byte[] getDataModelData(Object pDataModel) {
+    public byte[] getDataModelData(CPlayer pPlayer, Object pDataModel) {
         Object tTag = NBTUtil.newNBTTagCompound();
         MethodUtil.invokeMethod(method_ServerQuestData_writeData, pDataModel, tTag);
         return PDSNBTUtil.compressNBT(tTag);
     }
 
     @Override
-    public void restoreDataModelData(Object pDataModel, byte[] pData) {
+    public void restoreDataModelData(CPlayer pPlayer, Object pDataModel, byte[] pData) {
+        postForgeTeamCreatedEvent(pPlayer);
+
         Object tTag;
-        if (pData == null || pData.length == 0) tTag = NBTUtil.newNBTTagCompound();
-        else tTag = PDSNBTUtil.decompressNBT(pData);
+        if (pData == null || pData.length == 0) {
+            tTag = NBTUtil.newNBTTagCompound();
+        } else tTag = PDSNBTUtil.decompressNBT(pData);
 
         MethodUtil.invokeMethod(method_ServerQuestData_readData, pDataModel, tTag);
     }
