@@ -62,7 +62,7 @@ public class PDSNBTUtil extends NBTUtil {
         Object tNMSWorld = MethodUtil.invokeMethod(tMethod, tWorld);
         Object tObj_EntityZombie = null;
         try {
-            tObj_EntityZombie = ClassUtil.getConstrouctor(clazz_EntityZombie, tMethod.getReturnType().getSuperclass())
+            tObj_EntityZombie = ClassUtil.getConstrouctor(clazz_EntityZombie, tNMSWorld.getClass().getSuperclass())
                     .newInstance(tNMSWorld);
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
             Log.severe(e);
