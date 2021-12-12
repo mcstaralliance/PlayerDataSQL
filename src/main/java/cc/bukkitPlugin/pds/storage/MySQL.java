@@ -113,7 +113,7 @@ public class MySQL extends AManager<PlayerDataSQL> implements IConfigModel, INee
                     this.getConn();
                     Log.info(this.mPlugin.C("MsgSuccessConnectToDB"));
                 } catch (SQLException exp) {
-                    Log.warn(this.mPlugin.C("MsgUnableConnectToDB") + ": " + exp.getMessage());
+                    Log.severe(this.mPlugin.C("MsgUnableConnectToDB"),exp);
                 }
             });
         }
