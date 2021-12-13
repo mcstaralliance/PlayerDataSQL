@@ -48,7 +48,7 @@ public class PDSNBTUtil extends NBTUtil {
         
         Class<?> clazz_EntityZombie = null;
         {
-            List<String> tNames = Arrays.asList(packetPath+".EntityZombie","net.minecraft.entity.monster.EntityZombie"
+            List<String> tNames = Arrays.asList(packetPath+"EntityZombie","net.minecraft.entity.monster.EntityZombie"
                     ,"net.minecraft.world.entity.monster.EntityZombie");
             for(String sName : tNames){
                 if(ClassUtil.isClassLoaded(sName)) clazz_EntityZombie=ClassUtil.getClass(sName);
