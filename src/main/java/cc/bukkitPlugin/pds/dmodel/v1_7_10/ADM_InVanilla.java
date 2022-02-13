@@ -243,9 +243,12 @@ public abstract class ADM_InVanilla extends DM_Minecraft {
      */
     public Object newExProp(CPlayer pPlayer, Object pNMSWorld) {
         try {
-            Constructor<?> tConstructor = this.mExPropClazz.getDeclaredConstructor(NMSUtil.clazz_EntityPlayer);
-            tConstructor.setAccessible(true);
-            return tConstructor.newInstance(pPlayer.getNMSPlayer());
+            for (Constructor<?> sConstructor : this.mExPropClazz.getConstructors()) {
+                if (sConstructor.getParameterCount() == 1 && sConstructor.getParameterTypes()[0].isInstance(pPlayer.getNMSPlayer())) {
+                    sConstructor.setAccessible(true);
+                    return sConstructor.newInstance(pPlayer.getNMSPlayer());
+                }
+            }
         } catch (Throwable ignore) {
         }
 
