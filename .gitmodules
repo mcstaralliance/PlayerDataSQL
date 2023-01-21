@@ -1,0 +1,12 @@
+[submodule "libs/Bukkit-Commons-PluginBase"]
+	path = libs/Bukkit-Commons-PluginBase
+	url = https://gitee.com/Imcc/Bukkit-Commons-PluginBase
+[submodule "libs/Bukkit-Commons-NMSUtil"]
+	path = libs/Bukkit-Commons-NMSUtil
+	url = https://gitee.com/Imcc/Bukkit-Commons-NMSUtil
+[submodule "libs/Java-Commons-Util"]
+	path = libs/Java-Commons-Util
+	url = https://gitee.com/Imcc/Java-Commons-Util
+[submodule "libs/Java-Commons-CommentedYaml"]
+	path = libs/Java-Commons-CommentedYaml
+	url = https://gitee.com/Imcc/Java-Commons-CommentedYaml

@@ -1,7 +1,16 @@
-#PlayerDataSQL
+# PlayerDataSQL
 
 ---
 
+## Setup
+
+```shell
+git clone --recursive git@github.com:mcstaralliance/PlayerDataSQL.git
+cd PlayerDataSQL
+bash setup.sh
+```
+
+## Original
 
 + 本插件部分结构参照自梦梦的[PlayerSQL](https://github.com/caoli5288/PlayerSQL/)
 + 插件特点为备份数据模块化,数据表只有一张

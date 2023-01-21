@@ -1,12 +1,17 @@
 package cc.bukkitPlugin.pds.util;
 
-import lombok.Getter;
-
 public class Pair<K, V> {
 
-    @Getter
+    public K getKey() {
+        return key;
+    }
+
+    public V getValue() {
+        return value;
+    }
+
     private final K key;
-    @Getter
+
     private final V value;
 
     public Pair(K pKey, V pValue) {

@@ -32,7 +32,6 @@ import cc.bukkitPlugin.pds.user.UserManager;
 import cc.bukkitPlugin.pds.util.CPlayer;
 import cc.bukkitPlugin.pds.util.PDSNBTUtil;
 import cc.commons.util.reflect.ClassUtil;
-import lombok.Getter;
 
 public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL> {
 
@@ -58,7 +57,11 @@ public class PlayerDataSQL extends ABukkitPlugin<PlayerDataSQL> {
 
     private UserManager mUserMan;
     private IStorage mStorage;
-    @Getter
+
+    public List<File> getScripts() {
+        return scripts;
+    }
+
     private List<File> scripts = new ArrayList();
 
     private static boolean PRE_UUID_MODE = false;
