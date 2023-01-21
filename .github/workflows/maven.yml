@@ -36,7 +36,7 @@ jobs:
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update artifacts
-      uses: actions/upload-artifacts@v3
+      uses: actions/upload-artifact@v3
       with:
         path: target/*.jar
         name: PlayerDataSQL
